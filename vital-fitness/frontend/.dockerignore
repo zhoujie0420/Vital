@@ -2,4 +2,5 @@ node_modules
 dist
 unpackage
 .DS_Store
-npminstall-debug.log
+*.log
+package-lock.json

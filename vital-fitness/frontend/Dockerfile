@@ -3,8 +3,11 @@ FROM node:16-alpine AS builder
 
 WORKDIR /app
 
+# 增加 Node 内存限制
+ENV NODE_OPTIONS=--max_old_space_size=4096
+
 COPY package.json ./
-RUN npm install --registry=https://registry.npmmirror.com
+RUN npm install --registry=https://registry.npmmirror.com --legacy-peer-deps
 
 COPY . .
 RUN npm run build:h5
