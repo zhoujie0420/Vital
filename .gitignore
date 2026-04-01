@@ -1,0 +1,30 @@
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Claude
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go
+vital-fitness/backend/tmp/
+vital-fitness/backend/vendor/
+
+# Node
+vital-fitness/frontend/node_modules/
+vital-fitness/frontend/npminstall-debug.log
+vital-fitness/frontend/unpackage/
+vital-fitness/frontend/dist/
+
+# Logs
+*.log
+
+# Docker volumes
+mysql_data/
+redis_data/
