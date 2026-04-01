@@ -2,7 +2,9 @@
  * 统一请求封装
  */
 
-const BASE_URL = 'http://localhost:8080/api/v1'
+// H5 部署时 nginx 代理 /api/ 到后端，用相对路径即可
+// 本地开发时 vite devServer 也配了代理
+const BASE_URL = '/api/v1'
 
 const request = (options) => {
   return new Promise((resolve, reject) => {

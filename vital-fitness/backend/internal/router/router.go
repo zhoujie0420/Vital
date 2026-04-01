@@ -21,6 +21,9 @@ func SetupRouter(mode string) *gin.Engine {
 
 	r := gin.Default()
 
+	// 跨域支持
+	r.Use(middleware.CORS())
+
 	// 健康检查接口
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{

@@ -45,7 +45,7 @@ services:
     networks:
       - vital_network
 
-  # 前端Web服务
+  # 前端H5服务（nginx + API代理）
   web:
     build:
       context: ./frontend
