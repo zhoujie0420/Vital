@@ -3,5 +3,4 @@ dist
 unpackage
 .DS_Store
 *.log
-package-lock.json
 docs

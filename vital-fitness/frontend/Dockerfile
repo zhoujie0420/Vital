@@ -5,8 +5,8 @@ WORKDIR /app
 
 ENV NODE_OPTIONS=--max_old_space_size=4096
 
-COPY package.json ./
-RUN npm install --registry=https://registry.npmmirror.com --legacy-peer-deps
+COPY package.json package-lock.json ./
+RUN npm ci --registry=https://registry.npmmirror.com --legacy-peer-deps
 
 COPY . .
 RUN npm run build:h5
