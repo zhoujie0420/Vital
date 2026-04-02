@@ -39,7 +39,7 @@ jobs:
             # 构建并重启服务
             cd "$PROJECT_DIR/vital-fitness"
             docker compose down
-            docker compose up -d --build
+            docker compose up -d --build --force-recreate
 
             # 清理旧镜像
             docker image prune -f
