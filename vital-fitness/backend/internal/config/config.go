@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"os"
+	"strconv"
 
 	"github.com/spf13/viper"
 )
@@ -48,15 +50,35 @@ func LoadConfig() *Config {
 	viper.SetDefault("DATABASE.DB_NAME", "vital_fitness")
 	viper.SetDefault("JWT.JWT_EXPIRE", 24)
 
-	// 读取配置文件
-	if err := viper.ReadInConfig(); err != nil {
-		panic(fmt.Errorf("fatal error config file: %w", err))
-	}
+	// 读取配置文件（不存在也不报错，用默认值和环境变量）
+	_ = viper.ReadInConfig()
 
 	var config Config
 	if err := viper.Unmarshal(&config); err != nil {
 		panic(fmt.Errorf("unable to decode into struct: %w", err))
 	}
 
+	// 环境变量覆盖（Docker 部署时使用）
+	envOverride(&config.ServerPort, "SERVER_PORT")
+	envOverride(&config.Mode, "MODE")
+	envOverride(&config.LogLevel, "LOG_LEVEL")
+	envOverride(&config.Database.Host, "DB_HOST")
+	envOverride(&config.Database.Port, "DB_PORT")
+	envOverride(&config.Database.User, "DB_USER")
+	envOverride(&config.Database.Password, "DB_PASSWORD")
+	envOverride(&config.Database.Name, "DB_NAME")
+	envOverride(&config.JWT.Secret, "JWT_SECRET")
+	if v := os.Getenv("JWT_EXPIRE"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			config.JWT.Expire = n
+		}
+	}
+
 	return &config
+}
+
+func envOverride(target *string, key string) {
+	if v := os.Getenv(key); v != "" {
+		*target = v
+	}
 }

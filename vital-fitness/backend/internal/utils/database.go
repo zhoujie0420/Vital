@@ -5,38 +5,41 @@ import (
 	"time"
 
 	"vital-fitness/backend/internal/config"
+
+	"go.uber.org/zap"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"go.uber.org/zap"
 )
 
 var db *gorm.DB
 
-// InitDatabase 初始化数据库连接
+// InitDatabase 初始化数据库连接（带重试）
 func InitDatabase(cfg config.Database) *gorm.DB {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		cfg.User, cfg.Password, cfg.Host, cfg.Port, cfg.Name)
 
 	var err error
-	db, err = gorm.Open(mysql.New(mysql.Config{
-		DSN: dsn,
-	}), &gorm.Config{})
-
-	if err != nil {
-		GetLogger().Fatal("failed to connect database", zap.Error(err))
+	// 最多重试 30 次，每次间隔 2 秒，等 MySQL 启动
+	for i := 0; i < 30; i++ {
+		db, err = gorm.Open(mysql.New(mysql.Config{DSN: dsn}), &gorm.Config{})
+		if err == nil {
+			break
+		}
+		GetLogger().Warn("waiting for database...", zap.Int("attempt", i+1), zap.Error(err))
+		time.Sleep(2 * time.Second)
 	}
 
-	// 设置连接池
+	if err != nil {
+		GetLogger().Fatal("failed to connect database after retries", zap.Error(err))
+	}
+
 	sqlDB, err := db.DB()
 	if err != nil {
 		GetLogger().Fatal("failed to get sql db", zap.Error(err))
 	}
 
-	// 设置空闲连接池中连接的最大数量
 	sqlDB.SetMaxIdleConns(10)
-	// 设置打开数据库连接的最大数量
 	sqlDB.SetMaxOpenConns(100)
-	// 设置连接可复用的最大时间
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	GetLogger().Info("database connected successfully")
