@@ -2,9 +2,13 @@
  * 统一请求封装
  */
 
-// H5 部署时 nginx 代理 /api/ 到后端，用相对路径即可
-// 本地开发时 vite devServer 也配了代理
+// 条件编译：H5 用相对路径（nginx 代理），小程序直接请求服务器
+// #ifdef H5
 const BASE_URL = '/api/v1'
+// #endif
+// #ifndef H5
+const BASE_URL = 'http://115.191.3.226:8080/api/v1'
+// #endif
 
 const request = (options) => {
   return new Promise((resolve, reject) => {
