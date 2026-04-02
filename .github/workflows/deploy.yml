@@ -1,11 +1,38 @@
-name: 自动部署
+name: 构建并部署
 
 on:
   push:
     branches: [main]
 
 jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 登录 Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 构建并推送 API 镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: ./vital-fitness/backend
+          push: true
+          tags: jiezhou8917/vital-api:latest
+
+      - name: 构建并推送 Web 镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: ./vital-fitness/frontend
+          push: true
+          tags: jiezhou8917/vital-web:latest
+
   deploy:
+    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: 部署到服务器
@@ -16,30 +43,213 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           command_timeout: 30m
           script: |
-            # 安装 Docker（首次）
-            if ! command -v docker &> /dev/null; then
-              curl -fsSL https://get.docker.com | sh
-              systemctl start docker
-              systemctl enable docker
-            fi
+            # 创建项目目录
+            mkdir -p /opt/vital-fitness
 
-            # 安装 Docker Compose 插件（首次）
-            if ! docker compose version &> /dev/null; then
-              apt-get update && apt-get install -y docker-compose-plugin
-            fi
+            # 写入 docker-compose.yml
+            cat > /opt/vital-fitness/docker-compose.yml << 'EOF'
+            services:
+              mysql:
+                image: mysql:8.0
+                container_name: vital_mysql
+                restart: always
+                environment:
+                  MYSQL_ROOT_PASSWORD: rootpassword
+                  MYSQL_DATABASE: vital_fitness
+                  MYSQL_USER: vitaluser
+                  MYSQL_PASSWORD: vitalpass
+                ports:
+                  - "3306:3306"
+                volumes:
+                  - mysql_data:/var/lib/mysql
+                  - /opt/vital-fitness/mysql-init:/docker-entrypoint-initdb.d
+                command: --default-authentication-plugin=mysql_native_password
+                networks:
+                  - vital_network
 
-            # 克隆或更新代码
-            PROJECT_DIR="/opt/vital-fitness"
-            if [ -d "$PROJECT_DIR" ]; then
-              cd "$PROJECT_DIR" && git pull origin main
-            else
-              git clone https://github.com/zhoujie0420/Vital.git "$PROJECT_DIR"
-            fi
+              api:
+                image: jiezhou8917/vital-api:latest
+                container_name: vital_api
+                restart: always
+                ports:
+                  - "8080:8080"
+                environment:
+                  - SERVER_PORT=8080
+                  - MODE=release
+                  - LOG_LEVEL=info
+                  - DB_HOST=mysql
+                  - DB_PORT=3306
+                  - DB_USER=vitaluser
+                  - DB_PASSWORD=vitalpass
+                  - DB_NAME=vital_fitness
+                  - JWT_SECRET=vital_fitness_secret_key
+                  - JWT_EXPIRE=24
+                depends_on:
+                  - mysql
+                networks:
+                  - vital_network
 
-            # 构建并重启服务
-            cd "$PROJECT_DIR/vital-fitness"
-            docker compose down
-            docker compose up -d --build --force-recreate
+              web:
+                image: jiezhou8917/vital-web:latest
+                container_name: vital_web
+                restart: always
+                ports:
+                  - "80:80"
+                depends_on:
+                  - api
+                networks:
+                  - vital_network
 
-            # 清理旧镜像
+              phpmyadmin:
+                image: phpmyadmin/phpmyadmin
+                container_name: vital_phpmyadmin
+                restart: always
+                ports:
+                  - "8081:80"
+                environment:
+                  PMA_HOST: mysql
+                  PMA_USER: root
+                  PMA_PASSWORD: rootpassword
+                depends_on:
+                  - mysql
+                networks:
+                  - vital_network
+
+            volumes:
+              mysql_data:
+
+            networks:
+              vital_network:
+                driver: bridge
+            EOF
+
+            # 写入数据库初始化脚本
+            mkdir -p /opt/vital-fitness/mysql-init
+            cat > /opt/vital-fitness/mysql-init/01_init_tables.sql << 'EOSQL'
+            CREATE DATABASE IF NOT EXISTS vital_fitness CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+            USE vital_fitness;
+
+            CREATE TABLE IF NOT EXISTS users (
+                id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                deleted_at TIMESTAMP NULL,
+                username VARCHAR(50) NOT NULL UNIQUE,
+                email VARCHAR(100) NOT NULL UNIQUE,
+                phone VARCHAR(20) UNIQUE,
+                password VARCHAR(255) NOT NULL,
+                avatar VARCHAR(255),
+                nickname VARCHAR(50),
+                gender TINYINT DEFAULT 0,
+                birthday DATE,
+                height DECIMAL(5,2),
+                weight DECIMAL(5,2),
+                INDEX idx_deleted_at (deleted_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+            CREATE TABLE IF NOT EXISTS exercises (
+                id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                deleted_at TIMESTAMP NULL,
+                name VARCHAR(100) NOT NULL,
+                category VARCHAR(50),
+                description TEXT,
+                video_url VARCHAR(255),
+                image_url VARCHAR(255),
+                INDEX idx_deleted_at (deleted_at)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+            CREATE TABLE IF NOT EXISTS workouts (
+                id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                deleted_at TIMESTAMP NULL,
+                user_id BIGINT UNSIGNED NOT NULL,
+                exercise_id BIGINT UNSIGNED NOT NULL,
+                workout_date DATE NOT NULL,
+                weight DECIMAL(10,2),
+                sets INT NOT NULL DEFAULT 1,
+                reps INT NOT NULL DEFAULT 1,
+                rest_time INT,
+                feeling TINYINT DEFAULT 3,
+                notes TEXT,
+                image_url VARCHAR(255),
+                INDEX idx_user_id (user_id),
+                INDEX idx_deleted_at (deleted_at),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+            CREATE TABLE IF NOT EXISTS mood_records (
+                id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                deleted_at TIMESTAMP NULL,
+                user_id BIGINT UNSIGNED NOT NULL,
+                record_date DATE NOT NULL,
+                mood_score TINYINT NOT NULL,
+                mood_tags VARCHAR(255),
+                description TEXT,
+                INDEX idx_user_id (user_id),
+                INDEX idx_deleted_at (deleted_at),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+            CREATE TABLE IF NOT EXISTS weight_records (
+                id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                deleted_at TIMESTAMP NULL,
+                user_id BIGINT UNSIGNED NOT NULL,
+                record_date DATE NOT NULL,
+                weight DECIMAL(5,2) NOT NULL,
+                height DECIMAL(5,2),
+                bmi DECIMAL(5,2),
+                INDEX idx_user_id (user_id),
+                INDEX idx_deleted_at (deleted_at),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+            CREATE TABLE IF NOT EXISTS diet_records (
+                id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                deleted_at TIMESTAMP NULL,
+                user_id BIGINT UNSIGNED NOT NULL,
+                record_date DATE NOT NULL,
+                meal_type VARCHAR(20) NOT NULL,
+                food_items TEXT,
+                total_calories DECIMAL(10,2),
+                protein DECIMAL(10,2),
+                carbs DECIMAL(10,2),
+                fat DECIMAL(10,2),
+                water_intake INT,
+                notes TEXT,
+                INDEX idx_user_id (user_id),
+                INDEX idx_deleted_at (deleted_at),
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+            INSERT IGNORE INTO exercises (name, category, description) VALUES
+            ('杠铃卧推', '胸部', '经典的胸部训练动作'),
+            ('哑铃飞鸟', '胸部', '孤立训练胸部的动作'),
+            ('俯卧撑', '胸部', '自重训练动作'),
+            ('引体向上', '背部', '经典的背部训练动作'),
+            ('杠铃划船', '背部', '复合型背部训练动作'),
+            ('哑铃划船', '背部', '单侧背部训练'),
+            ('杠铃深蹲', '腿部', '最全面的下肢训练动作'),
+            ('腿举', '腿部', '器械训练动作'),
+            ('腿弯举', '腿部', '专门训练腘绳肌的动作'),
+            ('杠铃推举', '肩部', '经典的肩部训练动作'),
+            ('哑铃侧平举', '肩部', '孤立训练三角肌中束'),
+            ('哑铃弯举', '手臂', '经典的肱二头肌训练动作'),
+            ('杠铃弯举', '手臂', '大重量肱二头肌训练'),
+            ('平板支撑', '核心', '静态核心稳定性训练');
+            EOSQL
+
+            # 拉取最新镜像并启动
+            cd /opt/vital-fitness
+            docker compose pull api web
+            docker compose up -d --force-recreate
             docker image prune -f
