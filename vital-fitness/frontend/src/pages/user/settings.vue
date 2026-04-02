@@ -290,7 +290,7 @@
 		gap: 20rpx;
 		padding: 30rpx 0;
 
-		/u-button {
+		::v-deep .u-btn {
 			flex: 1;
 			border-radius: 10rpx;
 		}

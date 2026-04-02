@@ -340,7 +340,7 @@
 .logout-section {
 	padding: 30rpx 0;
 
-	/u-button {
+	::v-deep .u-btn {
 		border-radius: 10rpx;
 	}
 }

@@ -231,7 +231,7 @@
 		display: flex;
 		gap: 20rpx;
 
-		/u-button {
+		::v-deep .u-btn {
 			flex: 1;
 		}
 	}

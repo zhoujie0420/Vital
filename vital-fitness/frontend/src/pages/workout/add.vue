@@ -34,7 +34,7 @@
 				<text class="label">训练动作</text>
 				<u-cell
 					title="选择动作"
-					:value="selectedExercise?.name || '请选择'"
+					:value="selectedExercise ? selectedExercise.name : '请选择'"
 					isLink
 					@click="showExercisePicker = true"
 				></u-cell>
@@ -62,7 +62,7 @@
 							<view class="exercise-item" v-for="exercise in filteredExercises" :key="exercise.id"
 								@click="selectExercise(exercise)">
 								<text class="exercise-name">{{ exercise.name }}</text>
-								<u-icon name="checkmark" v-if="selectedExercise?.id === exercise.id" color="#3c9cff"></u-icon>
+								<u-icon name="checkmark" v-if="selectedExercise && selectedExercise.id === exercise.id" color="#3c9cff"></u-icon>
 							</view>
 						</view>
 
