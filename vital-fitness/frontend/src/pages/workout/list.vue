@@ -1,10 +1,9 @@
 <template>
 	<view class="container">
-		<u-navbar title="训练记录" fixed placeholder>
-			<view slot="right">
-				<text class="add-btn" @tap="addWorkout">+ 记录</text>
-			</view>
-		</u-navbar>
+		<view class="nav-bar">
+			<text class="nav-title">训练记录</text>
+			<text class="add-btn" @tap="addWorkout">+ 记录</text>
+		</view>
 
 		<!-- 分类筛选 -->
 		<view class="filter-bar">
@@ -100,6 +99,10 @@
 
 <style lang="scss" scoped>
 .container { padding: 20rpx; }
+
+.nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15rpx;
+	.nav-title { font-size: 36rpx; font-weight: 700; color: #1c1c1e; }
+}
 
 .add-btn {
 	color: #3c9cff;

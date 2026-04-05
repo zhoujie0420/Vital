@@ -1,52 +1,41 @@
 <template>
-	<view class="container">
-		<u-navbar title="记录心情" fixed placeholder>
-			<view slot="left">
-				<u-icon name="arrow-left" size="20" @click="goBack"></u-icon>
-			</view>
-		</u-navbar>
+	<view class="page">
+		<view class="nav-bar">
+			<text class="nav-back" @tap="goBack">‹ 返回</text>
+			<text class="nav-title">记录心情</text>
+			<text class="nav-placeholder"></text>
+		</view>
 
-		<view class="form-container">
-			<!-- 心情评分 -->
-			<view class="form-item">
-				<text class="label">今天心情怎么样？</text>
-				<view class="mood-grid">
-					<view
-						v-for="exp in moods"
-						:key="exp.score"
-						class="mood-card"
-						:class="{ selected: score === exp.score }"
-						@tap="score = exp.score"
-					>
-						<text class="emoji">{{ exp.emoji }}</text>
-						<text class="mood-label">{{ exp.label }}</text>
-					</view>
+		<view class="card">
+			<text class="card-label">今天心情怎么样？</text>
+			<view class="mood-grid">
+				<view v-for="exp in moods" :key="exp.score" class="mood-card"
+					:class="{ selected: score === exp.score }" @tap="score = exp.score">
+					<text class="emoji">{{ exp.emoji }}</text>
+					<text class="mood-text">{{ exp.label }}</text>
 				</view>
 			</view>
+		</view>
 
-			<!-- 心情标签 -->
-			<view class="form-item" v-if="score > 0">
-				<text class="label">标签</text>
-				<view class="tag-list">
-					<text
-						v-for="tag in tags"
-						:key="tag"
-						class="tag-item"
-						:class="{ active: selectedTags.includes(tag) }"
-						@tap="toggleTag(tag)"
-					>{{ tag }}</text>
-				</view>
+		<view class="card" v-if="score > 0">
+			<text class="card-label">标签</text>
+			<view class="tag-grid">
+				<text v-for="tag in tags" :key="tag" class="tag-pill"
+					:class="{ active: selectedTags.includes(tag) }" @tap="toggleTag(tag)">
+					{{ tag }}
+				</text>
 			</view>
+		</view>
 
-			<!-- 描述 -->
-			<view class="form-item" v-if="score > 0">
-				<text class="label">说点什么</text>
-				<textarea v-model="description" placeholder="记录今天的心情..." class="desc-input" />
+		<view class="card" v-if="score > 0">
+			<text class="card-label">说点什么</text>
+			<textarea v-model="description" placeholder="记录今天的心情..." class="desc-area" />
+		</view>
+
+		<view class="bottom-action" v-if="score > 0">
+			<view class="save-btn" :class="{ loading: saving }" @tap="save">
+				<text>{{ saving ? '保存中...' : '保存记录' }}</text>
 			</view>
-
-			<button v-if="score > 0" class="save-btn" type="primary" :loading="saving" @tap="save">
-				{{ saving ? '保存中...' : '保存记录' }}
-			</button>
 		</view>
 	</view>
 </template>
@@ -94,30 +83,74 @@
 </script>
 
 <style lang="scss" scoped>
-.container { padding: 20rpx; }
-.form-container {
-	.form-item {
-		background: white; border-radius: 20rpx; padding: 30rpx; margin-bottom: 20rpx;
-		.label { font-size: 32rpx; font-weight: bold; color: #333; margin-bottom: 20rpx; display: block; }
-		.mood-grid {
-			display: flex; flex-wrap: wrap; gap: 15rpx; justify-content: center;
-			.mood-card {
-				width: 140rpx; text-align: center; padding: 20rpx 10rpx; border-radius: 15rpx; background: #f5f5f5;
-				border: 2rpx solid transparent;
-				&.selected { background: #fff0f0; border-color: #ff6b6b; }
-				.emoji { font-size: 48rpx; display: block; margin-bottom: 8rpx; }
-				.mood-label { font-size: 22rpx; color: #666; }
-			}
-		}
-		.tag-list {
-			display: flex; flex-wrap: wrap; gap: 15rpx;
-			.tag-item {
-				padding: 10rpx 24rpx; border-radius: 30rpx; background: #f5f5f5; font-size: 24rpx; color: #666;
-				&.active { background: #ff6b6b; color: white; }
-			}
-		}
-		.desc-input { width: 100%; height: 150rpx; border: 1rpx solid #eee; border-radius: 10rpx; padding: 20rpx; font-size: 28rpx; }
+.page {
+	padding: 0 32rpx; padding-top: 120rpx; padding-bottom: 160rpx;
+	min-height: 100vh; background: #f2f2f7;
+}
+
+.nav-bar {
+	display: flex; align-items: center; justify-content: space-between; margin-bottom: 28rpx;
+	.nav-back { font-size: 32rpx; color: #007aff; font-weight: 500; }
+	.nav-title { font-size: 34rpx; font-weight: 600; color: #1c1c1e; }
+	.nav-placeholder { width: 80rpx; }
+}
+
+.card {
+	background: #fff; border-radius: 20rpx; padding: 28rpx 32rpx; margin-bottom: 16rpx;
+	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+	.card-label {
+		display: block; font-size: 26rpx; font-weight: 600; color: #8e8e93;
+		text-transform: uppercase; letter-spacing: 1rpx; margin-bottom: 20rpx;
 	}
-	.save-btn { margin-top: 20rpx; border-radius: 15rpx; font-size: 32rpx; }
+}
+
+.mood-grid {
+	display: flex; flex-wrap: wrap; gap: 16rpx; justify-content: center;
+
+	.mood-card {
+		width: 160rpx; text-align: center; padding: 24rpx 12rpx;
+		border-radius: 20rpx; background: #f2f2f7;
+		border: 3rpx solid transparent;
+		transition: all 0.2s;
+
+		&.selected {
+			background: #fff;
+			border-color: #007aff;
+			box-shadow: 0 4rpx 20rpx rgba(0, 122, 255, 0.15);
+		}
+		&:active { transform: scale(0.95); }
+
+		.emoji { display: block; font-size: 56rpx; margin-bottom: 8rpx; }
+		.mood-text { display: block; font-size: 24rpx; color: #636366; font-weight: 500; }
+	}
+}
+
+.tag-grid {
+	display: flex; flex-wrap: wrap; gap: 12rpx;
+
+	.tag-pill {
+		padding: 12rpx 28rpx; border-radius: 24rpx; background: #f2f2f7;
+		font-size: 26rpx; color: #636366; font-weight: 500;
+		transition: all 0.2s;
+
+		&.active { background: #007aff; color: #fff; }
+		&:active { opacity: 0.7; }
+	}
+}
+
+.desc-area {
+	width: 100%; height: 160rpx; font-size: 30rpx; color: #1c1c1e; line-height: 1.6;
+}
+
+.bottom-action {
+	position: fixed; bottom: 0; left: 0; right: 0;
+	padding: 20rpx 32rpx; padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+	background: rgba(242, 242, 247, 0.9); backdrop-filter: blur(20px);
+	.save-btn {
+		background: #007aff; color: #fff; text-align: center; padding: 28rpx 0;
+		border-radius: 16rpx; font-size: 32rpx; font-weight: 600;
+		&:active { opacity: 0.8; }
+		&.loading { opacity: 0.6; }
+	}
 }
 </style>

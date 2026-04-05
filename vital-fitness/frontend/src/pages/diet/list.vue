@@ -1,27 +1,46 @@
 <template>
-	<view class="container">
-		<u-navbar title="饮食记录" fixed placeholder>
-			<view slot="right">
-				<text class="add-btn" @tap="addDiet">+ 记录</text>
-			</view>
-		</u-navbar>
+	<view class="page">
+		<view class="page-header">
+			<text class="page-title">饮食记录</text>
+			<text class="header-action" @tap="addDiet">添加</text>
+		</view>
 
-		<view class="diet-list">
-			<view v-for="(r, i) in dietList" :key="i" class="diet-item">
-				<view class="item-header">
+		<view class="list">
+			<view v-for="(r, i) in dietList" :key="i" class="list-item">
+				<view class="item-top">
+					<view class="meal-badge" :class="'meal-' + r.meal_type">
+						<text>{{ getMealName(r.meal_type) }}</text>
+					</view>
 					<text class="item-date">{{ formatDate(r.record_date) }}</text>
-					<text class="item-meal">{{ getMealName(r.meal_type) }}</text>
 				</view>
-				<view class="item-body">
-					<text class="item-cal">{{ r.total_calories }}kcal</text>
-					<text class="item-macro">蛋白{{ r.protein }}g | 碳水{{ r.carbs }}g | 脂肪{{ r.fat }}g</text>
+				<view class="item-main">
+					<text class="item-cal">{{ r.total_calories }}</text>
+					<text class="item-cal-unit">千卡</text>
+				</view>
+				<view class="item-macros">
+					<view class="macro">
+						<text class="macro-val">{{ r.protein }}g</text>
+						<text class="macro-label">蛋白质</text>
+					</view>
+					<view class="macro">
+						<text class="macro-val">{{ r.carbs }}g</text>
+						<text class="macro-label">碳水</text>
+					</view>
+					<view class="macro">
+						<text class="macro-val">{{ r.fat }}g</text>
+						<text class="macro-label">脂肪</text>
+					</view>
 				</view>
 				<text v-if="r.notes" class="item-notes">{{ r.notes }}</text>
 			</view>
+		</view>
 
-			<view v-if="dietList.length === 0" class="empty-state">
-				<text class="empty-text">暂无饮食记录</text>
-				<button class="add-first-btn" type="primary" @tap="addDiet">记录第一餐</button>
+		<view v-if="dietList.length === 0" class="empty">
+			<text class="empty-icon">🥗</text>
+			<text class="empty-title">暂无饮食记录</text>
+			<text class="empty-desc">记录每一餐，了解你的营养摄入</text>
+			<view class="empty-btn" @tap="addDiet">
+				<text>开始记录</text>
 			</view>
 		</view>
 	</view>
@@ -54,24 +73,144 @@
 </script>
 
 <style lang="scss" scoped>
-.container { padding: 20rpx; }
-.add-btn { color: #3c9cff; font-size: 28rpx; font-weight: bold; }
-.diet-list {
-	.diet-item {
-		background: white; border-radius: 20rpx; padding: 30rpx; margin-bottom: 15rpx;
-		.item-header { display: flex; justify-content: space-between; margin-bottom: 10rpx;
-			.item-date { font-size: 24rpx; color: #999; }
-			.item-meal { font-size: 24rpx; color: #3c9cff; font-weight: bold; }
-		}
-		.item-body {
-			.item-cal { font-size: 36rpx; font-weight: bold; color: #ff9900; display: block; margin-bottom: 8rpx; }
-			.item-macro { font-size: 22rpx; color: #666; }
-		}
-		.item-notes { font-size: 24rpx; color: #999; margin-top: 10rpx; display: block; }
+.page {
+	padding: 0 32rpx;
+	padding-top: 120rpx;
+	padding-bottom: 40rpx;
+	min-height: 100vh;
+	background: #f2f2f7;
+}
+
+.page-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-bottom: 28rpx;
+
+	.page-title {
+		font-size: 52rpx;
+		font-weight: 700;
+		color: #1c1c1e;
+		letter-spacing: -1rpx;
 	}
-	.empty-state { text-align: center; padding: 100rpx 0; background: white; border-radius: 20rpx;
-		.empty-text { font-size: 28rpx; color: #999; display: block; margin-bottom: 30rpx; }
-		.add-first-btn { width: 60%; font-size: 28rpx; }
+	.header-action {
+		font-size: 30rpx;
+		color: #007aff;
+		font-weight: 500;
+	}
+}
+
+.list-item {
+	background: #fff;
+	border-radius: 20rpx;
+	padding: 28rpx 32rpx;
+	margin-bottom: 16rpx;
+	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+
+	.item-top {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 16rpx;
+	}
+
+	.meal-badge {
+		padding: 6rpx 20rpx;
+		border-radius: 12rpx;
+		font-size: 24rpx;
+		font-weight: 600;
+		background: #f2f2f7;
+		color: #8e8e93;
+	}
+	.meal-breakfast { background: #fff3e0; color: #ff9500; }
+	.meal-lunch { background: #e8f5e9; color: #34c759; }
+	.meal-dinner { background: #e3f2fd; color: #007aff; }
+	.meal-snack { background: #fce4ec; color: #ff2d55; }
+
+	.item-date {
+		font-size: 26rpx;
+		color: #8e8e93;
+	}
+
+	.item-main {
+		display: flex;
+		align-items: baseline;
+		margin-bottom: 20rpx;
+
+		.item-cal {
+			font-size: 56rpx;
+			font-weight: 700;
+			color: #1c1c1e;
+			letter-spacing: -2rpx;
+		}
+		.item-cal-unit {
+			font-size: 26rpx;
+			color: #8e8e93;
+			margin-left: 8rpx;
+		}
+	}
+
+	.item-macros {
+		display: flex;
+		gap: 32rpx;
+
+		.macro {
+			.macro-val {
+				display: block;
+				font-size: 28rpx;
+				font-weight: 600;
+				color: #3a3a3c;
+			}
+			.macro-label {
+				display: block;
+				font-size: 22rpx;
+				color: #8e8e93;
+				margin-top: 2rpx;
+			}
+		}
+	}
+
+	.item-notes {
+		display: block;
+		font-size: 26rpx;
+		color: #8e8e93;
+		margin-top: 16rpx;
+		line-height: 1.5;
+	}
+}
+
+.empty {
+	text-align: center;
+	padding: 120rpx 0;
+
+	.empty-icon {
+		display: block;
+		font-size: 96rpx;
+		margin-bottom: 24rpx;
+	}
+	.empty-title {
+		display: block;
+		font-size: 34rpx;
+		font-weight: 600;
+		color: #1c1c1e;
+		margin-bottom: 8rpx;
+	}
+	.empty-desc {
+		display: block;
+		font-size: 26rpx;
+		color: #8e8e93;
+		margin-bottom: 40rpx;
+	}
+	.empty-btn {
+		display: inline-block;
+		padding: 20rpx 56rpx;
+		background: #007aff;
+		color: #fff;
+		border-radius: 16rpx;
+		font-size: 30rpx;
+		font-weight: 600;
+
+		&:active { opacity: 0.8; }
 	}
 }
 </style>

@@ -1,32 +1,32 @@
 {
 	"pages": [
-		{ "path": "pages/index/index", "style": { "navigationBarTitleText": "Vital Fitness" } },
+		{ "path": "pages/index/index", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
 		{ "path": "pages/auth/login", "style": { "navigationBarTitleText": "登录" } },
 		{ "path": "pages/auth/register", "style": { "navigationBarTitleText": "注册" } },
-		{ "path": "pages/workout/add", "style": { "navigationBarTitleText": "记录训练" } },
-		{ "path": "pages/workout/list", "style": { "navigationBarTitleText": "训练记录" } },
-		{ "path": "pages/diet/add", "style": { "navigationBarTitleText": "记录饮食" } },
-		{ "path": "pages/diet/list", "style": { "navigationBarTitleText": "饮食记录" } },
-		{ "path": "pages/mood/add", "style": { "navigationBarTitleText": "记录心情" } },
-		{ "path": "pages/mood/list", "style": { "navigationBarTitleText": "心情记录" } },
-		{ "path": "pages/weight/add", "style": { "navigationBarTitleText": "记录体重" } },
-		{ "path": "pages/weight/list", "style": { "navigationBarTitleText": "体重记录" } },
-		{ "path": "pages/statistics/index", "style": { "navigationBarTitleText": "数据统计" } },
-		{ "path": "pages/user/index", "style": { "navigationBarTitleText": "个人中心" } },
-		{ "path": "pages/user/profile", "style": { "navigationBarTitleText": "个人资料" } },
-		{ "path": "pages/user/settings", "style": { "navigationBarTitleText": "设置" } }
+		{ "path": "pages/workout/add", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
+		{ "path": "pages/workout/list", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
+		{ "path": "pages/diet/add", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
+		{ "path": "pages/diet/list", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
+		{ "path": "pages/mood/add", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
+		{ "path": "pages/mood/list", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
+		{ "path": "pages/weight/add", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
+		{ "path": "pages/weight/list", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
+		{ "path": "pages/statistics/index", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
+		{ "path": "pages/user/index", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
+		{ "path": "pages/user/profile", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
+		{ "path": "pages/user/settings", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } }
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "Vital Fitness",
 		"navigationBarBackgroundColor": "#FFFFFF",
-		"backgroundColor": "#F5F5F5"
+		"backgroundColor": "#F2F2F7"
 	},
 	"tabBar": {
-		"color": "#909399",
-		"selectedColor": "#3c9cff",
-		"backgroundColor": "#ffffff",
-		"borderStyle": "black",
+		"color": "#8e8e93",
+		"selectedColor": "#007aff",
+		"backgroundColor": "#f9f9f9",
+		"borderStyle": "white",
 		"list": [
 			{
 				"pagePath": "pages/index/index",

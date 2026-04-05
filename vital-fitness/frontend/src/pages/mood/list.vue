@@ -1,15 +1,18 @@
 <template>
-	<view class="container">
-		<u-navbar title="心情记录" fixed placeholder>
-			<view slot="right">
-				<text class="add-btn" @tap="addMood">+ 记录</text>
-			</view>
-		</u-navbar>
+	<view class="page">
+		<view class="page-header">
+			<text class="page-title">心情记录</text>
+			<text class="header-action" @tap="addMood">添加</text>
+		</view>
 
-		<view class="mood-list">
-			<view v-for="(r, i) in moodList" :key="i" class="mood-item">
-				<view class="item-header">
-					<text class="item-date">{{ formatDate(r.record_date) }}</text>
+		<view class="list">
+			<view v-for="(r, i) in moodList" :key="i" class="list-item">
+				<view class="item-top">
+					<text class="item-emoji">{{ getEmoji(r.mood_score) }}</text>
+					<view class="item-meta">
+						<text class="item-mood-text">{{ getMoodText(r.mood_score) }}</text>
+						<text class="item-date">{{ formatDate(r.record_date) }}</text>
+					</view>
 					<text class="item-score">{{ r.mood_score }}/10</text>
 				</view>
 				<view v-if="r.mood_tags" class="item-tags">
@@ -17,10 +20,14 @@
 				</view>
 				<text v-if="r.description" class="item-desc">{{ r.description }}</text>
 			</view>
+		</view>
 
-			<view v-if="moodList.length === 0" class="empty-state">
-				<text class="empty-text">暂无心情记录</text>
-				<button class="add-first-btn" type="primary" @tap="addMood">记录今天的心情</button>
+		<view v-if="moodList.length === 0" class="empty">
+			<text class="empty-icon">😊</text>
+			<text class="empty-title">暂无心情记录</text>
+			<text class="empty-desc">记录每天的心情，关注内心变化</text>
+			<view class="empty-btn" @tap="addMood">
+				<text>开始记录</text>
 			</view>
 		</view>
 	</view>
@@ -44,29 +51,134 @@
 				if (!d) return ''
 				const date = new Date(d)
 				return (date.getMonth()+1) + '月' + date.getDate() + '日'
+			},
+			getEmoji(score) {
+				if (score >= 9) return '😍'
+				if (score >= 7) return '😊'
+				if (score >= 5) return '😐'
+				if (score >= 3) return '😔'
+				return '😫'
+			},
+			getMoodText(score) {
+				if (score >= 9) return '极佳'
+				if (score >= 7) return '不错'
+				if (score >= 5) return '一般'
+				if (score >= 3) return '较差'
+				return '糟糕'
 			}
 		}
 	}
 </script>
 
 <style lang="scss" scoped>
-.container { padding: 20rpx; }
-.add-btn { color: #3c9cff; font-size: 28rpx; font-weight: bold; }
-.mood-list {
-	.mood-item {
-		background: white; border-radius: 20rpx; padding: 30rpx; margin-bottom: 15rpx;
-		.item-header { display: flex; justify-content: space-between; margin-bottom: 10rpx;
-			.item-date { font-size: 24rpx; color: #999; }
-			.item-score { font-size: 32rpx; font-weight: bold; color: #ff6b6b; }
-		}
-		.item-tags { display: flex; flex-wrap: wrap; gap: 10rpx; margin-bottom: 10rpx;
-			.tag { padding: 5rpx 15rpx; background: #fff0f0; color: #ff6b6b; border-radius: 10rpx; font-size: 22rpx; }
-		}
-		.item-desc { font-size: 26rpx; color: #666; line-height: 1.5; }
+.page {
+	padding: 0 32rpx;
+	padding-top: 120rpx;
+	padding-bottom: 40rpx;
+	min-height: 100vh;
+	background: #f2f2f7;
+}
+
+.page-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-bottom: 28rpx;
+
+	.page-title {
+		font-size: 52rpx;
+		font-weight: 700;
+		color: #1c1c1e;
+		letter-spacing: -1rpx;
 	}
-	.empty-state { text-align: center; padding: 100rpx 0; background: white; border-radius: 20rpx;
-		.empty-text { font-size: 28rpx; color: #999; display: block; margin-bottom: 30rpx; }
-		.add-first-btn { width: 60%; font-size: 28rpx; }
+	.header-action {
+		font-size: 30rpx;
+		color: #007aff;
+		font-weight: 500;
+	}
+}
+
+.list-item {
+	background: #fff;
+	border-radius: 20rpx;
+	padding: 28rpx 32rpx;
+	margin-bottom: 16rpx;
+	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+
+	.item-top {
+		display: flex;
+		align-items: center;
+
+		.item-emoji {
+			font-size: 56rpx;
+			margin-right: 20rpx;
+		}
+
+		.item-meta {
+			flex: 1;
+
+			.item-mood-text {
+				display: block;
+				font-size: 32rpx;
+				font-weight: 600;
+				color: #1c1c1e;
+			}
+			.item-date {
+				display: block;
+				font-size: 24rpx;
+				color: #8e8e93;
+				margin-top: 4rpx;
+			}
+		}
+
+		.item-score {
+			font-size: 30rpx;
+			font-weight: 700;
+			color: #8e8e93;
+		}
+	}
+
+	.item-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12rpx;
+		margin-top: 20rpx;
+
+		.tag {
+			padding: 8rpx 20rpx;
+			background: #f2f2f7;
+			color: #3a3a3c;
+			border-radius: 20rpx;
+			font-size: 24rpx;
+			font-weight: 500;
+		}
+	}
+
+	.item-desc {
+		display: block;
+		font-size: 28rpx;
+		color: #636366;
+		margin-top: 16rpx;
+		line-height: 1.6;
+	}
+}
+
+.empty {
+	text-align: center;
+	padding: 120rpx 0;
+
+	.empty-icon { display: block; font-size: 96rpx; margin-bottom: 24rpx; }
+	.empty-title { display: block; font-size: 34rpx; font-weight: 600; color: #1c1c1e; margin-bottom: 8rpx; }
+	.empty-desc { display: block; font-size: 26rpx; color: #8e8e93; margin-bottom: 40rpx; }
+	.empty-btn {
+		display: inline-block;
+		padding: 20rpx 56rpx;
+		background: #007aff;
+		color: #fff;
+		border-radius: 16rpx;
+		font-size: 30rpx;
+		font-weight: 600;
+		&:active { opacity: 0.8; }
 	}
 }
 </style>

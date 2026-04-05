@@ -1,48 +1,25 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import { defineStore } from 'pinia'
 
-Vue.use(Vuex)
-
-const store = new Vuex.Store({
-  state: {
+export const useUserStore = defineStore('user', {
+  state: () => ({
     token: uni.getStorageSync('token') || '',
     userInfo: JSON.parse(uni.getStorageSync('userInfo') || 'null')
-  },
-
+  }),
   getters: {
-    isLoggedIn: state => !!state.token,
-    userInfo: state => state.userInfo
+    isLoggedIn: (state) => !!state.token
   },
-
-  mutations: {
-    SET_TOKEN(state, token) {
-      state.token = token
+  actions: {
+    saveLoginInfo({ token, user }) {
+      this.token = token
+      this.userInfo = user
       uni.setStorageSync('token', token)
+      uni.setStorageSync('userInfo', JSON.stringify(user))
     },
-    SET_USER_INFO(state, userInfo) {
-      state.userInfo = userInfo
-      uni.setStorageSync('userInfo', JSON.stringify(userInfo))
-    },
-    CLEAR_AUTH(state) {
-      state.token = ''
-      state.userInfo = null
+    logout() {
+      this.token = ''
+      this.userInfo = null
       uni.removeStorageSync('token')
       uni.removeStorageSync('userInfo')
     }
-  },
-
-  actions: {
-    // 保存登录信息
-    saveLoginInfo({ commit }, { token, user }) {
-      commit('SET_TOKEN', token)
-      commit('SET_USER_INFO', user)
-    },
-
-    // 退出登录
-    logout({ commit }) {
-      commit('CLEAR_AUTH')
-    }
   }
 })
-
-export default store
