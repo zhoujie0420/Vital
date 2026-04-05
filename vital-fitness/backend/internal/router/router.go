@@ -36,6 +36,8 @@ func SetupRouter(mode string, wxCfg config.WeChat) *gin.Engine {
 	// 初始化 handler
 	authHandler := handler.NewAuthHandler(wxCfg)
 	workoutHandler := handler.NewWorkoutHandler()
+	weightHandler := handler.NewWeightHandler()
+	moodHandler := handler.NewMoodHandler()
 
 	// API v1 路由组
 	v1 := r.Group("/api/v1")
@@ -78,15 +80,15 @@ func SetupRouter(mode string, wxCfg config.WeChat) *gin.Engine {
 			// 心情记录接口
 			moods := authorized.Group("/moods")
 			{
-				moods.POST("/", placeholder("create mood"))
-				moods.GET("/", placeholder("get moods"))
+				moods.POST("/", moodHandler.Create)
+				moods.GET("/", moodHandler.GetList)
 			}
 
 			// 体重记录接口
 			weights := authorized.Group("/weights")
 			{
-				weights.POST("/", placeholder("create weight"))
-				weights.GET("/", placeholder("get weights"))
+				weights.POST("/", weightHandler.Create)
+				weights.GET("/", weightHandler.GetList)
 			}
 
 			// 饮食记录接口
