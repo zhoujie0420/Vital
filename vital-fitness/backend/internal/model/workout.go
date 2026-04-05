@@ -8,10 +8,10 @@ import (
 
 // Exercise 动作模型
 type Exercise struct {
-	ID          uint           `gorm:"primarykey" json:"id"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
+	ID        uint           `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
 
 	Name        string `gorm:"size:100;not null;index" json:"name"`
 	Category    string `gorm:"size:50;index" json:"category"` // 动作分类: 胸、背、腿、肩、手臂、核心等
@@ -22,23 +22,24 @@ type Exercise struct {
 
 // Workout 训练记录模型
 type Workout struct {
-	ID          uint           `gorm:"primarykey" json:"id"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
+	ID        uint           `gorm:"primarykey" json:"id"`
+	CreatedAt time.Time      `json:"created_at"`
+	UpdatedAt time.Time      `json:"updated_at"`
+	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`
 
-	UserID      uint   `gorm:"not null;index" json:"user_id"`
-	ExerciseID  uint   `gorm:"not null;index" json:"exercise_id"`
+	UserID      uint      `gorm:"not null;index" json:"user_id"`
+	ExerciseID  uint      `gorm:"not null;index" json:"exercise_id"`
+	Exercise    Exercise  `gorm:"foreignKey:ExerciseID" json:"exercise"`
 	WorkoutDate time.Time `gorm:"not null;index" json:"workout_date"`
 
-	Weight      float64 `gorm:"type:decimal(10,2)" json:"weight"` // 重量(kg)
-	Sets        int     `gorm:"not null;default:1" json:"sets"`   // 组数
-	Reps        int     `gorm:"not null;default:1" json:"reps"`   // 次数
-	RestTime    int     `json:"rest_time,omitempty"`              // 休息时间(秒)
+	Weight   float64 `gorm:"type:decimal(10,2)" json:"weight"` // 重量(kg)
+	Sets     int     `gorm:"not null;default:1" json:"sets"`   // 组数
+	Reps     int     `gorm:"not null;default:1" json:"reps"`   // 次数
+	RestTime int     `json:"rest_time,omitempty"`              // 休息时间(秒)
 
-	Feeling     int    `gorm:"default:3" json:"feeling"`         // 训练感受(1-5分)
-	Notes       string `gorm:"type:text" json:"notes,omitempty"` // 备注
-	ImageURL    string `gorm:"size:255" json:"image_url,omitempty"` // 训练照片
+	Feeling  int    `gorm:"default:3" json:"feeling"`            // 训练感受(1-5分)
+	Notes    string `gorm:"type:text" json:"notes,omitempty"`    // 备注
+	ImageURL string `gorm:"size:255" json:"image_url,omitempty"` // 训练照片
 }
 
 // TableName 设置表名

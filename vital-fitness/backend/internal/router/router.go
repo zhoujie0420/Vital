@@ -35,6 +35,7 @@ func SetupRouter(mode string, wxCfg config.WeChat) *gin.Engine {
 
 	// 初始化 handler
 	authHandler := handler.NewAuthHandler(wxCfg)
+	workoutHandler := handler.NewWorkoutHandler()
 
 	// API v1 路由组
 	v1 := r.Group("/api/v1")
@@ -60,18 +61,18 @@ func SetupRouter(mode string, wxCfg config.WeChat) *gin.Engine {
 			// 健身记录接口
 			workouts := authorized.Group("/workouts")
 			{
-				workouts.POST("/", placeholder("create workout"))
-				workouts.GET("/", placeholder("get workouts"))
-				workouts.GET("/:id", placeholder("get workout"))
-				workouts.PUT("/:id", placeholder("update workout"))
-				workouts.DELETE("/:id", placeholder("delete workout"))
+				workouts.POST("/", workoutHandler.CreateWorkout)
+				workouts.GET("/", workoutHandler.GetWorkouts)
+				workouts.GET("/:id", workoutHandler.GetWorkout)
+				workouts.PUT("/:id", workoutHandler.UpdateWorkout)
+				workouts.DELETE("/:id", workoutHandler.DeleteWorkout)
 			}
 
 			// 动作库接口
 			exercises := authorized.Group("/exercises")
 			{
-				exercises.GET("/", placeholder("get exercises"))
-				exercises.POST("/", placeholder("create exercise"))
+				exercises.GET("/", workoutHandler.GetExercises)
+				exercises.POST("/", workoutHandler.CreateExercise)
 			}
 
 			// 心情记录接口

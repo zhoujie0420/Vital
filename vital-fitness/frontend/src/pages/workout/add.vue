@@ -151,6 +151,8 @@
 </template>
 
 <script>
+	import { getExercises, createExercise, createWorkout } from '../../api/workout'
+
 	export default {
 		data() {
 			return {
@@ -181,22 +183,7 @@
 				categories: ['全部', '胸部', '背部', '腿部', '肩部', '手臂', '核心'],
 				currentCategory: '全部',
 
-				exercises: [
-					{ id: 1, name: '杠铃卧推', category: '胸部' },
-					{ id: 2, name: '哑铃飞鸟', category: '胸部' },
-					{ id: 3, name: '俯卧撑', category: '胸部' },
-					{ id: 4, name: '引体向上', category: '背部' },
-					{ id: 5, name: '杠铃划船', category: '背部' },
-					{ id: 6, name: '哑铃划船', category: '背部' },
-					{ id: 7, name: '杠铃深蹲', category: '腿部' },
-					{ id: 8, name: '腿举', category: '腿部' },
-					{ id: 9, name: '腿弯举', category: '腿部' },
-					{ id: 10, name: '杠铃推举', category: '肩部' },
-					{ id: 11, name: '哑铃侧平举', category: '肩部' },
-					{ id: 12, name: '哑铃弯举', category: '手臂' },
-					{ id: 13, name: '杠铃弯举', category: '手臂' },
-					{ id: 14, name: '平板支撑', category: '核心' }
-				],
+				exercises: [],
 
 				categoryColumns: [['胸部', '背部', '腿部', '肩部', '手臂', '核心']]
 			}
@@ -209,38 +196,46 @@
 				return this.exercises.filter(ex => ex.category === this.currentCategory)
 			}
 		},
+		onLoad() {
+			this.loadExercises()
+		},
 		methods: {
+			async loadExercises() {
+				try {
+					const res = await getExercises('')
+					this.exercises = res.data || []
+				} catch (e) {}
+			},
+
 			goBack() {
 				uni.navigateBack()
 			},
 
-			saveWorkout() {
+			async saveWorkout() {
 				if (!this.selectedExercise) {
-					uni.showToast({
-						title: '请选择训练动作',
-						icon: 'none'
-					})
+					uni.showToast({ title: '请选择训练动作', icon: 'none' })
 					return
 				}
-
 				if (this.workoutForm.weight <= 0) {
-					uni.showToast({
-						title: '请填写重量',
-						icon: 'none'
-					})
+					uni.showToast({ title: '请填写重量', icon: 'none' })
 					return
 				}
 
-				// 这里应该调用API保存训练记录
-				uni.showToast({
-					title: '保存成功',
-					icon: 'success'
-				})
-
-				// 返回上一页
-				setTimeout(() => {
-					uni.navigateBack()
-				}, 1000)
+				try {
+					const date = new Date(this.workoutForm.workout_date)
+					await createWorkout({
+						exercise_id: this.workoutForm.exercise_id,
+						workout_date: date.toISOString(),
+						weight: this.workoutForm.weight,
+						sets: this.workoutForm.sets,
+						reps: this.workoutForm.reps,
+						rest_time: this.workoutForm.rest_time,
+						feeling: this.workoutForm.feeling,
+						notes: this.workoutForm.notes
+					})
+					uni.showToast({ title: '保存成功', icon: 'success' })
+					setTimeout(() => uni.navigateBack(), 1000)
+				} catch (e) {}
 			},
 
 			confirmDate(e) {
@@ -263,46 +258,29 @@
 				this.showCategoryPicker = false
 			},
 
-			saveCustomExercise() {
+			async saveCustomExercise() {
 				if (!this.customExerciseForm.name) {
-					uni.showToast({
-						title: '请输入动作名称',
-						icon: 'none'
-					})
+					uni.showToast({ title: '请输入动作名称', icon: 'none' })
 					return
 				}
-
 				if (!this.customExerciseForm.category) {
-					uni.showToast({
-						title: '请选择动作分类',
-						icon: 'none'
-					})
+					uni.showToast({ title: '请选择动作分类', icon: 'none' })
 					return
 				}
 
-				// 这里应该调用API保存自定义动作
-				const newExercise = {
-					id: this.exercises.length + 1,
-					name: this.customExerciseForm.name,
-					category: this.customExerciseForm.category
-				}
-
-				this.exercises.push(newExercise)
-				this.selectExercise(newExercise)
-
-				// 重置表单
-				this.customExerciseForm = {
-					name: '',
-					category: '',
-					description: ''
-				}
-
-				this.showCustomExercise = false
-
-				uni.showToast({
-					title: '添加成功',
-					icon: 'success'
-				})
+				try {
+					const res = await createExercise({
+						name: this.customExerciseForm.name,
+						category: this.customExerciseForm.category,
+						description: this.customExerciseForm.description
+					})
+					const newExercise = res.data
+					this.exercises.push(newExercise)
+					this.selectExercise(newExercise)
+					this.customExerciseForm = { name: '', category: '', description: '' }
+					this.showCustomExercise = false
+					uni.showToast({ title: '添加成功', icon: 'success' })
+				} catch (e) {}
 			},
 
 			formatDate(timestamp) {

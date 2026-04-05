@@ -121,7 +121,7 @@
 
 		<!-- 退出登录 -->
 		<view class="logout-section">
-			<u-button type="error" plain @click="logout">退出登录</u-button>
+			<button class="logout-btn" @tap="logout">退出登录</button>
 		</view>
 	</view>
 </template>
@@ -340,8 +340,12 @@
 .logout-section {
 	padding: 30rpx 0;
 
-	::v-deep .u-btn {
+	.logout-btn {
+		background: white;
+		color: #ff4d4f;
+		border: 1rpx solid #ff4d4f;
 		border-radius: 10rpx;
+		font-size: 30rpx;
 	}
 }
 </style>
