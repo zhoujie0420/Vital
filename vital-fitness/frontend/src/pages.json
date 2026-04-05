@@ -41,8 +41,8 @@
 				"selectedIconPath": "static/tabbar/workout_active.png"
 			},
 			{
-				"pagePath": "pages/mood/list",
-				"text": "心情",
+				"pagePath": "pages/diet/list",
+				"text": "饮食",
 				"iconPath": "static/tabbar/mood.png",
 				"selectedIconPath": "static/tabbar/mood_active.png"
 			},
