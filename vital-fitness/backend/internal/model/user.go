@@ -19,7 +19,7 @@ type User struct {
 	Avatar    string         `gorm:"size:255" json:"avatar,omitempty"`
 	Nickname  string         `gorm:"size:50" json:"nickname,omitempty"`
 	Gender    int            `gorm:"default:0" json:"gender,omitempty"`
-	Birthday  time.Time      `json:"birthday,omitempty"`
+	Birthday  *time.Time     `json:"birthday,omitempty"`
 	Height    float64        `json:"height,omitempty"`
 	Weight    float64        `json:"weight,omitempty"`
 }
@@ -27,16 +27,16 @@ type User struct {
 func (User) TableName() string { return "users" }
 
 type UserProfile struct {
-	ID        uint      `json:"id"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email,omitempty"`
-	Phone     string    `json:"phone,omitempty"`
-	Avatar    string    `json:"avatar,omitempty"`
-	Nickname  string    `json:"nickname,omitempty"`
-	Gender    int       `json:"gender,omitempty"`
-	Height    float64   `json:"height,omitempty"`
-	Weight    float64   `json:"weight,omitempty"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        uint       `json:"id"`
+	Username  string     `json:"username"`
+	Email     string     `json:"email,omitempty"`
+	Phone     string     `json:"phone,omitempty"`
+	Avatar    string     `json:"avatar,omitempty"`
+	Nickname  string     `json:"nickname,omitempty"`
+	Gender    int        `json:"gender,omitempty"`
+	Height    float64    `json:"height,omitempty"`
+	Weight    float64    `json:"weight,omitempty"`
+	CreatedAt time.Time  `json:"created_at"`
 }
 
 type WxLoginRequest struct {

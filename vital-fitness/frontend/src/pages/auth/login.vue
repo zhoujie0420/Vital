@@ -15,14 +15,15 @@
 		</view>
 
 		<view class="login-section">
-			<u-button
+			<button
+				class="wx-login-btn"
 				type="primary"
-				@click="handleWxLogin"
 				:loading="loading"
 				:disabled="loading"
+				@tap="handleWxLogin"
 			>
 				{{ loading ? '登录中...' : '微信一键登录' }}
-			</u-button>
+			</button>
 		</view>
 	</view>
 </template>
@@ -101,5 +102,12 @@
 
 .login-section {
 	padding: 60rpx 80rpx;
+
+	.wx-login-btn {
+		background: #3c9cff;
+		color: white;
+		border-radius: 20rpx;
+		font-size: 32rpx;
+	}
 }
 </style>
