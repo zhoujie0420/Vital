@@ -38,6 +38,7 @@ func SetupRouter(mode string, wxCfg config.WeChat) *gin.Engine {
 	workoutHandler := handler.NewWorkoutHandler()
 	weightHandler := handler.NewWeightHandler()
 	moodHandler := handler.NewMoodHandler()
+	dietHandler := handler.NewDietHandler()
 
 	// API v1 路由组
 	v1 := r.Group("/api/v1")
@@ -94,8 +95,15 @@ func SetupRouter(mode string, wxCfg config.WeChat) *gin.Engine {
 			// 饮食记录接口
 			diets := authorized.Group("/diets")
 			{
-				diets.POST("/", placeholder("create diet"))
-				diets.GET("/", placeholder("get diets"))
+				diets.POST("/", dietHandler.CreateRecord)
+				diets.GET("/", dietHandler.GetRecords)
+			}
+
+			// 食物库接口
+			foods := authorized.Group("/foods")
+			{
+				foods.GET("/", dietHandler.GetFoods)
+				foods.POST("/", dietHandler.CreateFood)
 			}
 		}
 	}

@@ -1,12 +1,8 @@
 <template>
 	<view class="container">
-		<!-- 顶部导航栏 -->
 		<u-navbar title="记录饮食" fixed placeholder>
 			<view slot="left">
 				<u-icon name="arrow-left" size="20" @click="goBack"></u-icon>
-			</view>
-			<view slot="right">
-				<text class="nav-btn" @click="saveDiet">保存</text>
 			</view>
 		</u-navbar>
 
@@ -14,536 +10,201 @@
 			<!-- 餐次选择 -->
 			<view class="form-item">
 				<text class="label">餐次</text>
-				<view class="meal-types">
-					<view
-						v-for="meal in mealTypes"
-						:key="meal.type"
-						class="meal-item"
-						:class="{ active: dietForm.meal_type === meal.type }"
-						@click="selectMealType(meal.type)"
-					>
-						<u-icon :name="meal.icon" :color="dietForm.meal_type === meal.type ? '#fff' : meal.color" size="20"></u-icon>
-						<text class="meal-name">{{ meal.name }}</text>
-					</view>
+				<view class="meal-tabs">
+					<text v-for="m in meals" :key="m.type" class="meal-tab"
+						:class="{ active: mealType === m.type }" @tap="mealType = m.type">
+						{{ m.name }}
+					</text>
 				</view>
 			</view>
 
-			<!-- 记录时间 -->
+			<!-- 搜索食物 -->
 			<view class="form-item">
-				<text class="label">记录时间</text>
-				<u-datetime-picker
-					:show="showTimePicker"
-					v-model="dietForm.record_time"
-					mode="datetime"
-					@confirm="confirmTime"
-					@cancel="showTimePicker = false"
-				></u-datetime-picker>
-				<u-cell
-					title="记录时间"
-					:value="formatDateTime(dietForm.record_time)"
-					isLink
-					@click="showTimePicker = true"
-				></u-cell>
-			</view>
+				<text class="label">选择食物</text>
+				<input class="search-input" v-model="keyword" placeholder="搜索食物..." @input="searchFoods" />
 
-			<!-- 食物列表 -->
-			<view class="form-item">
-				<view class="section-header">
-					<text class="label">食物列表</text>
-					<u-icon name="plus" size="20" color="#3c9cff" @click="addFoodItem"></u-icon>
+				<!-- 分类 -->
+				<view class="cat-tabs">
+					<text v-for="c in categories" :key="c" class="cat-tab"
+						:class="{ active: currentCat === c }" @tap="currentCat = c; searchFoods()">
+						{{ c }}
+					</text>
 				</view>
 
-				<view v-for="(food, index) in foodItems" :key="index" class="food-item">
-					<u-icon
-						name="close"
-						size="16"
-						color="#ff6b6b"
-						class="remove-btn"
-						@click="removeFoodItem(index)"
-					></u-icon>
-
-					<u-input
-						v-model="food.name"
-						placeholder="食物名称"
-						border="none"
-						style="flex: 1; margin-right: 20rpx;"
-					/>
-
-					<u-input
-						v-model="food.amount"
-						placeholder="份量"
-						border="none"
-						style="width: 120rpx; margin-right: 20rpx;"
-					/>
-
-					<u-button
-						type="primary"
-						size="mini"
-						@click="searchFoodInfo(index)"
-					>查询</u-button>
+				<!-- 食物列表 -->
+				<view class="food-list">
+					<view v-for="f in foodList" :key="f.id" class="food-item" @tap="selectFood(f)">
+						<view class="food-info">
+							<text class="food-name">{{ f.name }}</text>
+							<text class="food-detail">{{ f.calories }}kcal | 蛋白{{ f.protein }}g | 碳水{{ f.carbs }}g | 脂肪{{ f.fat }}g</text>
+						</view>
+						<text class="food-unit">/ {{ f.unit }}</text>
+					</view>
 				</view>
 
-				<view v-if="foodItems.length === 0" class="empty-food-list">
-					<text>点击上方+号添加食物</text>
+				<view class="add-custom" @tap="showCustom = true">
+					<text>+ 添加自定义食物</text>
 				</view>
 			</view>
 
-			<!-- 营养信息（自动计算） -->
-			<view class="form-item">
-				<text class="label">营养信息</text>
-
-				<view class="nutrition-grid">
-					<view class="nutrition-item">
-						<text class="nutrition-label">总卡路里</text>
-						<view class="nutrition-value">
-							<u-input
-								v-model="dietForm.total_calories"
-								type="digit"
-								placeholder="0"
-								border="none"
-								style="text-align: center;"
-							/>
-							<text class="unit">kcal</text>
-						</view>
-					</view>
-
-					<view class="nutrition-item">
-						<text class="nutrition-label">蛋白质</text>
-						<view class="nutrition-value">
-							<u-input
-								v-model="dietForm.protein"
-								type="digit"
-								placeholder="0"
-								border="none"
-								style="text-align: center;"
-							/>
-							<text class="unit">g</text>
-						</view>
-					</view>
-
-					<view class="nutrition-item">
-						<text class="nutrition-label">碳水化合物</text>
-						<view class="nutrition-value">
-							<u-input
-								v-model="dietForm.carbs"
-								type="digit"
-								placeholder="0"
-								border="none"
-								style="text-align: center;"
-							/>
-							<text class="unit">g</text>
-						</view>
-					</view>
-
-					<view class="nutrition-item">
-						<text class="nutrition-label">脂肪</text>
-						<view class="nutrition-value">
-							<u-input
-								v-model="dietForm.fat"
-								type="digit"
-								placeholder="0"
-								border="none"
-								style="text-align: center;"
-							/>
-							<text class="unit">g</text>
-						</view>
-					</view>
+			<!-- 已选食物 -->
+			<view class="form-item" v-if="selectedFoods.length > 0">
+				<text class="label">已选食物</text>
+				<view v-for="(sf, i) in selectedFoods" :key="i" class="selected-food">
+					<text class="sf-name">{{ sf.name }}</text>
+					<text class="sf-cal">{{ sf.calories }}kcal</text>
+					<text class="sf-remove" @tap="selectedFoods.splice(i, 1)">x</text>
 				</view>
-			</view>
-
-			<!-- 饮水量 -->
-			<view class="form-item">
-				<text class="label">饮水量</text>
-				<view class="water-intake">
-					<text class="intake-label">今日饮水</text>
-					<u-number-box
-						v-model="dietForm.water_intake"
-						:min="0"
-						:step="100"
-						label="ml"
-					></u-number-box>
+				<view class="total-row">
+					<text>合计: {{ totalCalories }}kcal | 蛋白{{ totalProtein }}g | 碳水{{ totalCarbs }}g | 脂肪{{ totalFat }}g</text>
 				</view>
 			</view>
 
 			<!-- 备注 -->
-			<view class="form-item">
-				<text class="label">备注</text>
-				<u-textarea
-					v-model="dietForm.notes"
-					placeholder="记录烹饪方式、特殊说明等..."
-					:height="120"
-				/>
+			<view class="form-item" v-if="selectedFoods.length > 0">
+				<textarea v-model="notes" placeholder="备注（可选）" class="notes-input" />
 			</view>
+
+			<button v-if="selectedFoods.length > 0" class="save-btn" type="primary" :loading="saving" @tap="save">
+				{{ saving ? '保存中...' : '保存记录' }}
+			</button>
 		</view>
 
-		<!-- 食物数据库搜索弹窗 -->
-		<u-popup :show="showFoodSearch" mode="bottom" @close="showFoodSearch = false">
-			<view class="food-search-popup">
-				<view class="popup-header">
-					<text class="popup-title">搜索食物</text>
-					<u-icon name="close" size="20" @click="showFoodSearch = false"></u-icon>
-				</view>
-
-				<view class="search-box">
-					<u-search
-						v-model="searchKeyword"
-						placeholder="搜索食物名称"
-						@search="searchFoods"
-						@custom="searchFoods"
-					></u-search>
-				</view>
-
-				<view class="search-results">
-					<view
-						v-for="food in searchResults"
-						:key="food.id"
-						class="result-item"
-						@click="selectFood(food)"
-					>
-						<view class="food-info">
-							<text class="food-name">{{ food.name }}</text>
-							<text class="food-calories">{{ food.calories }}kcal/100g</text>
-						</view>
-						<u-icon name="checkmark" color="#3c9cff" v-if="selectedFoodId === food.id"></u-icon>
-					</view>
-
-					<view v-if="searchResults.length === 0 && searchKeyword" class="no-results">
-						<u-empty text="未找到相关食物" mode="search"></u-empty>
-					</view>
-
-					<view v-if="!searchKeyword" class="search-tip">
-						<u-empty text="输入关键词搜索食物" mode="search"></u-empty>
-					</view>
-				</view>
+		<!-- 自定义食物弹窗 -->
+		<u-popup :show="showCustom" mode="bottom" @close="showCustom = false">
+			<view class="custom-popup">
+				<text class="popup-title">添加自定义食物</text>
+				<input v-model="customFood.name" placeholder="食物名称" class="popup-input" />
+				<input v-model="customFood.calories" type="digit" placeholder="热量(kcal/100g)" class="popup-input" />
+				<input v-model="customFood.protein" type="digit" placeholder="蛋白质(g/100g)" class="popup-input" />
+				<input v-model="customFood.carbs" type="digit" placeholder="碳水(g/100g)" class="popup-input" />
+				<input v-model="customFood.fat" type="digit" placeholder="脂肪(g/100g)" class="popup-input" />
+				<button type="primary" @tap="saveCustomFood">保存食物</button>
 			</view>
 		</u-popup>
 	</view>
 </template>
 
 <script>
+	import { getFoods, createFood, createDietRecord } from '../../api/diet'
+
 	export default {
 		data() {
 			return {
-				showTimePicker: false,
-				showFoodSearch: false,
-				searchKeyword: '',
-				selectedFoodId: null,
-				currentFoodIndex: 0,
-
-				dietForm: {
-					meal_type: 'breakfast',
-					record_time: Date.now(),
-					total_calories: '',
-					protein: '',
-					carbs: '',
-					fat: '',
-					water_intake: 0,
-					notes: ''
-				},
-
-				foodItems: [
-					{ name: '', amount: '' }
+				saving: false, showCustom: false,
+				mealType: 'lunch', keyword: '', currentCat: '全部',
+				meals: [
+					{ type: 'breakfast', name: '早餐' },
+					{ type: 'lunch', name: '午餐' },
+					{ type: 'dinner', name: '晚餐' },
+					{ type: 'snack', name: '加餐' }
 				],
-
-				mealTypes: [
-					{ type: 'breakfast', name: '早餐', icon: 'coffee', color: '#ff9900' },
-					{ type: 'lunch', name: '午餐', icon: 'restaurant', color: '#3c9cff' },
-					{ type: 'dinner', name: '晚餐', icon: 'moon', color: '#a78bfa' },
-					{ type: 'snack', name: '加餐', icon: 'gift', color: '#6bcf7f' }
-				],
-
-				searchResults: [
-					{ id: 1, name: '鸡胸肉', calories: 165, protein: 31, carbs: 0, fat: 3.6 },
-					{ id: 2, name: '三文鱼', calories: 208, protein: 20, carbs: 0, fat: 13 },
-					{ id: 3, name: '牛肉', calories: 250, protein: 26, carbs: 0, fat: 15 },
-					{ id: 4, name: '鸡蛋', calories: 155, protein: 13, carbs: 1.1, fat: 11 },
-					{ id: 5, name: '燕麦', calories: 389, protein: 16.9, carbs: 66.3, fat: 6.9 }
-				]
+				categories: ['全部', '主食', '肉类', '蔬菜', '水果', '奶制品', '零食'],
+				foodList: [],
+				selectedFoods: [],
+				notes: '',
+				customFood: { name: '', calories: '', protein: '', carbs: '', fat: '' }
 			}
 		},
+		computed: {
+			totalCalories() { return this.selectedFoods.reduce((s, f) => s + f.calories, 0).toFixed(0) },
+			totalProtein() { return this.selectedFoods.reduce((s, f) => s + f.protein, 0).toFixed(1) },
+			totalCarbs() { return this.selectedFoods.reduce((s, f) => s + f.carbs, 0).toFixed(1) },
+			totalFat() { return this.selectedFoods.reduce((s, f) => s + f.fat, 0).toFixed(1) }
+		},
+		onLoad() { this.searchFoods() },
 		methods: {
-			goBack() {
-				uni.navigateBack()
-			},
-
-			saveDiet() {
-				if (this.foodItems.every(item => !item.name.trim())) {
-					uni.showToast({
-						title: '请至少添加一种食物',
-						icon: 'none'
+			goBack() { uni.navigateBack() },
+			async searchFoods() {
+				try {
+					const res = await getFoods({
+						keyword: this.keyword,
+						category: this.currentCat === '全部' ? '' : this.currentCat
 					})
+					this.foodList = res.data || []
+				} catch (e) {}
+			},
+			selectFood(f) {
+				this.selectedFoods.push({ ...f })
+			},
+			async saveCustomFood() {
+				if (!this.customFood.name || !this.customFood.calories) {
+					uni.showToast({ title: '请填写名称和热量', icon: 'none' })
 					return
 				}
-
-				// 这里应该调用API保存饮食记录
-				uni.showToast({
-					title: '保存成功',
-					icon: 'success'
-				})
-
-				// 返回上一页
-				setTimeout(() => {
-					uni.navigateBack()
-				}, 1000)
+				try {
+					const res = await createFood({
+						name: this.customFood.name,
+						calories: parseFloat(this.customFood.calories),
+						protein: parseFloat(this.customFood.protein) || 0,
+						carbs: parseFloat(this.customFood.carbs) || 0,
+						fat: parseFloat(this.customFood.fat) || 0
+					})
+					this.foodList.unshift(res.data)
+					this.showCustom = false
+					this.customFood = { name: '', calories: '', protein: '', carbs: '', fat: '' }
+					uni.showToast({ title: '添加成功', icon: 'success' })
+				} catch (e) {}
 			},
-
-			selectMealType(type) {
-				this.dietForm.meal_type = type
-			},
-
-			confirmTime(e) {
-				this.dietForm.record_time = e.value
-				this.showTimePicker = false
-			},
-
-			addFoodItem() {
-				this.foodItems.push({ name: '', amount: '' })
-			},
-
-			removeFoodItem(index) {
-				if (this.foodItems.length > 1) {
-					this.foodItems.splice(index, 1)
-				} else {
-					this.foodItems[0] = { name: '', amount: '' }
-				}
-			},
-
-			searchFoodInfo(index) {
-				this.currentFoodIndex = index
-				this.showFoodSearch = true
-				this.searchKeyword = this.foodItems[index].name
-				if (this.searchKeyword) {
-					this.searchFoods()
-				}
-			},
-
-			searchFoods() {
-				// 实际项目中这里应该调用食物数据库API
-				// 这里模拟搜索结果
-				if (this.searchKeyword) {
-					this.searchResults = this.searchResults.filter(food =>
-						food.name.includes(this.searchKeyword)
-					)
-				} else {
-					this.searchResults = [
-						{ id: 1, name: '鸡胸肉', calories: 165, protein: 31, carbs: 0, fat: 3.6 },
-						{ id: 2, name: '三文鱼', calories: 208, protein: 20, carbs: 0, fat: 13 },
-						{ id: 3, name: '牛肉', calories: 250, protein: 26, carbs: 0, fat: 15 },
-						{ id: 4, name: '鸡蛋', calories: 155, protein: 13, carbs: 1.1, fat: 11 },
-						{ id: 5, name: '燕麦', calories: 389, protein: 16.9, carbs: 66.3, fat: 6.9 }
-					]
-				}
-			},
-
-			selectFood(food) {
-				this.selectedFoodId = food.id
-				this.foodItems[this.currentFoodIndex].name = food.name
-
-				// 自动填充营养信息（简化处理）
-				this.dietForm.total_calories = food.calories
-				this.dietForm.protein = food.protein
-				this.dietForm.carbs = food.carbs
-				this.dietForm.fat = food.fat
-
-				// 1秒后关闭弹窗
-				setTimeout(() => {
-					this.showFoodSearch = false
-				}, 500)
-			},
-
-			formatDateTime(timestamp) {
-				const date = new Date(timestamp)
-				return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+			async save() {
+				this.saving = true
+				try {
+					await createDietRecord({
+						record_date: new Date().toISOString(),
+						meal_type: this.mealType,
+						food_items: JSON.stringify(this.selectedFoods.map(f => ({ name: f.name, calories: f.calories }))),
+						total_calories: parseFloat(this.totalCalories),
+						protein: parseFloat(this.totalProtein),
+						carbs: parseFloat(this.totalCarbs),
+						fat: parseFloat(this.totalFat),
+						notes: this.notes
+					})
+					uni.showToast({ title: '保存成功', icon: 'success' })
+					setTimeout(() => uni.navigateBack(), 1000)
+				} catch (e) {} finally { this.saving = false }
 			}
 		}
 	}
 </script>
 
 <style lang="scss" scoped>
-.container {
-	padding: 20rpx;
-}
-
-.nav-btn {
-	color: #3c9cff;
-	font-size: 28rpx;
-}
-
+.container { padding: 20rpx; }
 .form-container {
 	.form-item {
-		background: white;
-		border-radius: 20rpx;
-		padding: 0 30rpx 30rpx;
-		margin-bottom: 20rpx;
-
-		.section-header {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			padding: 30rpx 0 20rpx;
-
-			.label {
-				font-size: 32rpx;
-				font-weight: bold;
-				color: #333;
-			}
+		background: white; border-radius: 20rpx; padding: 30rpx; margin-bottom: 20rpx;
+		.label { font-size: 32rpx; font-weight: bold; color: #333; margin-bottom: 20rpx; display: block; }
+		.meal-tabs, .cat-tabs { display: flex; flex-wrap: wrap; gap: 15rpx; margin-bottom: 15rpx; }
+		.meal-tab, .cat-tab {
+			padding: 10rpx 24rpx; border-radius: 30rpx; background: #f5f5f5; font-size: 24rpx; color: #666;
+			&.active { background: #3c9cff; color: white; }
 		}
-
-		.label {
-			display: block;
-			font-size: 32rpx;
-			font-weight: bold;
-			color: #333;
-			padding: 30rpx 0 20rpx;
-		}
-
-		.meal-types {
-			display: flex;
-			justify-content: space-between;
-			flex-wrap: wrap;
-			gap: 20rpx;
-
-			.meal-item {
-				flex: 1;
-				min-width: 25%;
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				justify-content: center;
-				padding: 20rpx;
-				border-radius: 10rpx;
-				background: #f5f5f5;
-				color: #666;
-
-				&.active {
-					background: #3c9cff;
-					color: white;
+		.search-input { border: 1rpx solid #eee; border-radius: 10rpx; padding: 15rpx; font-size: 28rpx; margin-bottom: 15rpx; }
+		.food-list { max-height: 400rpx; overflow-y: auto;
+			.food-item {
+				display: flex; justify-content: space-between; align-items: center;
+				padding: 20rpx 0; border-bottom: 1rpx solid #f5f5f5;
+				.food-info {
+					.food-name { font-size: 28rpx; color: #333; display: block; }
+					.food-detail { font-size: 20rpx; color: #999; }
 				}
-
-				.meal-name {
-					font-size: 24rpx;
-					margin-top: 10rpx;
-				}
+				.food-unit { font-size: 22rpx; color: #999; }
 			}
 		}
-
-		.food-item {
-			display: flex;
-			align-items: center;
-			padding: 20rpx 0;
-			border-bottom: 1rpx dashed #eee;
-			position: relative;
-
-			&:last-child {
-				border-bottom: none;
-			}
-
-			.remove-btn {
-				position: absolute;
-				top: 10rpx;
-				right: 0;
-			}
+		.add-custom { text-align: center; padding: 20rpx; color: #3c9cff; font-size: 26rpx; }
+		.selected-food {
+			display: flex; align-items: center; padding: 15rpx 0; border-bottom: 1rpx solid #f5f5f5;
+			.sf-name { flex: 1; font-size: 28rpx; color: #333; }
+			.sf-cal { font-size: 24rpx; color: #ff9900; margin-right: 20rpx; }
+			.sf-remove { color: #ff4d4f; font-size: 28rpx; padding: 0 10rpx; }
 		}
-
-		.empty-food-list {
-			text-align: center;
-			padding: 40rpx 0;
-			color: #999;
-		}
-
-		.nutrition-grid {
-			display: grid;
-			grid-template-columns: repeat(2, 1fr);
-			gap: 20rpx;
-
-			.nutrition-item {
-				background: #f5f5f5;
-				border-radius: 10rpx;
-				padding: 20rpx;
-				text-align: center;
-
-				.nutrition-label {
-					font-size: 24rpx;
-					color: #666;
-					display: block;
-					margin-bottom: 10rpx;
-				}
-
-				.nutrition-value {
-					display: flex;
-					align-items: center;
-					justify-content: center;
-
-					.unit {
-						font-size: 24rpx;
-						color: #999;
-						margin-left: 5rpx;
-					}
-				}
-			}
-		}
-
-		.water-intake {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-
-			.intake-label {
-				font-size: 28rpx;
-				color: #333;
-			}
-		}
+		.total-row { margin-top: 15rpx; padding-top: 15rpx; border-top: 1rpx solid #eee; font-size: 24rpx; color: #3c9cff; }
+		.notes-input { width: 100%; height: 100rpx; border: 1rpx solid #eee; border-radius: 10rpx; padding: 15rpx; font-size: 26rpx; }
 	}
+	.save-btn { margin-top: 20rpx; border-radius: 15rpx; font-size: 32rpx; }
 }
-
-.food-search-popup {
-	.popup-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 30rpx;
-		border-bottom: 1rpx solid #eee;
-
-		.popup-title {
-			font-size: 32rpx;
-			font-weight: bold;
-		}
-	}
-
-	.search-box {
-		padding: 20rpx 30rpx;
-	}
-
-	.search-results {
-		max-height: 500rpx;
-		overflow-y: auto;
-
-		.result-item {
-			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			padding: 30rpx;
-			border-bottom: 1rpx solid #eee;
-
-			.food-info {
-				.food-name {
-					font-size: 28rpx;
-					color: #333;
-					display: block;
-					margin-bottom: 10rpx;
-				}
-
-				.food-calories {
-					font-size: 24rpx;
-					color: #999;
-				}
-			}
-		}
-
-		.no-results,
-		.search-tip {
-			padding: 50rpx 0;
-		}
-	}
+.custom-popup {
+	padding: 40rpx;
+	.popup-title { font-size: 32rpx; font-weight: bold; text-align: center; margin-bottom: 30rpx; display: block; }
+	.popup-input { border: 1rpx solid #eee; border-radius: 10rpx; padding: 15rpx; font-size: 28rpx; margin-bottom: 20rpx; }
 }
 </style>

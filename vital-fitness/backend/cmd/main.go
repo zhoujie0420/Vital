@@ -6,6 +6,7 @@ import (
 
 	"vital-fitness/backend/internal/config"
 	"vital-fitness/backend/internal/middleware"
+	"vital-fitness/backend/internal/model"
 	"vital-fitness/backend/internal/router"
 	"vital-fitness/backend/internal/utils"
 )
@@ -37,8 +38,9 @@ func main() {
 	sqlDB, _ := db.DB()
 	defer sqlDB.Close()
 
-	// 自动迁移（添加新字段）
+	// 自动迁移（添加新字段和表）
 	db.Exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS open_id VARCHAR(100) UNIQUE AFTER deleted_at")
+	db.AutoMigrate(&model.Food{})
 
 	// 初始化JWT
 	middleware.InitJWT(cfg.JWT)
