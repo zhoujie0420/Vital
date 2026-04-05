@@ -1,58 +1,46 @@
 <template>
 	<view class="container">
-		<!-- 顶部导航栏 -->
 		<u-navbar title="训练记录" fixed placeholder>
 			<view slot="right">
-				<u-icon name="plus" size="20" @click="addWorkout"></u-icon>
+				<text class="add-btn" @tap="addWorkout">+ 记录</text>
 			</view>
 		</u-navbar>
 
-		<!-- 筛选条件 -->
+		<!-- 分类筛选 -->
 		<view class="filter-bar">
-			<u-tabs :list="tabList" :current="currentTab" @change="changeTab"></u-tabs>
+			<text
+				v-for="(tab, index) in tabList"
+				:key="index"
+				class="filter-tab"
+				:class="{ active: currentTab === index }"
+				@tap="changeTab(index)"
+			>{{ tab.name }}</text>
 		</view>
 
 		<!-- 训练记录列表 -->
 		<view class="workout-list">
-			<view v-for="(workout, index) in workoutList" :key="index" class="workout-item" @click="viewWorkout(workout.id)">
+			<view v-for="(workout, index) in workoutList" :key="index" class="workout-item">
 				<view class="workout-header">
 					<text class="workout-date">{{ formatDate(workout.workout_date) }}</text>
 					<text class="workout-time">{{ formatTime(workout.created_at) }}</text>
 				</view>
-
 				<view class="workout-content">
-					<view class="exercise-info">
-						<u-icon name="level" size="18" color="#3c9cff"></u-icon>
-						<text class="exercise-name">{{ workout.exercise.name }}</text>
-					</view>
-
+					<text class="exercise-name">{{ workout.exercise.name }}</text>
 					<view class="workout-details">
-						<text class="detail-item">重量: {{ workout.weight }}kg</text>
-						<text class="detail-item">组数: {{ workout.sets }}组</text>
-						<text class="detail-item">次数: {{ workout.reps }}次</text>
-					</view>
-
-					<view class="workout-feeling">
-						<text class="feeling-label">感受:</text>
-						<u-rate :value="workout.feeling" readonly size="14" active-color="#ff9900"></u-rate>
+						<text class="detail-tag">{{ workout.weight }}kg</text>
+						<text class="detail-tag" v-if="workout.sets > 1">{{ workout.sets }}组</text>
+						<text class="detail-tag" v-if="workout.reps > 1">{{ workout.reps }}次</text>
 					</view>
 				</view>
-
-				<view class="workout-footer">
-					<u-tag :text="workout.exercise.category" type="primary" size="mini" />
-					<text v-if="workout.notes" class="notes-preview">{{ workout.notes }}</text>
-				</view>
+				<text v-if="workout.notes" class="workout-notes">{{ workout.notes }}</text>
 			</view>
 
 			<!-- 空状态 -->
 			<view v-if="workoutList.length === 0" class="empty-state">
-				<u-empty text="暂无训练记录" mode="list"></u-empty>
+				<text class="empty-text">暂无训练记录</text>
 				<button class="add-first-btn" type="primary" @tap="addWorkout">添加第一条记录</button>
 			</view>
 		</view>
-
-		<!-- 加载更多 -->
-		<u-loadmore :status="loadStatus" v-if="workoutList.length > 0" />
 	</view>
 </template>
 
@@ -63,93 +51,80 @@
 		data() {
 			return {
 				tabList: [
-					{ name: '全部' },
-					{ name: '胸部' },
-					{ name: '背部' },
-					{ name: '腿部' },
-					{ name: '肩部' }
+					{ name: '全部' }, { name: '胸部' }, { name: '背部' },
+					{ name: '腿部' }, { name: '肩部' }, { name: '手臂' }
 				],
 				currentTab: 0,
-				workoutList: [],
-				loadStatus: 'loadmore',
-				page: 1
+				workoutList: []
 			}
 		},
 		onShow() {
-			this.page = 1
 			this.loadWorkouts()
 		},
 		methods: {
 			changeTab(index) {
 				this.currentTab = index
-				this.page = 1
 				this.loadWorkouts()
 			},
-
 			async loadWorkouts() {
-				this.loadStatus = 'loading'
 				try {
 					const category = this.tabList[this.currentTab].name
 					const res = await getWorkouts({
 						category: category === '全部' ? '' : category,
-						page: this.page,
-						page_size: 20
+						page: 1, page_size: 50
 					})
 					this.workoutList = res.data || []
-					this.loadStatus = this.workoutList.length < 20 ? 'nomore' : 'loadmore'
-				} catch (e) {
-					this.loadStatus = 'loadmore'
-				}
+				} catch (e) {}
 			},
-
 			addWorkout() {
-				uni.navigateTo({
-					url: '/pages/workout/add'
-				})
+				uni.navigateTo({ url: '/pages/workout/add' })
 			},
-
-			viewWorkout(id) {
-				uni.navigateTo({
-					url: `/pages/workout/detail?id=${id}`
-				})
-			},
-
-			formatDate(dateString) {
-				const date = new Date(dateString)
+			formatDate(dateStr) {
+				if (!dateStr) return ''
+				const date = new Date(dateStr)
 				const today = new Date()
-
-				if (date.toDateString() === today.toDateString()) {
-					return '今天'
-				}
-
+				if (date.toDateString() === today.toDateString()) return '今天'
 				const yesterday = new Date(today)
 				yesterday.setDate(yesterday.getDate() - 1)
-
-				if (date.toDateString() === yesterday.toDateString()) {
-					return '昨天'
-				}
-
-				return `${date.getMonth() + 1}月${date.getDate()}日`
+				if (date.toDateString() === yesterday.toDateString()) return '昨天'
+				return (date.getMonth() + 1) + '月' + date.getDate() + '日'
 			},
-
-			formatTime(dateTimeString) {
-				const date = new Date(dateTimeString)
-				return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+			formatTime(dateStr) {
+				if (!dateStr) return ''
+				const d = new Date(dateStr)
+				return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0')
 			}
 		}
 	}
 </script>
 
 <style lang="scss" scoped>
-.container {
-	padding: 20rpx;
+.container { padding: 20rpx; }
+
+.add-btn {
+	color: #3c9cff;
+	font-size: 28rpx;
+	font-weight: bold;
 }
 
 .filter-bar {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 15rpx;
 	background: white;
 	border-radius: 20rpx;
+	padding: 20rpx;
 	margin-bottom: 20rpx;
-	overflow: hidden;
+
+	.filter-tab {
+		padding: 10rpx 24rpx;
+		border-radius: 30rpx;
+		background: #f5f5f5;
+		font-size: 24rpx;
+		color: #666;
+
+		&.active { background: #3c9cff; color: white; }
+	}
 }
 
 .workout-list {
@@ -157,77 +132,44 @@
 		background: white;
 		border-radius: 20rpx;
 		padding: 30rpx;
-		margin-bottom: 20rpx;
+		margin-bottom: 15rpx;
 
 		.workout-header {
 			display: flex;
 			justify-content: space-between;
-			align-items: center;
-			margin-bottom: 20rpx;
+			margin-bottom: 15rpx;
 
-			.workout-date {
-				font-size: 32rpx;
-				font-weight: bold;
-				color: #333;
-			}
-
-			.workout-time {
-				font-size: 24rpx;
-				color: #999;
-			}
+			.workout-date { font-size: 24rpx; color: #999; }
+			.workout-time { font-size: 24rpx; color: #999; }
 		}
 
 		.workout-content {
-			.exercise-info {
-				display: flex;
-				align-items: center;
-				margin-bottom: 20rpx;
-
-				.exercise-name {
-					font-size: 28rpx;
-					font-weight: bold;
-					color: #333;
-					margin-left: 10rpx;
-				}
+			.exercise-name {
+				font-size: 32rpx;
+				font-weight: bold;
+				color: #333;
+				display: block;
+				margin-bottom: 15rpx;
 			}
 
 			.workout-details {
 				display: flex;
-				flex-wrap: wrap;
-				gap: 20rpx;
-				margin-bottom: 20rpx;
+				gap: 15rpx;
 
-				.detail-item {
-					font-size: 26rpx;
-					color: #666;
-					background: #f5f5f5;
-					padding: 10rpx 20rpx;
+				.detail-tag {
+					padding: 8rpx 20rpx;
+					background: #f0f7ff;
+					color: #3c9cff;
 					border-radius: 10rpx;
-				}
-			}
-
-			.workout-feeling {
-				display: flex;
-				align-items: center;
-
-				.feeling-label {
-					font-size: 26rpx;
-					color: #666;
-					margin-right: 10rpx;
+					font-size: 24rpx;
 				}
 			}
 		}
 
-		.workout-footer {
-			margin-top: 20rpx;
-			padding-top: 20rpx;
-			border-top: 1rpx solid #eee;
-
-			.notes-preview {
-				font-size: 24rpx;
-				color: #999;
-				margin-left: 10rpx;
-			}
+		.workout-notes {
+			margin-top: 15rpx;
+			font-size: 24rpx;
+			color: #999;
 		}
 	}
 
@@ -237,11 +179,8 @@
 		background: white;
 		border-radius: 20rpx;
 
-		.add-first-btn {
-			margin-top: 30rpx;
-			width: 60%;
-			font-size: 28rpx;
-		}
+		.empty-text { font-size: 28rpx; color: #999; display: block; margin-bottom: 30rpx; }
+		.add-first-btn { width: 60%; font-size: 28rpx; }
 	}
 }
 </style>
