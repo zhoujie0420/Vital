@@ -7,6 +7,7 @@ import (
 	"vital-fitness/backend/internal/middleware"
 	"vital-fitness/backend/internal/model"
 	"vital-fitness/backend/internal/service"
+	"vital-fitness/backend/internal/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -91,4 +92,38 @@ func (h *AuthHandler) GetProfile(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"code": 200, "message": "success", "data": profile})
+}
+
+// UpdateProfile 更新用户资料
+func (h *AuthHandler) UpdateProfile(c *gin.Context) {
+	userID := c.GetUint("user_id")
+
+	var updates map[string]interface{}
+	if err := c.ShouldBindJSON(&updates); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "参数错误"})
+		return
+	}
+
+	// 只允许更新这些字段
+	allowed := map[string]bool{"nickname": true, "avatar": true, "gender": true, "height": true, "weight": true}
+	filtered := make(map[string]interface{})
+	for k, v := range updates {
+		if allowed[k] {
+			filtered[k] = v
+		}
+	}
+
+	if len(filtered) == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "没有可更新的字段"})
+		return
+	}
+
+	db := utils.GetDB()
+	if err := db.Table("users").Where("id = ?", userID).Updates(filtered).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "更新失败"})
+		return
+	}
+
+	profile, _ := h.userService.GetProfile(userID)
+	c.JSON(http.StatusOK, gin.H{"code": 200, "message": "更新成功", "data": profile})
 }
