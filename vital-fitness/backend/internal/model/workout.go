@@ -60,7 +60,7 @@ type CreateWorkoutRequest struct {
 	Sets        int       `json:"sets" binding:"required,min=1"`
 	Reps        int       `json:"reps" binding:"required,min=1"`
 	RestTime    int       `json:"rest_time,omitempty"`
-	Feeling     int       `json:"feeling,omitempty" binding:"min=1,max=5"`
+	Feeling     int       `json:"feeling,omitempty"`
 	Notes       string    `json:"notes,omitempty"`
 }
 
@@ -69,10 +69,10 @@ type UpdateWorkoutRequest struct {
 	ExerciseID  uint      `json:"exercise_id,omitempty"`
 	WorkoutDate time.Time `json:"workout_date,omitempty"`
 	Weight      float64   `json:"weight,omitempty"`
-	Sets        int       `json:"sets,omitempty" binding:"min=1"`
-	Reps        int       `json:"reps,omitempty" binding:"min=1"`
+	Sets        int       `json:"sets,omitempty"`
+	Reps        int       `json:"reps,omitempty"`
 	RestTime    int       `json:"rest_time,omitempty"`
-	Feeling     int       `json:"feeling,omitempty" binding:"min=1,max=5"`
+	Feeling     int       `json:"feeling,omitempty"`
 	Notes       string    `json:"notes,omitempty"`
 }
 

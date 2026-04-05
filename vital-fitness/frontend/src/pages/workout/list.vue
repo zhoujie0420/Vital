@@ -47,7 +47,7 @@
 			<!-- 空状态 -->
 			<view v-if="workoutList.length === 0" class="empty-state">
 				<u-empty text="暂无训练记录" mode="list"></u-empty>
-				<u-button type="primary" icon="plus" @click="addWorkout" style="margin-top: 30rpx;">添加第一条记录</u-button>
+				<button class="add-first-btn" type="primary" @tap="addWorkout">添加第一条记录</button>
 			</view>
 		</view>
 
@@ -236,6 +236,12 @@
 		padding: 100rpx 0;
 		background: white;
 		border-radius: 20rpx;
+
+		.add-first-btn {
+			margin-top: 30rpx;
+			width: 60%;
+			font-size: 28rpx;
+		}
 	}
 }
 </style>
