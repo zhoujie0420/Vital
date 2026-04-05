@@ -14,4 +14,9 @@ DATABASE:
 # JWT配置
 JWT:
   JWT_SECRET: "vital_fitness_secret_key"
-  JWT_EXPIRE: 24  # 小时
+  JWT_EXPIRE: 24
+
+# 微信小程序配置
+WECHAT:
+  WX_APP_ID: "wxcfe982f21211f9c6"
+  WX_APP_SECRET: "7a72fe7769b53e048bb7a8e1b10ccfaa"

@@ -65,3 +65,13 @@ func (d *UserDAO) ExistsByEmail(email string) bool {
 	d.db.Model(&model.User{}).Where("email = ?", email).Count(&count)
 	return count > 0
 }
+
+// FindByOpenID 根据微信 openid 查找用户
+func (d *UserDAO) FindByOpenID(openID string) (*model.User, error) {
+	var user model.User
+	err := d.db.Where("open_id = ?", openID).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}

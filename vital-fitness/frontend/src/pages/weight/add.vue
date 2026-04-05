@@ -94,10 +94,10 @@
 				<view class="bmi-reference">
 					<text class="reference-title">参考标准：</text>
 					<view class="reference-items">
-						<text class="reference-item"><text class="underweight">偏瘦</text> &lt; 18.5</text>
+						<text class="reference-item"><text class="underweight">偏瘦</text> 小于 18.5</text>
 						<text class="reference-item"><text class="normal">正常</text> 18.5-23.9</text>
 						<text class="reference-item"><text class="overweight">超重</text> 24-27.9</text>
-						<text class="reference-item"><text class="obese">肥胖</text> ≥ 28</text>
+						<text class="reference-item"><text class="obese">肥胖</text> 大于等于 28</text>
 					</view>
 				</view>
 			</view>

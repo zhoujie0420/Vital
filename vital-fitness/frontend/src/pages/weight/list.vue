@@ -71,7 +71,7 @@
 					<view v-if="weight.bmi" class="bmi-info">
 						<text class="bmi-label">BMI:</text>
 						<text class="bmi-value">{{ weight.bmi }}</text>
-						<text class="bmi-status-small" :class="getBMIStatusClass(weight.bmi)">{{ getBMIStatus(weight.bmi) }}</text>
+						<text class="bmi-status-small" :class="weight.bmi < 18.5 ? 'status-underweight' : weight.bmi < 24 ? 'status-normal' : weight.bmi < 28 ? 'status-overweight' : 'status-obese'">{{ getBMIStatus(weight.bmi) }}</text>
 					</view>
 				</view>
 			</view>

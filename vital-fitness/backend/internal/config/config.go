@@ -15,6 +15,7 @@ type Config struct {
 	LogLevel   string   `mapstructure:"LOG_LEVEL"`
 	Database   Database `mapstructure:"DATABASE"`
 	JWT        JWT      `mapstructure:"JWT"`
+	WeChat     WeChat   `mapstructure:"WECHAT"`
 }
 
 // Database 数据库配置
@@ -30,6 +31,12 @@ type Database struct {
 type JWT struct {
 	Secret string `mapstructure:"JWT_SECRET"`
 	Expire int    `mapstructure:"JWT_EXPIRE"`
+}
+
+// WeChat 微信小程序配置
+type WeChat struct {
+	AppID     string `mapstructure:"WX_APP_ID"`
+	AppSecret string `mapstructure:"WX_APP_SECRET"`
 }
 
 // LoadConfig 加载配置
@@ -68,6 +75,8 @@ func LoadConfig() *Config {
 	envOverride(&config.Database.Password, "DB_PASSWORD")
 	envOverride(&config.Database.Name, "DB_NAME")
 	envOverride(&config.JWT.Secret, "JWT_SECRET")
+	envOverride(&config.WeChat.AppID, "WX_APP_ID")
+	envOverride(&config.WeChat.AppSecret, "WX_APP_SECRET")
 	if v := os.Getenv("JWT_EXPIRE"); v != "" {
 		if n, err := strconv.Atoi(v); err == nil {
 			config.JWT.Expire = n

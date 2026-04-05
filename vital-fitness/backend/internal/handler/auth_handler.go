@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"vital-fitness/backend/internal/config"
 	"vital-fitness/backend/internal/middleware"
 	"vital-fitness/backend/internal/model"
 	"vital-fitness/backend/internal/service"
@@ -12,42 +13,37 @@ import (
 
 // AuthHandler 认证处理器
 type AuthHandler struct {
-	userService *service.UserService
+	userService   *service.UserService
+	wechatService *service.WeChatService
 }
 
 // NewAuthHandler 创建 AuthHandler 实例
-func NewAuthHandler() *AuthHandler {
-	return &AuthHandler{userService: service.NewUserService()}
+func NewAuthHandler(wxCfg config.WeChat) *AuthHandler {
+	return &AuthHandler{
+		userService:   service.NewUserService(),
+		wechatService: service.NewWeChatService(wxCfg),
+	}
 }
 
-// Register 用户注册
-func (h *AuthHandler) Register(c *gin.Context) {
-	var req model.RegisterRequest
+// WxLogin 微信小程序登录
+func (h *AuthHandler) WxLogin(c *gin.Context) {
+	var req model.WxLoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "请求参数错误: " + err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "请提供code"})
 		return
 	}
 
-	profile, err := h.userService.Register(&req)
+	// 用 code 换 openid
+	session, err := h.wechatService.Code2Session(req.Code)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"code": 200, "message": "注册成功", "data": profile})
-}
-
-// Login 用户登录
-func (h *AuthHandler) Login(c *gin.Context) {
-	var req model.LoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "请求参数错误"})
-		return
-	}
-
-	user, err := h.userService.Login(&req)
+	// 登录或自动注册
+	user, err := h.wechatService.LoginOrRegister(session.OpenID)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": err.Error()})
 		return
 	}
 
@@ -64,17 +60,11 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		"data": model.LoginResponse{
 			Token: token,
 			User: model.UserProfile{
-				ID:        user.ID,
-				Username:  user.Username,
-				Email:     user.Email,
-				Phone:     user.Phone,
-				Avatar:    user.Avatar,
-				Nickname:  user.Nickname,
-				Gender:    user.Gender,
-				Birthday:  user.Birthday,
-				Height:    user.Height,
-				Weight:    user.Weight,
-				CreatedAt: user.CreatedAt,
+				ID:       user.ID,
+				Username: user.Username,
+				Avatar:   user.Avatar,
+				Nickname: user.Nickname,
+				Gender:   user.Gender,
 			},
 			ExpiresAt: expiresAt,
 		},

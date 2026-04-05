@@ -37,11 +37,14 @@ func main() {
 	sqlDB, _ := db.DB()
 	defer sqlDB.Close()
 
+	// 自动迁移（添加新字段）
+	db.Exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS open_id VARCHAR(100) UNIQUE AFTER deleted_at")
+
 	// 初始化JWT
 	middleware.InitJWT(cfg.JWT)
 
 	// 设置路由
-	r := router.SetupRouter(cfg.Mode)
+	r := router.SetupRouter(cfg.Mode, cfg.WeChat)
 
 	// 启动服务
 	port := fmt.Sprintf(":%s", cfg.ServerPort)

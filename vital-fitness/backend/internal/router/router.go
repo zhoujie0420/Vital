@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 
+	"vital-fitness/backend/internal/config"
 	"vital-fitness/backend/internal/handler"
 	"vital-fitness/backend/internal/middleware"
 
@@ -14,7 +15,7 @@ import (
 )
 
 // SetupRouter 设置路由
-func SetupRouter(mode string) *gin.Engine {
+func SetupRouter(mode string, wxCfg config.WeChat) *gin.Engine {
 	if mode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -33,7 +34,7 @@ func SetupRouter(mode string) *gin.Engine {
 	})
 
 	// 初始化 handler
-	authHandler := handler.NewAuthHandler()
+	authHandler := handler.NewAuthHandler(wxCfg)
 
 	// API v1 路由组
 	v1 := r.Group("/api/v1")
@@ -41,8 +42,7 @@ func SetupRouter(mode string) *gin.Engine {
 		// 认证相关接口（无需登录）
 		auth := v1.Group("/auth")
 		{
-			auth.POST("/register", authHandler.Register)
-			auth.POST("/login", authHandler.Login)
+			auth.POST("/wx-login", authHandler.WxLogin)
 			auth.POST("/logout", authHandler.Logout)
 		}
 
