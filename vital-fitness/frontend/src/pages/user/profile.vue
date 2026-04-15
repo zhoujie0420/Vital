@@ -1,5 +1,5 @@
 <template>
-	<view class="page">
+	<view class="page" :style="{ paddingTop: topPadding + 'px' }">
 		<view class="nav-bar">
 			<text class="nav-back" @tap="goBack">‹ 返回</text>
 			<text class="nav-title">个人资料</text>
@@ -49,12 +49,19 @@
 <script>
 	import { getProfile } from '../../api/user'
 	import { put } from '../../utils/request'
+	import { useUserStore } from '../../store'
 
 	export default {
 		data() {
 			return {
 				saving: false,
 				form: { nickname: '', gender: 0, height: '', weight: '' }
+			}
+		},
+		computed: {
+			topPadding() {
+				const app = getApp()
+				return (app.globalData?.customBarHeight || 88) + 8
 			}
 		},
 		onLoad() { this.loadProfile() },
@@ -79,6 +86,11 @@
 						height: parseFloat(this.form.height) || 0,
 						weight: parseFloat(this.form.weight) || 0
 					})
+					// 同步更新 store 里的用户信息
+					const userStore = useUserStore()
+					const updated = { ...userStore.userInfo, nickname: this.form.nickname, gender: this.form.gender }
+					userStore.userInfo = updated
+					uni.setStorageSync('userInfo', JSON.stringify(updated))
 					uni.showToast({ title: '保存成功', icon: 'success' })
 					setTimeout(() => uni.navigateBack(), 1000)
 				} catch (e) {} finally { this.saving = false }
@@ -89,52 +101,103 @@
 
 <style lang="scss" scoped>
 .page {
-	padding: 0 32rpx; padding-top: 120rpx; padding-bottom: 160rpx;
-	min-height: 100vh; background: #f2f2f7;
+	padding: 0 32rpx;
+	padding-bottom: 160rpx;
+	min-height: 100vh;
+	background: #f2f2f7;
 }
 
 .nav-bar {
-	display: flex; align-items: center; justify-content: space-between; margin-bottom: 28rpx;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 28rpx;
+
 	.nav-back { font-size: 32rpx; color: #007aff; font-weight: 500; }
 	.nav-title { font-size: 34rpx; font-weight: 600; color: #1c1c1e; }
 	.nav-placeholder { width: 80rpx; }
 }
 
 .card {
-	background: #fff; border-radius: 20rpx; padding: 28rpx 32rpx; margin-bottom: 16rpx;
+	background: #fff;
+	border-radius: 20rpx;
+	padding: 28rpx 32rpx;
+	margin-bottom: 16rpx;
 	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+
 	.card-label {
-		display: block; font-size: 26rpx; font-weight: 600; color: #8e8e93;
-		text-transform: uppercase; letter-spacing: 1rpx; margin-bottom: 16rpx;
+		display: block;
+		font-size: 26rpx;
+		font-weight: 600;
+		color: #8e8e93;
+		text-transform: uppercase;
+		letter-spacing: 1rpx;
+		margin-bottom: 16rpx;
 	}
 }
 
 .input-row {
-	display: flex; align-items: center; background: #f2f2f7; border-radius: 16rpx; padding: 20rpx;
+	display: flex;
+	align-items: center;
+	background: #f2f2f7;
+	border-radius: 16rpx;
+	padding: 22rpx;
+	transition: box-shadow 0.2s ease;
+
+	&:focus-within { box-shadow: 0 0 0 4rpx rgba(0, 122, 255, 0.15); }
+
 	.field-input { flex: 1; font-size: 30rpx; color: #1c1c1e; }
 	.input-suffix { font-size: 28rpx; color: #8e8e93; }
 }
 
 .segment {
-	display: flex; background: #f2f2f7; border-radius: 16rpx; padding: 4rpx;
+	display: flex;
+	background: #f2f2f7;
+	border-radius: 16rpx;
+	padding: 4rpx;
+
 	.segment-item {
-		flex: 1; text-align: center; padding: 16rpx 0; font-size: 28rpx;
-		font-weight: 500; color: #636366; border-radius: 14rpx; transition: all 0.2s;
+		flex: 1;
+		text-align: center;
+		padding: 16rpx 0;
+		font-size: 28rpx;
+		font-weight: 500;
+		color: #636366;
+		border-radius: 14rpx;
+		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
 		&.active {
-			background: #fff; color: #1c1c1e; font-weight: 600;
-			box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+			background: #fff;
+			color: #1c1c1e;
+			font-weight: 600;
+			box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.1);
 		}
 	}
 }
 
 .bottom-action {
-	position: fixed; bottom: 0; left: 0; right: 0;
-	padding: 20rpx 32rpx; padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-	background: rgba(242, 242, 247, 0.9); backdrop-filter: blur(20px);
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 20rpx 32rpx;
+	padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+	background: rgba(242, 242, 247, 0.85);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+
 	.save-btn {
-		background: #007aff; color: #fff; text-align: center; padding: 28rpx 0;
-		border-radius: 16rpx; font-size: 32rpx; font-weight: 600;
-		&:active { opacity: 0.8; }
+		background: #007aff;
+		color: #fff;
+		text-align: center;
+		padding: 28rpx 0;
+		border-radius: 16rpx;
+		font-size: 32rpx;
+		font-weight: 600;
+		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+		transition: all 0.15s ease;
+
+		&:active { transform: scale(0.98); opacity: 0.9; }
 		&.loading { opacity: 0.6; }
 	}
 }

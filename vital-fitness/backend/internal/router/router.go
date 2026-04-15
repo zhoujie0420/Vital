@@ -102,6 +102,7 @@ func SetupRouter(mode string, wxCfg config.WeChat) *gin.Engine {
 			{
 				diets.POST("/", dietHandler.CreateRecord)
 				diets.GET("/", dietHandler.GetRecords)
+				diets.DELETE("/:id", dietHandler.DeleteRecord)
 			}
 
 			// 食物库接口

@@ -1,8 +1,9 @@
 <template>
-	<view class="page">
+	<view class="page" :style="{ paddingTop: topPadding + 'px' }">
 		<view class="page-header">
+			<text class="nav-back" @tap="goBack">‹</text>
 			<text class="page-title">体重记录</text>
-			<text class="header-action" @tap="addWeight">添加</text>
+			<text class="header-action" @tap="addWeight">+ 添加</text>
 		</view>
 
 		<view class="list">
@@ -41,6 +42,12 @@
 
 	export default {
 		data() { return { weightList: [] } },
+		computed: {
+			topPadding() {
+				const app = getApp()
+				return (app.globalData?.customBarHeight || 88) + 8
+			}
+		},
 		onShow() { this.load() },
 		methods: {
 			async load() {
@@ -50,6 +57,7 @@
 				} catch (e) {}
 			},
 			addWeight() { uni.navigateTo({ url: '/pages/weight/add' }) },
+			goBack() { uni.navigateBack() },
 			formatDate(d) {
 				if (!d) return ''
 				const date = new Date(d)
@@ -68,7 +76,6 @@
 <style lang="scss" scoped>
 .page {
 	padding: 0 32rpx;
-	padding-top: 120rpx;
 	padding-bottom: 40rpx;
 	min-height: 100vh;
 	background: #f2f2f7;
@@ -77,19 +84,25 @@
 .page-header {
 	display: flex;
 	justify-content: space-between;
-	align-items: baseline;
+	align-items: center;
 	margin-bottom: 28rpx;
 
+	.nav-back {
+		font-size: 48rpx;
+		color: #007aff;
+		font-weight: 300;
+		line-height: 1;
+	}
+
 	.page-title {
-		font-size: 52rpx;
-		font-weight: 700;
+		font-size: 34rpx;
+		font-weight: 600;
 		color: #1c1c1e;
-		letter-spacing: -1rpx;
 	}
 	.header-action {
 		font-size: 30rpx;
 		color: #007aff;
-		font-weight: 500;
+		font-weight: 600;
 	}
 }
 
@@ -99,6 +112,9 @@
 	padding: 28rpx 32rpx;
 	margin-bottom: 16rpx;
 	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+	transition: transform 0.15s ease;
+
+	&:active { transform: scale(0.98); }
 
 	.item-row {
 		display: flex;
@@ -166,7 +182,9 @@
 		border-radius: 16rpx;
 		font-size: 30rpx;
 		font-weight: 600;
-		&:active { opacity: 0.8; }
+		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+
+		&:active { transform: scale(0.95); opacity: 0.9; }
 	}
 }
 </style>

@@ -71,63 +71,6 @@ Vital Fitness 是一个多用户的身体状态记录系统，旨在帮助用户
 - 营养成分分析 (蛋白质、碳水、脂肪)
 - 饮水记录
 
-## 数据库设计
-
-### 核心数据表
-
-#### 用户表 (users)
-- id: 主键
-- username: 用户名
-- email: 邮箱
-- phone: 手机号
-- password: 密码hash
-- avatar: 头像URL
-- created_at: 注册时间
-- updated_at: 更新时间
-
-#### 健身动作表 (exercises)
-- id: 主键
-- name: 动作名称
-- category: 动作分类 (胸、背、腿等)
-- description: 动作描述
-- video_url: 教学视频链接
-
-#### 训练记录表 (workouts)
-- id: 主键
-- user_id: 用户ID
-- exercise_id: 动作ID
-- workout_date: 训练日期
-- weight: 重量
-- sets: 组数
-- reps: 次数
-- rest_time: 休息时间
-- feeling: 训练感受 (1-5分)
-- notes: 备注
-
-#### 心情记录表 (mood_records)
-- id: 主键
-- user_id: 用户ID
-- record_date: 记录日期
-- mood_score: 心情分数 (1-10)
-- mood_tags: 心情标签
-- description: 描述
-
-#### 体重记录表 (weight_records)
-- id: 主键
-- user_id: 用户ID
-- record_date: 记录日期
-- weight: 体重(kg)
-- height: 身高(cm)
-- bmi: BMI值
-
-#### 饮食记录表 (diet_records)
-- id: 主键
-- user_id: 用户ID
-- record_date: 记录日期
-- meal_type: 餐次类型 (早餐、午餐等)
-- food_items: 食物列表
-- total_calories: 总卡路里
-
 ## API接口设计
 
 ### 认证接口
@@ -183,32 +126,6 @@ vital-fitness/
 ├── docker/                   # Docker配置
 └── README.md                 # 项目说明文档
 ```
-
-## 开发计划
-
-### 第一阶段：基础框架搭建 (1-2周)
-- 后端API框架搭建
-- 数据库设计与初始化
-- 用户认证系统实现
-- 前端项目初始化
-
-### 第二阶段：核心功能开发 (3-4周)
-- 健身记录模块开发 (重点)
-- 心理状态模块开发
-- 体重管理模块开发
-- 饮食记录模块开发
-
-### 第三阶段：完善与优化 (2周)
-- 数据统计与可视化
-- 性能优化
-- 安全性加固
-- 测试与bug修复
-
-### 第四阶段：部署上线 (1周)
-- 服务器环境搭建
-- Docker容器化部署
-- 域名配置与SSL证书
-- 监控与日志系统
 
 ## 部署方案
 

@@ -29,6 +29,10 @@ func (s *DietService) CreateRecord(userID uint, req *model.CreateDietRequest) (*
 	return r, nil
 }
 
+func (s *DietService) DeleteRecord(id uint, userID uint) error {
+	return s.dietDAO.Delete(id, userID)
+}
+
 func (s *DietService) GetRecords(userID uint, page, pageSize int) ([]model.DietRecord, int64, error) {
 	if page < 1 {
 		page = 1

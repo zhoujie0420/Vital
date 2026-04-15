@@ -1,43 +1,49 @@
 <template>
-	<view class="container">
-		<view class="nav-bar">
-			<text class="nav-title">训练记录</text>
-			<text class="add-btn" @tap="addWorkout">+ 记录</text>
+	<view class="page" :style="{ paddingTop: topPadding + 'px' }">
+		<view class="page-header">
+			<text class="page-title">训练记录</text>
+			<text class="header-action" @tap="addWorkout">+ 记录</text>
 		</view>
 
 		<!-- 分类筛选 -->
-		<view class="filter-bar">
-			<text
-				v-for="(tab, index) in tabList"
-				:key="index"
-				class="filter-tab"
-				:class="{ active: currentTab === index }"
-				@tap="changeTab(index)"
-			>{{ tab.name }}</text>
-		</view>
+		<scroll-view scroll-x class="filter-scroll">
+			<view class="filter-bar">
+				<text v-for="(tab, index) in tabList" :key="index" class="filter-pill"
+					:class="{ active: currentTab === index }" @tap="changeTab(index)">
+					{{ tab.name }}
+				</text>
+			</view>
+		</scroll-view>
 
-		<!-- 训练记录列表 -->
-		<view class="workout-list">
-			<view v-for="(workout, index) in workoutList" :key="index" class="workout-item">
-				<view class="workout-header">
-					<text class="workout-date">{{ formatDate(workout.workout_date) }}</text>
-					<text class="workout-time">{{ formatTime(workout.created_at) }}</text>
-				</view>
-				<view class="workout-content">
-					<text class="exercise-name">{{ workout.exercise.name }}</text>
-					<view class="workout-details">
-						<text class="detail-tag">{{ workout.weight }}kg</text>
-						<text class="detail-tag" v-if="workout.sets > 1">{{ workout.sets }}组</text>
-						<text class="detail-tag" v-if="workout.reps > 1">{{ workout.reps }}次</text>
+		<!-- 按天分组的卡片 -->
+		<view class="day-list">
+			<view v-for="(day, i) in groupedDays" :key="i" class="day-card" @tap="goToDetail(day.date)">
+				<view class="day-header">
+					<view class="day-date-wrap">
+						<text class="day-label">{{ day.label }}</text>
+						<text class="day-date">{{ day.dateStr }}</text>
+					</view>
+					<view class="day-summary">
+						<text class="day-count">{{ day.workouts.length }}个动作</text>
+						<text class="day-arrow">›</text>
 					</view>
 				</view>
-				<text v-if="workout.notes" class="workout-notes">{{ workout.notes }}</text>
+				<view class="day-exercises">
+					<text v-for="(w, j) in day.workouts.slice(0, 4)" :key="j" class="exercise-tag">
+						{{ w.exercise.name }}
+					</text>
+					<text v-if="day.workouts.length > 4" class="exercise-more">+{{ day.workouts.length - 4 }}</text>
+				</view>
 			</view>
+		</view>
 
-			<!-- 空状态 -->
-			<view v-if="workoutList.length === 0" class="empty-state">
-				<text class="empty-text">暂无训练记录</text>
-				<button class="add-first-btn" type="primary" @tap="addWorkout">添加第一条记录</button>
+		<!-- 空状态 -->
+		<view v-if="groupedDays.length === 0" class="empty">
+			<text class="empty-icon">💪</text>
+			<text class="empty-title">暂无训练记录</text>
+			<text class="empty-desc">记录每一次训练，见证你的进步</text>
+			<view class="empty-btn" @tap="addWorkout">
+				<text>开始记录</text>
 			</view>
 		</view>
 	</view>
@@ -57,8 +63,36 @@
 				workoutList: []
 			}
 		},
-		onShow() {
-			this.loadWorkouts()
+		onShow() { this.loadWorkouts() },
+		computed: {
+			topPadding() {
+				const app = getApp()
+				return (app.globalData?.customBarHeight || 88) + 8
+			},
+			groupedDays() {
+				const map = {}
+				this.workoutList.forEach(w => {
+					const d = new Date(w.workout_date)
+					const key = d.toISOString().split('T')[0]
+					if (!map[key]) map[key] = { date: key, workouts: [] }
+					map[key].workouts.push(w)
+				})
+				return Object.values(map).sort((a, b) => b.date.localeCompare(a.date)).map(day => {
+					const d = new Date(day.date + 'T00:00:00')
+					const today = new Date()
+					const yesterday = new Date(today)
+					yesterday.setDate(yesterday.getDate() - 1)
+					let label = ''
+					if (d.toDateString() === today.toDateString()) label = '今天'
+					else if (d.toDateString() === yesterday.toDateString()) label = '昨天'
+					else label = (d.getMonth() + 1) + '月' + d.getDate() + '日'
+					return {
+						...day,
+						label,
+						dateStr: d.getFullYear() + '.' + (d.getMonth()+1) + '.' + d.getDate()
+					}
+				})
+			}
 		},
 		methods: {
 			changeTab(index) {
@@ -70,120 +104,152 @@
 					const category = this.tabList[this.currentTab].name
 					const res = await getWorkouts({
 						category: category === '全部' ? '' : category,
-						page: 1, page_size: 50
+						page: 1, page_size: 200
 					})
 					this.workoutList = res.data || []
 				} catch (e) {}
 			},
-			addWorkout() {
-				uni.navigateTo({ url: '/pages/workout/add' })
-			},
-			formatDate(dateStr) {
-				if (!dateStr) return ''
-				const date = new Date(dateStr)
-				const today = new Date()
-				if (date.toDateString() === today.toDateString()) return '今天'
-				const yesterday = new Date(today)
-				yesterday.setDate(yesterday.getDate() - 1)
-				if (date.toDateString() === yesterday.toDateString()) return '昨天'
-				return (date.getMonth() + 1) + '月' + date.getDate() + '日'
-			},
-			formatTime(dateStr) {
-				if (!dateStr) return ''
-				const d = new Date(dateStr)
-				return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0')
+			addWorkout() { uni.navigateTo({ url: '/pages/workout/add' }) },
+			goToDetail(date) {
+				uni.navigateTo({ url: '/pages/workout/detail?date=' + date })
 			}
 		}
 	}
 </script>
 
 <style lang="scss" scoped>
-.container { padding: 20rpx; }
-
-.nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15rpx;
-	.nav-title { font-size: 36rpx; font-weight: 700; color: #1c1c1e; }
+.page {
+	padding: 0 32rpx;
+	padding-bottom: 40rpx;
+	min-height: 100vh;
+	background: #f2f2f7;
 }
 
-.add-btn {
-	color: #3c9cff;
-	font-size: 28rpx;
-	font-weight: bold;
-}
-
-.filter-bar {
+.page-header {
 	display: flex;
-	flex-wrap: wrap;
-	gap: 15rpx;
-	background: white;
-	border-radius: 20rpx;
-	padding: 20rpx;
+	justify-content: space-between;
+	align-items: baseline;
+	margin-bottom: 24rpx;
+
+	.page-title { font-size: 52rpx; font-weight: 700; color: #1c1c1e; letter-spacing: -1rpx; }
+	.header-action { font-size: 30rpx; color: #007aff; font-weight: 600; }
+}
+
+.filter-scroll {
+	white-space: nowrap;
 	margin-bottom: 20rpx;
 
-	.filter-tab {
-		padding: 10rpx 24rpx;
-		border-radius: 30rpx;
-		background: #f5f5f5;
-		font-size: 24rpx;
-		color: #666;
+	.filter-bar {
+		display: inline-flex;
+		gap: 12rpx;
 
-		&.active { background: #3c9cff; color: white; }
+		.filter-pill {
+			display: inline-block;
+			padding: 12rpx 28rpx;
+			border-radius: 24rpx;
+			background: rgba(0, 0, 0, 0.04);
+			font-size: 26rpx;
+			color: #636366;
+			font-weight: 500;
+
+			&.active {
+				background: #007aff;
+				color: #fff;
+				box-shadow: 0 4rpx 12rpx rgba(0, 122, 255, 0.3);
+			}
+			&:active { transform: scale(0.95); }
+		}
 	}
 }
 
-.workout-list {
-	.workout-item {
-		background: white;
-		border-radius: 20rpx;
-		padding: 30rpx;
-		margin-bottom: 15rpx;
+.day-card {
+	background: #fff;
+	border-radius: 20rpx;
+	padding: 28rpx 32rpx;
+	margin-bottom: 16rpx;
+	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+	transition: transform 0.15s ease;
 
-		.workout-header {
-			display: flex;
-			justify-content: space-between;
-			margin-bottom: 15rpx;
+	&:active { transform: scale(0.98); }
 
-			.workout-date { font-size: 24rpx; color: #999; }
-			.workout-time { font-size: 24rpx; color: #999; }
-		}
+	.day-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 16rpx;
 
-		.workout-content {
-			.exercise-name {
-				font-size: 32rpx;
-				font-weight: bold;
-				color: #333;
+		.day-date-wrap {
+			.day-label {
 				display: block;
-				margin-bottom: 15rpx;
+				font-size: 32rpx;
+				font-weight: 600;
+				color: #1c1c1e;
 			}
-
-			.workout-details {
-				display: flex;
-				gap: 15rpx;
-
-				.detail-tag {
-					padding: 8rpx 20rpx;
-					background: #f0f7ff;
-					color: #3c9cff;
-					border-radius: 10rpx;
-					font-size: 24rpx;
-				}
+			.day-date {
+				display: block;
+				font-size: 22rpx;
+				color: #8e8e93;
+				margin-top: 4rpx;
 			}
 		}
 
-		.workout-notes {
-			margin-top: 15rpx;
-			font-size: 24rpx;
-			color: #999;
+		.day-summary {
+			display: flex;
+			align-items: center;
+			gap: 8rpx;
+
+			.day-count {
+				font-size: 26rpx;
+				color: #8e8e93;
+				font-weight: 500;
+			}
+			.day-arrow {
+				font-size: 36rpx;
+				color: #c7c7cc;
+				font-weight: 300;
+			}
 		}
 	}
 
-	.empty-state {
-		text-align: center;
-		padding: 100rpx 0;
-		background: white;
-		border-radius: 20rpx;
+	.day-exercises {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 10rpx;
 
-		.empty-text { font-size: 28rpx; color: #999; display: block; margin-bottom: 30rpx; }
-		.add-first-btn { width: 60%; font-size: 28rpx; }
+		.exercise-tag {
+			padding: 8rpx 20rpx;
+			background: rgba(0, 122, 255, 0.08);
+			color: #007aff;
+			border-radius: 12rpx;
+			font-size: 24rpx;
+			font-weight: 500;
+		}
+		.exercise-more {
+			padding: 8rpx 16rpx;
+			color: #8e8e93;
+			font-size: 24rpx;
+			font-weight: 500;
+		}
+	}
+}
+
+.empty {
+	text-align: center;
+	padding: 120rpx 0;
+
+	.empty-icon { display: block; font-size: 96rpx; margin-bottom: 24rpx; }
+	.empty-title { display: block; font-size: 34rpx; font-weight: 600; color: #1c1c1e; margin-bottom: 8rpx; }
+	.empty-desc { display: block; font-size: 26rpx; color: #8e8e93; margin-bottom: 40rpx; }
+	.empty-btn {
+		display: inline-block;
+		padding: 20rpx 56rpx;
+		background: #007aff;
+		color: #fff;
+		border-radius: 16rpx;
+		font-size: 30rpx;
+		font-weight: 600;
+		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+		&:active { transform: scale(0.95); opacity: 0.9; }
 	}
 }
 </style>

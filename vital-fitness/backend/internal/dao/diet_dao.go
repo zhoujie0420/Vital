@@ -13,6 +13,10 @@ func NewDietDAO() *DietDAO { return &DietDAO{db: utils.GetDB()} }
 
 func (d *DietDAO) CreateRecord(r *model.DietRecord) error { return d.db.Create(r).Error }
 
+func (d *DietDAO) Delete(id uint, userID uint) error {
+	return d.db.Where("id = ? AND user_id = ?", id, userID).Delete(&model.DietRecord{}).Error
+}
+
 func (d *DietDAO) FindByUserID(userID uint, page, pageSize int) ([]model.DietRecord, int64, error) {
 	var records []model.DietRecord
 	var total int64

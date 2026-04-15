@@ -1,5 +1,5 @@
 <template>
-	<view class="page">
+	<view class="page" :style="{ paddingTop: topPadding + 'px' }">
 		<view class="nav-bar">
 			<text class="nav-back" @tap="goBack">‹ 返回</text>
 			<text class="nav-title">记录饮食</text>
@@ -126,6 +126,10 @@
 			}
 		},
 		computed: {
+			topPadding() {
+				const app = getApp()
+				return (app.globalData?.customBarHeight || 88) + 8
+			},
 			totalCalories() { return this.selectedFoods.reduce((s, f) => s + f.calories, 0).toFixed(0) },
 			totalProtein() { return this.selectedFoods.reduce((s, f) => s + f.protein, 0).toFixed(1) },
 			totalCarbs() { return this.selectedFoods.reduce((s, f) => s + f.carbs, 0).toFixed(1) },
@@ -187,7 +191,6 @@
 <style lang="scss" scoped>
 .page {
 	padding: 0 32rpx;
-	padding-top: 120rpx;
 	padding-bottom: 160rpx;
 	min-height: 100vh;
 	background: #f2f2f7;
@@ -199,16 +202,8 @@
 	justify-content: space-between;
 	margin-bottom: 28rpx;
 
-	.nav-back {
-		font-size: 32rpx;
-		color: #007aff;
-		font-weight: 500;
-	}
-	.nav-title {
-		font-size: 34rpx;
-		font-weight: 600;
-		color: #1c1c1e;
-	}
+	.nav-back { font-size: 32rpx; color: #007aff; font-weight: 500; }
+	.nav-title { font-size: 34rpx; font-weight: 600; color: #1c1c1e; }
 	.nav-placeholder { width: 80rpx; }
 }
 
@@ -244,13 +239,13 @@
 		font-weight: 500;
 		color: #636366;
 		border-radius: 14rpx;
-		transition: all 0.2s;
+		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
 		&.active {
 			background: #fff;
 			color: #1c1c1e;
 			font-weight: 600;
-			box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
+			box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.1);
 		}
 	}
 }
@@ -260,8 +255,13 @@
 	align-items: center;
 	background: #f2f2f7;
 	border-radius: 16rpx;
-	padding: 16rpx 20rpx;
+	padding: 18rpx 24rpx;
 	margin-bottom: 16rpx;
+	transition: box-shadow 0.2s ease;
+
+	&:focus-within {
+		box-shadow: 0 0 0 4rpx rgba(0, 122, 255, 0.15);
+	}
 
 	.search-icon { font-size: 28rpx; margin-right: 12rpx; }
 	.search-input { flex: 1; font-size: 28rpx; color: #1c1c1e; }
@@ -280,11 +280,14 @@
 		color: #636366;
 		margin-right: 12rpx;
 		font-weight: 500;
+		transition: all 0.2s ease;
 
 		&.active {
 			background: #007aff;
 			color: #fff;
+			box-shadow: 0 4rpx 12rpx rgba(0, 122, 255, 0.3);
 		}
+		&:active { transform: scale(0.95); }
 	}
 }
 
@@ -297,9 +300,10 @@
 		align-items: center;
 		padding: 20rpx 0;
 		border-bottom: 1rpx solid #f2f2f7;
+		transition: background 0.15s ease;
 
 		&:last-child { border-bottom: none; }
-		&:active { opacity: 0.6; }
+		&:active { background: rgba(0, 0, 0, 0.02); }
 
 		.food-info {
 			flex: 1;
@@ -311,11 +315,14 @@
 			height: 56rpx;
 			line-height: 52rpx;
 			text-align: center;
-			background: #f2f2f7;
+			background: rgba(0, 122, 255, 0.1);
 			border-radius: 50%;
 			font-size: 36rpx;
 			color: #007aff;
-			font-weight: 300;
+			font-weight: 400;
+			transition: all 0.15s ease;
+
+			&:active { transform: scale(0.85); background: rgba(0, 122, 255, 0.2); }
 		}
 	}
 }
@@ -326,6 +333,8 @@
 	font-size: 28rpx;
 	color: #007aff;
 	font-weight: 500;
+
+	&:active { opacity: 0.6; }
 }
 
 .selected-row {
@@ -336,7 +345,19 @@
 
 	.sf-name { flex: 1; font-size: 30rpx; color: #1c1c1e; font-weight: 500; }
 	.sf-cal { font-size: 26rpx; color: #8e8e93; margin-right: 20rpx; }
-	.sf-remove { font-size: 24rpx; color: #c7c7cc; padding: 8rpx; }
+	.sf-remove {
+		width: 44rpx;
+		height: 44rpx;
+		line-height: 44rpx;
+		text-align: center;
+		font-size: 22rpx;
+		color: #ff3b30;
+		background: rgba(255, 59, 48, 0.1);
+		border-radius: 50%;
+		transition: all 0.15s ease;
+
+		&:active { transform: scale(0.85); }
+	}
 }
 
 .total-bar {
@@ -346,15 +367,16 @@
 
 	.total-text {
 		display: block;
-		font-size: 34rpx;
+		font-size: 36rpx;
 		font-weight: 700;
 		color: #1c1c1e;
+		letter-spacing: -1rpx;
 	}
 	.total-detail {
 		display: block;
 		font-size: 24rpx;
 		color: #8e8e93;
-		margin-top: 4rpx;
+		margin-top: 6rpx;
 	}
 }
 
@@ -373,8 +395,9 @@
 	right: 0;
 	padding: 20rpx 32rpx;
 	padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-	background: rgba(242, 242, 247, 0.9);
+	background: rgba(242, 242, 247, 0.85);
 	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
 
 	.save-btn {
 		background: #007aff;
@@ -384,8 +407,10 @@
 		border-radius: 16rpx;
 		font-size: 32rpx;
 		font-weight: 600;
+		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+		transition: all 0.15s ease;
 
-		&:active { opacity: 0.8; }
+		&:active { transform: scale(0.98); opacity: 0.9; }
 		&.loading { opacity: 0.6; }
 	}
 }
@@ -414,10 +439,13 @@
 		}
 		.popup-input {
 			background: #f2f2f7;
-			border-radius: 12rpx;
-			padding: 20rpx;
+			border-radius: 14rpx;
+			padding: 22rpx;
 			font-size: 30rpx;
 			color: #1c1c1e;
+			transition: box-shadow 0.2s ease;
+
+			&:focus { box-shadow: 0 0 0 4rpx rgba(0, 122, 255, 0.15); }
 		}
 	}
 	.popup-btn {
@@ -428,9 +456,11 @@
 		border-radius: 16rpx;
 		font-size: 32rpx;
 		font-weight: 600;
-		margin-top: 12rpx;
+		margin-top: 16rpx;
+		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+		transition: all 0.15s ease;
 
-		&:active { opacity: 0.8; }
+		&:active { transform: scale(0.98); opacity: 0.9; }
 	}
 }
 </style>

@@ -29,6 +29,16 @@ func (h *DietHandler) CreateRecord(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"code": 200, "message": "创建成功", "data": r})
 }
 
+func (h *DietHandler) DeleteRecord(c *gin.Context) {
+	userID := c.GetUint("user_id")
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err := h.dietService.DeleteRecord(uint(id), userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "删除失败"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 200, "message": "删除成功"})
+}
+
 func (h *DietHandler) GetRecords(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))

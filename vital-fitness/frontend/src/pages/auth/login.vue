@@ -1,19 +1,26 @@
 <template>
-	<view class="container">
-		<view class="header-decoration">
-			<view class="decoration-circle circle-1"></view>
-			<view class="decoration-circle circle-2"></view>
+	<view class="page">
+		<view class="bg-blur">
+			<view class="bg-circle c1"></view>
+			<view class="bg-circle c2"></view>
+			<view class="bg-circle c3"></view>
 		</view>
 
-		<view class="logo-section">
-			<text class="app-title">Vital Fitness</text>
-			<text class="app-subtitle">记录每一个进步的瞬间</text>
-		</view>
+		<view class="content">
+			<view class="logo-section">
+				<view class="logo-ring">
+					<text class="logo-emoji">💪</text>
+				</view>
+				<text class="app-title">Vital Fitness</text>
+				<text class="app-subtitle">记录每一个进步的瞬间</text>
+			</view>
 
-		<view class="login-section">
-			<button class="wx-login-btn" :loading="loading" @tap="handleWxLogin">
-				{{ loading ? '登录中...' : '微信一键登录' }}
-			</button>
+			<view class="login-section">
+				<view class="wx-login-btn" :class="{ loading: loading }" @tap="handleWxLogin">
+					<text class="btn-text">{{ loading ? '登录中...' : '微信一键登录' }}</text>
+				</view>
+				<text class="login-hint">使用微信账号安全登录</text>
+			</view>
 		</view>
 	</view>
 </template>
@@ -49,22 +56,113 @@
 </script>
 
 <style lang="scss" scoped>
-.container {
+.page {
 	min-height: 100vh;
-	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-	display: flex; flex-direction: column; justify-content: center; padding: 40rpx;
+	background: #000;
+	position: relative;
+	overflow: hidden;
 }
-.header-decoration {
-	.decoration-circle { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.1); }
-	.circle-1 { width: 200rpx; height: 200rpx; top: -100rpx; right: -100rpx; }
-	.circle-2 { width: 300rpx; height: 300rpx; top: 200rpx; left: -150rpx; }
+
+.bg-blur {
+	position: absolute;
+	top: 0; left: 0; right: 0; bottom: 0;
+
+	.bg-circle {
+		position: absolute;
+		border-radius: 50%;
+		filter: blur(80rpx);
+	}
+	.c1 {
+		width: 500rpx; height: 500rpx;
+		background: rgba(0, 122, 255, 0.5);
+		top: -100rpx; right: -100rpx;
+	}
+	.c2 {
+		width: 600rpx; height: 600rpx;
+		background: rgba(88, 86, 214, 0.4);
+		top: 300rpx; left: -200rpx;
+	}
+	.c3 {
+		width: 400rpx; height: 400rpx;
+		background: rgba(175, 82, 222, 0.3);
+		bottom: 100rpx; right: -50rpx;
+	}
 }
+
+.content {
+	position: relative;
+	z-index: 1;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	padding: 60rpx 48rpx;
+}
+
 .logo-section {
-	text-align: center; padding: 100rpx 0 80rpx;
-	.app-title { font-size: 48rpx; font-weight: bold; color: white; display: block; margin-bottom: 20rpx; }
-	.app-subtitle { font-size: 28rpx; color: rgba(255,255,255,0.8); }
+	text-align: center;
+	margin-bottom: 120rpx;
+
+	.logo-ring {
+		width: 160rpx;
+		height: 160rpx;
+		border-radius: 50%;
+		background: rgba(255, 255, 255, 0.1);
+		border: 3rpx solid rgba(255, 255, 255, 0.2);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0 auto 32rpx;
+		backdrop-filter: blur(20px);
+
+		.logo-emoji {
+			font-size: 72rpx;
+		}
+	}
+
+	.app-title {
+		display: block;
+		font-size: 56rpx;
+		font-weight: 700;
+		color: #fff;
+		letter-spacing: -1rpx;
+		margin-bottom: 12rpx;
+	}
+	.app-subtitle {
+		display: block;
+		font-size: 28rpx;
+		color: rgba(255, 255, 255, 0.6);
+		font-weight: 400;
+	}
 }
-.login-section { padding: 60rpx 40rpx;
-	.wx-login-btn { background: #07c160; color: white; border: none; border-radius: 20rpx; font-size: 32rpx; padding: 24rpx 0; }
+
+.login-section {
+	.wx-login-btn {
+		background: rgba(255, 255, 255, 0.15);
+		border: 1rpx solid rgba(255, 255, 255, 0.2);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+		border-radius: 20rpx;
+		padding: 32rpx 0;
+		text-align: center;
+		transition: all 0.15s ease;
+
+		&:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.2); }
+		&.loading { opacity: 0.6; }
+
+		.btn-text {
+			font-size: 32rpx;
+			font-weight: 600;
+			color: #fff;
+		}
+	}
+
+	.login-hint {
+		display: block;
+		text-align: center;
+		font-size: 24rpx;
+		color: rgba(255, 255, 255, 0.35);
+		margin-top: 20rpx;
+	}
 }
 </style>

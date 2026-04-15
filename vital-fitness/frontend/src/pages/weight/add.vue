@@ -1,5 +1,5 @@
 <template>
-	<view class="page">
+	<view class="page" :style="{ paddingTop: topPadding + 'px' }">
 		<view class="nav-bar">
 			<text class="nav-back" @tap="goBack">‹ 返回</text>
 			<text class="nav-title">记录体重</text>
@@ -54,6 +54,10 @@
 	export default {
 		data() { return { saving: false, weight: '', height: '' } },
 		computed: {
+			topPadding() {
+				const app = getApp()
+				return (app.globalData?.customBarHeight || 88) + 8
+			},
 			bmi() {
 				const w = parseFloat(this.weight), h = parseFloat(this.height)
 				if (w > 0 && h > 0) return (w / ((h / 100) * (h / 100))).toFixed(1)
@@ -96,7 +100,6 @@
 <style lang="scss" scoped>
 .page {
 	padding: 0 32rpx;
-	padding-top: 120rpx;
 	padding-bottom: 160rpx;
 	min-height: 100vh;
 	background: #f2f2f7;
@@ -119,21 +122,22 @@
 }
 
 .weight-display {
-	display: flex; align-items: center; justify-content: center; padding: 20rpx 0;
+	display: flex; align-items: center; justify-content: center; padding: 24rpx 0;
 
 	.weight-minus, .weight-plus {
-		width: 72rpx; height: 72rpx; line-height: 68rpx; text-align: center;
-		background: #f2f2f7; border-radius: 50%; font-size: 40rpx; color: #007aff; font-weight: 300;
-		&:active { background: #e5e5ea; }
+		width: 76rpx; height: 76rpx; line-height: 72rpx; text-align: center;
+		background: #f2f2f7; border-radius: 50%; font-size: 44rpx; color: #007aff; font-weight: 300;
+		transition: all 0.15s ease;
+		&:active { background: #e5e5ea; transform: scale(0.88); }
 	}
 
 	.weight-center {
-		display: flex; align-items: baseline; margin: 0 40rpx;
+		display: flex; align-items: baseline; margin: 0 48rpx;
 		.weight-num {
-			width: 200rpx; text-align: center; font-size: 80rpx; font-weight: 700;
+			width: 220rpx; text-align: center; font-size: 88rpx; font-weight: 700;
 			color: #1c1c1e; letter-spacing: -3rpx;
 		}
-		.weight-unit { font-size: 30rpx; color: #8e8e93; margin-left: 4rpx; }
+		.weight-unit { font-size: 32rpx; color: #8e8e93; margin-left: 4rpx; }
 	}
 }
 
@@ -142,13 +146,16 @@
 	.quick-pill {
 		padding: 12rpx 28rpx; background: #f2f2f7; border-radius: 20rpx;
 		font-size: 26rpx; color: #636366; font-weight: 500;
-		&.active { background: #007aff; color: #fff; }
-		&:active { opacity: 0.7; }
+		transition: all 0.2s ease;
+		&.active { background: #007aff; color: #fff; box-shadow: 0 4rpx 12rpx rgba(0, 122, 255, 0.3); }
+		&:active { transform: scale(0.92); }
 	}
 }
 
 .input-row {
-	display: flex; align-items: center; background: #f2f2f7; border-radius: 16rpx; padding: 20rpx;
+	display: flex; align-items: center; background: #f2f2f7; border-radius: 16rpx; padding: 22rpx;
+	transition: box-shadow 0.2s ease;
+	&:focus-within { box-shadow: 0 0 0 4rpx rgba(0, 122, 255, 0.15); }
 	.field-input { flex: 1; font-size: 30rpx; color: #1c1c1e; }
 	.input-suffix { font-size: 28rpx; color: #8e8e93; }
 }
@@ -156,18 +163,24 @@
 .bmi-row {
 	display: flex; justify-content: space-between; align-items: center;
 	.bmi-label { display: block; font-size: 30rpx; font-weight: 600; color: #1c1c1e; }
-	.bmi-status { display: block; font-size: 24rpx; color: #8e8e93; margin-top: 4rpx; }
-	.bmi-value { font-size: 48rpx; font-weight: 700; color: #007aff; letter-spacing: -2rpx; }
+	.bmi-status {
+		display: inline-block; font-size: 22rpx; color: #34c759; margin-top: 6rpx;
+		background: rgba(52, 199, 89, 0.1); padding: 4rpx 16rpx; border-radius: 8rpx;
+		font-weight: 600;
+	}
+	.bmi-value { font-size: 52rpx; font-weight: 700; color: #007aff; letter-spacing: -2rpx; }
 }
 
 .bottom-action {
 	position: fixed; bottom: 0; left: 0; right: 0;
 	padding: 20rpx 32rpx; padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-	background: rgba(242, 242, 247, 0.9); backdrop-filter: blur(20px);
+	background: rgba(242, 242, 247, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
 	.save-btn {
 		background: #007aff; color: #fff; text-align: center; padding: 28rpx 0;
 		border-radius: 16rpx; font-size: 32rpx; font-weight: 600;
-		&:active { opacity: 0.8; }
+		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+		transition: all 0.15s ease;
+		&:active { transform: scale(0.98); opacity: 0.9; }
 		&.loading { opacity: 0.6; }
 	}
 }

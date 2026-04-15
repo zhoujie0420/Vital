@@ -1,5 +1,5 @@
 <template>
-	<view class="page">
+	<view class="page" :style="{ paddingTop: topPadding + 'px' }">
 		<view class="nav-bar">
 			<text class="nav-back" @tap="goBack">‹ 返回</text>
 			<text class="nav-title">记录心情</text>
@@ -58,6 +58,12 @@
 				tags: ['开心', '兴奋', '平静', '专注', '疲惫', '焦虑', '压力大', '放松']
 			}
 		},
+		computed: {
+			topPadding() {
+				const app = getApp()
+				return (app.globalData?.customBarHeight || 88) + 8
+			}
+		},
 		methods: {
 			goBack() { uni.navigateBack() },
 			toggleTag(tag) {
@@ -84,72 +90,132 @@
 
 <style lang="scss" scoped>
 .page {
-	padding: 0 32rpx; padding-top: 120rpx; padding-bottom: 160rpx;
-	min-height: 100vh; background: #f2f2f7;
+	padding: 0 32rpx;
+	padding-bottom: 160rpx;
+	min-height: 100vh;
+	background: #f2f2f7;
 }
 
 .nav-bar {
-	display: flex; align-items: center; justify-content: space-between; margin-bottom: 28rpx;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 28rpx;
+
 	.nav-back { font-size: 32rpx; color: #007aff; font-weight: 500; }
 	.nav-title { font-size: 34rpx; font-weight: 600; color: #1c1c1e; }
 	.nav-placeholder { width: 80rpx; }
 }
 
 .card {
-	background: #fff; border-radius: 20rpx; padding: 28rpx 32rpx; margin-bottom: 16rpx;
+	background: #fff;
+	border-radius: 20rpx;
+	padding: 28rpx 32rpx;
+	margin-bottom: 16rpx;
 	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+
 	.card-label {
-		display: block; font-size: 26rpx; font-weight: 600; color: #8e8e93;
-		text-transform: uppercase; letter-spacing: 1rpx; margin-bottom: 20rpx;
+		display: block;
+		font-size: 26rpx;
+		font-weight: 600;
+		color: #8e8e93;
+		text-transform: uppercase;
+		letter-spacing: 1rpx;
+		margin-bottom: 20rpx;
 	}
 }
 
 .mood-grid {
-	display: flex; flex-wrap: wrap; gap: 16rpx; justify-content: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16rpx;
+	justify-content: center;
 
 	.mood-card {
-		width: 160rpx; text-align: center; padding: 24rpx 12rpx;
-		border-radius: 20rpx; background: #f2f2f7;
+		width: 160rpx;
+		text-align: center;
+		padding: 28rpx 12rpx;
+		border-radius: 24rpx;
+		background: #f2f2f7;
 		border: 3rpx solid transparent;
-		transition: all 0.2s;
+		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
 		&.selected {
 			background: #fff;
 			border-color: #007aff;
-			box-shadow: 0 4rpx 20rpx rgba(0, 122, 255, 0.15);
+			box-shadow: 0 6rpx 24rpx rgba(0, 122, 255, 0.2);
+			transform: scale(1.05);
 		}
-		&:active { transform: scale(0.95); }
+		&:active { transform: scale(0.92); }
 
-		.emoji { display: block; font-size: 56rpx; margin-bottom: 8rpx; }
-		.mood-text { display: block; font-size: 24rpx; color: #636366; font-weight: 500; }
+		.emoji {
+			display: block;
+			font-size: 64rpx;
+			margin-bottom: 10rpx;
+		}
+		.mood-text {
+			display: block;
+			font-size: 24rpx;
+			color: #636366;
+			font-weight: 600;
+		}
 	}
 }
 
 .tag-grid {
-	display: flex; flex-wrap: wrap; gap: 12rpx;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12rpx;
 
 	.tag-pill {
-		padding: 12rpx 28rpx; border-radius: 24rpx; background: #f2f2f7;
-		font-size: 26rpx; color: #636366; font-weight: 500;
-		transition: all 0.2s;
+		padding: 14rpx 28rpx;
+		border-radius: 24rpx;
+		background: #f2f2f7;
+		font-size: 26rpx;
+		color: #636366;
+		font-weight: 500;
+		transition: all 0.2s ease;
 
-		&.active { background: #007aff; color: #fff; }
-		&:active { opacity: 0.7; }
+		&.active {
+			background: #007aff;
+			color: #fff;
+			box-shadow: 0 4rpx 12rpx rgba(0, 122, 255, 0.3);
+		}
+		&:active { transform: scale(0.92); }
 	}
 }
 
 .desc-area {
-	width: 100%; height: 160rpx; font-size: 30rpx; color: #1c1c1e; line-height: 1.6;
+	width: 100%;
+	height: 160rpx;
+	font-size: 30rpx;
+	color: #1c1c1e;
+	line-height: 1.6;
 }
 
 .bottom-action {
-	position: fixed; bottom: 0; left: 0; right: 0;
-	padding: 20rpx 32rpx; padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-	background: rgba(242, 242, 247, 0.9); backdrop-filter: blur(20px);
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	padding: 20rpx 32rpx;
+	padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+	background: rgba(242, 242, 247, 0.85);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+
 	.save-btn {
-		background: #007aff; color: #fff; text-align: center; padding: 28rpx 0;
-		border-radius: 16rpx; font-size: 32rpx; font-weight: 600;
-		&:active { opacity: 0.8; }
+		background: #007aff;
+		color: #fff;
+		text-align: center;
+		padding: 28rpx 0;
+		border-radius: 16rpx;
+		font-size: 32rpx;
+		font-weight: 600;
+		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+		transition: all 0.15s ease;
+
+		&:active { transform: scale(0.98); opacity: 0.9; }
 		&.loading { opacity: 0.6; }
 	}
 }

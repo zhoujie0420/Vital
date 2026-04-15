@@ -13,6 +13,7 @@
 Thumbs.db
 
 # Go
+vital-fitness/backend/main
 vital-fitness/backend/tmp/
 vital-fitness/backend/vendor/
 
