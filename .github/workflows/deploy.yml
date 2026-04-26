@@ -19,5 +19,6 @@ jobs:
             cd /opt/vital-fitness
             git pull origin main
             cd vital-fitness
-            docker compose up -d --build --force-recreate api web
+            docker compose down api web --remove-orphans || true
+            docker compose up -d --build api web
             docker image prune -f
