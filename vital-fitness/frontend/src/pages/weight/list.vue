@@ -78,7 +78,7 @@
 	padding: 0 32rpx;
 	padding-bottom: 40rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: linear-gradient(180deg, #fff7ea 0%, #f2f2f7 280rpx);
 }
 
 .page-header {
@@ -109,10 +109,11 @@
 .list-item {
 	background: #fff;
 	border-radius: 20rpx;
-	padding: 28rpx 32rpx;
+	padding: 28rpx 28rpx 28rpx 22rpx;
 	margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
 	transition: transform 0.15s ease;
+	border-left: 6rpx solid #ff9f0a;
 
 	&:active { transform: scale(0.98); }
 
@@ -156,13 +157,14 @@
 			color: #8e8e93;
 		}
 		.item-trend {
-			margin-top: 6rpx;
-			font-size: 26rpx;
+			margin-top: 8rpx;
+			font-size: 24rpx;
 			font-weight: 600;
+			display: inline-block;
 
-			.trend-up { color: #ff3b30; }
-			.trend-down { color: #34c759; }
-			.trend-flat { color: #8e8e93; }
+			.trend-up { color: #ff3b30; background: rgba(255, 59, 48, 0.1); border-radius: 20rpx; padding: 4rpx 14rpx; }
+			.trend-down { color: #30d158; background: rgba(48, 209, 88, 0.1); border-radius: 20rpx; padding: 4rpx 14rpx; }
+			.trend-flat { color: #8e8e93; background: #f2f2f7; border-radius: 20rpx; padding: 4rpx 14rpx; }
 		}
 	}
 }
@@ -177,12 +179,12 @@
 	.empty-btn {
 		display: inline-block;
 		padding: 20rpx 56rpx;
-		background: #007aff;
+		background: linear-gradient(135deg, #ff9f0a, #e67e00);
 		color: #fff;
 		border-radius: 16rpx;
 		font-size: 30rpx;
 		font-weight: 600;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+		box-shadow: 0 4rpx 16rpx rgba(255, 149, 0, 0.35);
 
 		&:active { transform: scale(0.95); opacity: 0.9; }
 	}

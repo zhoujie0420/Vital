@@ -5,58 +5,64 @@
 		</view>
 
 		<!-- 训练统计 -->
-		<view class="card">
+		<view class="card card-workout">
 			<view class="card-header">
 				<text class="card-label">近7天训练</text>
 				<text class="card-icon">💪</text>
 			</view>
-			<view v-if="stats.workout_stats && stats.workout_stats.length > 0" class="bar-chart">
-				<view v-for="(s, i) in stats.workout_stats" :key="i" class="bar-col">
-					<text class="bar-val" v-if="s.count > 0">{{ s.count }}</text>
-					<view class="bar-fill" :style="{ height: (s.count * 40 + 10) + 'rpx' }"></view>
-					<text class="bar-day">{{ formatDay(s.day) }}</text>
+			<view class="card-body">
+				<view v-if="stats.workout_stats && stats.workout_stats.length > 0" class="bar-chart">
+					<view v-for="(s, i) in stats.workout_stats" :key="i" class="bar-col">
+						<text class="bar-val" v-if="s.count > 0">{{ s.count }}</text>
+						<view class="bar-fill" :style="{ height: (s.count * 40 + 10) + 'rpx' }"></view>
+						<text class="bar-day">{{ formatDay(s.day) }}</text>
+					</view>
 				</view>
-			</view>
-			<view v-else class="no-data-wrap">
-				<text class="no-data">暂无训练数据</text>
+				<view v-else class="no-data-wrap">
+					<text class="no-data">暂无训练数据</text>
+				</view>
 			</view>
 		</view>
 
 		<!-- 体重趋势 -->
-		<view class="card">
+		<view class="card card-weight">
 			<view class="card-header">
 				<text class="card-label">体重趋势</text>
 				<text class="card-icon">⚖️</text>
 			</view>
-			<view v-if="stats.weight_trend && stats.weight_trend.length > 0" class="trend-list">
-				<view v-for="(w, i) in stats.weight_trend" :key="i" class="trend-row">
-					<text class="trend-day">{{ formatDay(w.day) }}</text>
-					<view class="trend-bar-wrap">
-						<view class="trend-bar" :style="{ width: getBarWidth(w.weight) + '%' }"></view>
+			<view class="card-body">
+				<view v-if="stats.weight_trend && stats.weight_trend.length > 0" class="trend-list">
+					<view v-for="(w, i) in stats.weight_trend" :key="i" class="trend-row">
+						<text class="trend-day">{{ formatDay(w.day) }}</text>
+						<view class="trend-bar-wrap">
+							<view class="trend-bar" :style="{ width: getBarWidth(w.weight) + '%' }"></view>
+						</view>
+						<text class="trend-val">{{ w.weight }}kg</text>
 					</view>
-					<text class="trend-val">{{ w.weight }}kg</text>
 				</view>
-			</view>
-			<view v-else class="no-data-wrap">
-				<text class="no-data">暂无体重数据</text>
+				<view v-else class="no-data-wrap">
+					<text class="no-data">暂无体重数据</text>
+				</view>
 			</view>
 		</view>
 
 		<!-- 饮食热量 -->
-		<view class="card">
+		<view class="card card-diet">
 			<view class="card-header">
 				<text class="card-label">近7天热量摄入</text>
 				<text class="card-icon">🍽️</text>
 			</view>
-			<view v-if="stats.diet_stats && stats.diet_stats.length > 0" class="bar-chart">
-				<view v-for="(s, i) in stats.diet_stats" :key="i" class="bar-col">
-					<text class="bar-val" v-if="s.calories > 0">{{ s.calories }}</text>
-					<view class="bar-fill bar-orange" :style="{ height: Math.min(s.calories / 10, 200) + 'rpx' }"></view>
-					<text class="bar-day">{{ formatDay(s.day) }}</text>
+			<view class="card-body">
+				<view v-if="stats.diet_stats && stats.diet_stats.length > 0" class="bar-chart">
+					<view v-for="(s, i) in stats.diet_stats" :key="i" class="bar-col">
+						<text class="bar-val" v-if="s.calories > 0">{{ s.calories }}</text>
+						<view class="bar-fill bar-orange" :style="{ height: Math.min(s.calories / 10, 200) + 'rpx' }"></view>
+						<text class="bar-day">{{ formatDay(s.day) }}</text>
+					</view>
 				</view>
-			</view>
-			<view v-else class="no-data-wrap">
-				<text class="no-data">暂无饮食数据</text>
+				<view v-else class="no-data-wrap">
+					<text class="no-data">暂无饮食数据</text>
+				</view>
 			</view>
 		</view>
 	</view>
@@ -101,7 +107,7 @@
 	padding: 0 32rpx;
 	padding-bottom: 40rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: linear-gradient(180deg, #f0f4ff 0%, #f2f2f7 280rpx);
 }
 
 .page-header {
@@ -118,27 +124,35 @@
 .card {
 	background: #fff;
 	border-radius: 20rpx;
-	padding: 28rpx 32rpx;
-	margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+	padding: 0;
+	margin-bottom: 20rpx;
+	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+	overflow: hidden;
 
 	.card-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 24rpx;
+		padding: 22rpx 32rpx;
+		border-bottom: 1rpx solid #f2f2f7;
 
 		.card-label {
-			font-size: 26rpx;
-			font-weight: 600;
-			color: #8e8e93;
-			text-transform: uppercase;
-			letter-spacing: 1rpx;
+			font-size: 28rpx;
+			font-weight: 700;
+			color: #1c1c1e;
 		}
 		.card-icon {
 			font-size: 32rpx;
 		}
 	}
+
+	.card-body {
+		padding: 24rpx 32rpx;
+	}
+
+	&.card-workout .card-header { background: linear-gradient(90deg, rgba(10, 132, 255, 0.08), transparent); }
+	&.card-weight .card-header  { background: linear-gradient(90deg, rgba(52, 199, 89, 0.08), transparent); }
+	&.card-diet .card-header    { background: linear-gradient(90deg, rgba(255, 159, 10, 0.08), transparent); }
 }
 
 .no-data-wrap {
@@ -166,12 +180,12 @@
 
 		.bar-fill {
 			width: 40rpx;
-			background: linear-gradient(180deg, #007aff, #5856d6);
+			background: linear-gradient(180deg, #0a84ff, #5856d6);
 			border-radius: 10rpx 10rpx 4rpx 4rpx;
 			min-height: 8rpx;
 		}
 		.bar-orange {
-			background: linear-gradient(180deg, #ff9500, #ff6b00);
+			background: linear-gradient(180deg, #ff9f0a, #e67e00);
 		}
 
 		.bar-val {
@@ -212,7 +226,7 @@
 
 			.trend-bar {
 				height: 100%;
-				background: linear-gradient(90deg, #34c759, #30d158);
+				background: linear-gradient(90deg, #30d158, #25a244);
 				border-radius: 14rpx;
 				min-width: 8rpx;
 			}

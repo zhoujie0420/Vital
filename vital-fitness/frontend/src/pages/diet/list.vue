@@ -98,7 +98,7 @@
 	padding: 0 32rpx;
 	padding-bottom: 40rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: linear-gradient(180deg, #eef9f0 0%, #f2f2f7 280rpx);
 }
 
 .page-header {
@@ -114,10 +114,11 @@
 .day-card {
 	background: #fff;
 	border-radius: 20rpx;
-	padding: 28rpx 32rpx;
+	padding: 28rpx 28rpx 28rpx 22rpx;
 	margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
 	transition: transform 0.15s ease;
+	border-left: 6rpx solid #30d158;
 
 	&:active { transform: scale(0.98); }
 
@@ -171,12 +172,12 @@
 	.empty-btn {
 		display: inline-block;
 		padding: 20rpx 56rpx;
-		background: #007aff;
+		background: linear-gradient(135deg, #30d158, #1ea33e);
 		color: #fff;
 		border-radius: 16rpx;
 		font-size: 30rpx;
 		font-weight: 600;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+		box-shadow: 0 4rpx 16rpx rgba(52, 199, 89, 0.35);
 		&:active { transform: scale(0.95); opacity: 0.9; }
 	}
 }

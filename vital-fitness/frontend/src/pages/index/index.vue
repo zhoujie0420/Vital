@@ -151,7 +151,7 @@
 <style lang="scss" scoped>
 .page {
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: linear-gradient(180deg, #e8f3ff 0%, #f2f2f7 320rpx);
 	padding-bottom: 40rpx;
 }
 
@@ -200,29 +200,30 @@
 
 .hero-card {
 	margin: 16rpx 32rpx 32rpx;
-	border-radius: 24rpx;
+	border-radius: 28rpx;
 	overflow: hidden;
 	position: relative;
+	box-shadow: 0 12rpx 40rpx rgba(0, 122, 255, 0.35);
 
 	.hero-bg {
 		position: absolute;
 		top: 0; left: 0; right: 0; bottom: 0;
-		background: linear-gradient(135deg, #007aff 0%, #5856d6 50%, #af52de 100%);
-		opacity: 0.95;
+		background: linear-gradient(135deg, #0a84ff 0%, #5856d6 50%, #af52de 100%);
 	}
 
 	.hero-content {
 		position: relative;
 		z-index: 1;
-		padding: 36rpx 32rpx;
+		padding: 40rpx 36rpx;
 
 		.hero-label {
 			display: block;
-			font-size: 26rpx;
-			color: rgba(255, 255, 255, 0.75);
+			font-size: 24rpx;
+			color: rgba(255, 255, 255, 0.7);
 			font-weight: 600;
-			letter-spacing: 1rpx;
-			margin-bottom: 28rpx;
+			letter-spacing: 2rpx;
+			text-transform: uppercase;
+			margin-bottom: 32rpx;
 		}
 
 		.hero-stats {
@@ -234,37 +235,40 @@
 			text-align: center;
 
 			.hero-ring {
-				width: 120rpx;
-				height: 120rpx;
+				width: 128rpx;
+				height: 128rpx;
 				border-radius: 50%;
-				background: rgba(255, 255, 255, 0.2);
-				border: 4rpx solid rgba(255, 255, 255, 0.4);
+				background: rgba(255, 255, 255, 0.15);
+				border: 3rpx solid rgba(255, 255, 255, 0.35);
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				margin: 0 auto 12rpx;
+				margin: 0 auto 16rpx;
+				box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.15);
 
 				.hero-ring-val {
-					font-size: 36rpx;
-					font-weight: 700;
+					font-size: 40rpx;
+					font-weight: 800;
 					color: #fff;
+					letter-spacing: -1rpx;
 				}
 			}
 
 			.ring-orange {
-				border-color: rgba(255, 149, 0, 0.6);
-				background: rgba(255, 149, 0, 0.15);
+				border-color: rgba(255, 190, 40, 0.55);
+				background: rgba(255, 159, 10, 0.18);
 			}
 
 			.ring-green {
-				border-color: rgba(52, 199, 89, 0.6);
-				background: rgba(52, 199, 89, 0.15);
+				border-color: rgba(52, 199, 89, 0.55);
+				background: rgba(48, 209, 88, 0.18);
 			}
 
 			.hero-stat-label {
 				font-size: 24rpx;
-				color: rgba(255, 255, 255, 0.8);
-				font-weight: 500;
+				color: rgba(255, 255, 255, 0.85);
+				font-weight: 600;
+				letter-spacing: 0.5rpx;
 			}
 		}
 	}
@@ -290,33 +294,44 @@
 
 	.action-card {
 		flex: 1;
-		background: #fff;
-		border-radius: 20rpx;
-		padding: 24rpx 0 20rpx;
+		border-radius: 22rpx;
+		padding: 28rpx 0 22rpx;
 		text-align: center;
-		box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
 		transition: transform 0.15s ease;
 
-		&:active { transform: scale(0.95); }
+		&:active { transform: scale(0.94); }
 
 		.action-icon-wrap {
 			width: 72rpx;
 			height: 72rpx;
 			border-radius: 20rpx;
+			background: rgba(255, 255, 255, 0.22);
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			margin: 0 auto 12rpx;
+			margin: 0 auto 14rpx;
 		}
 
 		.action-icon { font-size: 36rpx; }
-		.action-label { display: block; font-size: 24rpx; color: #3a3a3c; font-weight: 600; }
+		.action-label { display: block; font-size: 24rpx; color: #fff; font-weight: 700; }
 	}
 
-	.action-workout .action-icon-wrap { background: rgba(0, 122, 255, 0.1); }
-	.action-diet .action-icon-wrap { background: rgba(52, 199, 89, 0.1); }
-	.action-weight .action-icon-wrap { background: rgba(255, 149, 0, 0.1); }
-	.action-mood .action-icon-wrap { background: rgba(255, 45, 85, 0.1); }
+	.action-workout {
+		background: linear-gradient(145deg, #0a84ff, #005ec7);
+		box-shadow: 0 8rpx 24rpx rgba(0, 122, 255, 0.38);
+	}
+	.action-diet {
+		background: linear-gradient(145deg, #30d158, #1ea33e);
+		box-shadow: 0 8rpx 24rpx rgba(52, 199, 89, 0.38);
+	}
+	.action-weight {
+		background: linear-gradient(145deg, #ff9f0a, #d97400);
+		box-shadow: 0 8rpx 24rpx rgba(255, 149, 0, 0.38);
+	}
+	.action-mood {
+		background: linear-gradient(145deg, #ff375f, #c4003d);
+		box-shadow: 0 8rpx 24rpx rgba(255, 45, 85, 0.38);
+	}
 }
 
 .data-cards {
@@ -326,12 +341,17 @@
 		align-items: center;
 		background: #fff;
 		border-radius: 16rpx;
-		padding: 28rpx 32rpx;
+		padding: 28rpx 28rpx 28rpx 24rpx;
 		margin-bottom: 12rpx;
-		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.03);
+		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
 		transition: transform 0.15s ease;
+		border-left: 6rpx solid transparent;
 
 		&:active { transform: scale(0.98); }
+
+		&:nth-child(1) { border-left-color: #0a84ff; }
+		&:nth-child(2) { border-left-color: #30d158; }
+		&:nth-child(3) { border-left-color: #ff9f0a; }
 
 		.data-card-left {
 			display: flex;

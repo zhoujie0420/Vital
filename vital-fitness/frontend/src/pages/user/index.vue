@@ -1,5 +1,6 @@
 <template>
 	<view class="page" :style="{ paddingTop: topPadding + 'px' }">
+		<view class="banner-bg"></view>
 		<view class="page-header">
 			<text class="page-title">我的</text>
 		</view>
@@ -87,15 +88,28 @@
 	padding-bottom: 40rpx;
 	min-height: 100vh;
 	background: #f2f2f7;
+	position: relative;
+}
+
+.banner-bg {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 380rpx;
+	background: linear-gradient(135deg, #007aff 0%, #5856d6 60%, #af52de 100%);
+	z-index: 0;
 }
 
 .page-header {
+	position: relative;
+	z-index: 1;
 	margin-bottom: 28rpx;
 
 	.page-title {
 		font-size: 52rpx;
 		font-weight: 700;
-		color: #1c1c1e;
+		color: #fff;
 		letter-spacing: -1rpx;
 	}
 }
@@ -103,12 +117,16 @@
 .user-card {
 	display: flex;
 	align-items: center;
-	background: #fff;
+	background: rgba(255, 255, 255, 0.92);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
 	border-radius: 20rpx;
 	padding: 32rpx;
 	margin-bottom: 24rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+	box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.12);
 	transition: transform 0.15s ease;
+	position: relative;
+	z-index: 1;
 
 	&:active { transform: scale(0.98); }
 

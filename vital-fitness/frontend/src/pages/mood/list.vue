@@ -14,7 +14,7 @@
 						<text class="item-mood-text">{{ getMoodText(r.mood_score) }}</text>
 						<text class="item-date">{{ formatDate(r.record_date) }}</text>
 					</view>
-					<text class="item-score">{{ r.mood_score }}/10</text>
+					<text class="item-score" :class="getMoodClass(r.mood_score)">{{ r.mood_score }}/10</text>
 				</view>
 				<view v-if="r.mood_tags" class="item-tags">
 					<text v-for="tag in r.mood_tags.split(',')" :key="tag" class="tag">{{ tag }}</text>
@@ -73,6 +73,13 @@
 				if (score >= 5) return '一般'
 				if (score >= 3) return '较差'
 				return '糟糕'
+			},
+			getMoodClass(score) {
+				if (score >= 9) return 'score-great'
+				if (score >= 7) return 'score-good'
+				if (score >= 5) return 'score-ok'
+				if (score >= 3) return 'score-low'
+				return 'score-bad'
 			}
 		}
 	}
@@ -83,7 +90,7 @@
 	padding: 0 32rpx;
 	padding-bottom: 40rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: linear-gradient(180deg, #fef0f5 0%, #f2f2f7 280rpx);
 }
 
 .page-header {
@@ -114,10 +121,11 @@
 .list-item {
 	background: #fff;
 	border-radius: 20rpx;
-	padding: 28rpx 32rpx;
+	padding: 28rpx 28rpx 28rpx 22rpx;
 	margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+	box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
 	transition: transform 0.15s ease;
+	border-left: 6rpx solid #ff375f;
 
 	&:active { transform: scale(0.98); }
 
@@ -148,12 +156,17 @@
 		}
 
 		.item-score {
-			font-size: 28rpx;
+			font-size: 26rpx;
 			font-weight: 700;
-			color: #8e8e93;
-			background: #f2f2f7;
-			padding: 8rpx 16rpx;
-			border-radius: 12rpx;
+			color: #fff;
+			padding: 8rpx 18rpx;
+			border-radius: 20rpx;
+
+			&.score-great { background: linear-gradient(135deg, #ff9f0a, #e67e00); }
+			&.score-good  { background: linear-gradient(135deg, #30d158, #1ea33e); }
+			&.score-ok    { background: linear-gradient(135deg, #0a84ff, #005ec7); }
+			&.score-low   { background: linear-gradient(135deg, #636366, #48484a); }
+			&.score-bad   { background: linear-gradient(135deg, #ff375f, #c4003d); }
 		}
 	}
 
@@ -165,8 +178,8 @@
 
 		.tag {
 			padding: 8rpx 20rpx;
-			background: rgba(0, 122, 255, 0.08);
-			color: #007aff;
+			background: rgba(255, 55, 95, 0.08);
+			color: #ff375f;
 			border-radius: 20rpx;
 			font-size: 24rpx;
 			font-weight: 500;
@@ -192,12 +205,12 @@
 	.empty-btn {
 		display: inline-block;
 		padding: 20rpx 56rpx;
-		background: #007aff;
+		background: linear-gradient(135deg, #ff375f, #c4003d);
 		color: #fff;
 		border-radius: 16rpx;
 		font-size: 30rpx;
 		font-weight: 600;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+		box-shadow: 0 4rpx 16rpx rgba(255, 45, 85, 0.35);
 
 		&:active { transform: scale(0.95); opacity: 0.9; }
 	}
