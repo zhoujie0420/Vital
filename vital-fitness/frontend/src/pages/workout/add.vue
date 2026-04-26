@@ -3,16 +3,18 @@
 		<view class="nav-bar">
 			<text class="nav-back" @tap="goBack">‹ 返回</text>
 			<text class="nav-title">记录训练</text>
-			<text class="nav-placeholder"></text>
+			<view class="nav-placeholder"></view>
 		</view>
 
 		<view class="card">
 			<text class="card-label">选择动作</text>
-			<scroll-view scroll-x class="cat-scroll">
-				<text v-for="cat in categories" :key="cat" class="cat-pill"
-					:class="{ active: currentCategory === cat }" @tap="currentCategory = cat">
-					{{ cat }}
-				</text>
+			<scroll-view scroll-x class="cat-scroll" :show-scrollbar="false">
+				<view class="cat-bar">
+					<text v-for="cat in categories" :key="cat" class="cat-pill"
+						:class="{ active: currentCategory === cat }" @tap="currentCategory = cat">
+						{{ cat }}
+					</text>
+				</view>
 			</scroll-view>
 
 			<view class="exercise-grid">
@@ -27,12 +29,16 @@
 		<view class="card" v-if="selectedExercise">
 			<text class="card-label">重量</text>
 			<view class="weight-display">
-				<text class="weight-btn" @tap="adjustWeight(-2.5)">−</text>
+				<view class="weight-btn" @tap="adjustWeight(-2.5)">
+					<text class="weight-btn-text">−</text>
+				</view>
 				<view class="weight-center">
 					<input type="digit" v-model="weight" class="weight-num" placeholder="0" />
 					<text class="weight-unit">kg</text>
 				</view>
-				<text class="weight-btn" @tap="adjustWeight(2.5)">+</text>
+				<view class="weight-btn" @tap="adjustWeight(2.5)">
+					<text class="weight-btn-text">+</text>
+				</view>
 			</view>
 			<view class="quick-row">
 				<text class="quick-pill" v-for="w in [20, 40, 60, 80, 100]" :key="w"
@@ -101,129 +107,129 @@
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/variables.scss';
+
 .page {
-	padding: 0 32rpx;
+	padding: 0 $spacing-xl;
 	padding-bottom: 160rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: $color-bg;
 }
 
 .nav-bar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 28rpx;
+	@include nav-bar;
 
-	.nav-back { font-size: 32rpx; color: #007aff; font-weight: 500; }
-	.nav-title { font-size: 34rpx; font-weight: 600; color: #1c1c1e; }
+	.nav-back { font-size: $font-callout; color: $color-primary; font-weight: 500; }
+	.nav-title { font-size: $font-headline; font-weight: 600; color: $color-label; }
 	.nav-placeholder { width: 80rpx; }
 }
 
 .card {
-	background: #fff;
-	border-radius: 20rpx;
-	padding: 28rpx 32rpx;
-	margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+	@include card;
+	margin-bottom: $spacing-md;
 
-	.card-label {
-		display: block;
-		font-size: 26rpx;
-		font-weight: 600;
-		color: #8e8e93;
-		text-transform: uppercase;
-		letter-spacing: 1rpx;
-		margin-bottom: 20rpx;
-	}
+	.card-label { @include card-label; }
 }
 
+// --- Category Scroll ---
 .cat-scroll {
 	white-space: nowrap;
-	margin-bottom: 20rpx;
+	margin: 0 -#{$spacing-xl};
+	padding: 0 $spacing-xl;
+	margin-bottom: $spacing-md;
+
+	.cat-bar {
+		display: inline-flex;
+		gap: $spacing-sm;
+	}
 
 	.cat-pill {
 		display: inline-block;
-		padding: 10rpx 24rpx;
-		border-radius: 20rpx;
-		background: #f2f2f7;
-		font-size: 26rpx;
-		color: #636366;
-		margin-right: 12rpx;
+		padding: $spacing-xs $spacing-lg;
+		border-radius: $radius-full;
+		background: $color-fill;
+		font-size: $font-footnote;
+		color: $color-label-tertiary;
 		font-weight: 500;
-		transition: all 0.2s ease;
+		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
 		&.active {
-			background: #007aff;
+			background: $color-label;
 			color: #fff;
-			box-shadow: 0 4rpx 12rpx rgba(0, 122, 255, 0.3);
 		}
-		&:active { transform: scale(0.95); }
+		&:active { transform: scale(0.94); }
 	}
 }
 
+// --- Exercise Grid ---
 .exercise-grid {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 12rpx;
+	gap: $spacing-sm;
 
 	.exercise-chip {
-		padding: 16rpx 28rpx;
-		border-radius: 16rpx;
-		background: #f2f2f7;
+		padding: $spacing-md $spacing-lg;
+		border-radius: $radius-md;
+		background: $color-fill;
 		border: 2rpx solid transparent;
-		transition: all 0.2s ease;
+		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
 		&.selected {
-			background: rgba(0, 122, 255, 0.08);
-			border-color: #007aff;
-			box-shadow: 0 2rpx 12rpx rgba(0, 122, 255, 0.15);
+			background: $color-primary-light;
+			border-color: $color-primary;
 		}
-		&:active { transform: scale(0.95); }
+		&:active { transform: scale(0.94); }
 
 		.exercise-name {
-			font-size: 28rpx;
-			color: #1c1c1e;
+			font-size: $font-subhead;
+			color: $color-label;
 			font-weight: 500;
 		}
 	}
 }
 
+// --- Weight Display ---
 .weight-display {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: 20rpx 0;
+	padding: $spacing-lg 0;
 
 	.weight-btn {
 		width: 72rpx;
 		height: 72rpx;
-		line-height: 68rpx;
-		text-align: center;
-		background: #f2f2f7;
 		border-radius: 50%;
-		font-size: 40rpx;
-		color: #007aff;
-		font-weight: 300;
+		background: $color-fill;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		@include press-effect;
 
-		&:active { background: #e5e5ea; transform: scale(0.92); }
+		.weight-btn-text {
+			font-size: 44rpx;
+			color: $color-primary;
+			font-weight: 300;
+			line-height: 1;
+		}
 	}
 
 	.weight-center {
 		display: flex;
 		align-items: baseline;
-		margin: 0 32rpx;
+		margin: 0 $spacing-xl;
 
 		.weight-num {
-			width: 160rpx;
+			width: 180rpx;
 			text-align: center;
-			font-size: 60rpx;
+			font-size: $font-largeTitle;
 			font-weight: 700;
-			color: #1c1c1e;
+			color: $color-label;
 			letter-spacing: -2rpx;
+			font-variant-numeric: tabular-nums;
 		}
 		.weight-unit {
-			font-size: 30rpx;
-			color: #8e8e93;
+			font-size: $font-subhead;
+			color: $color-label-quaternary;
 			margin-left: 4rpx;
 		}
 	}
@@ -233,47 +239,27 @@
 	display: flex;
 	justify-content: center;
 	flex-wrap: wrap;
-	gap: 12rpx;
-	margin-top: 16rpx;
+	gap: $spacing-sm;
+	margin-top: $spacing-md;
 
 	.quick-pill {
-		padding: 12rpx 28rpx;
-		background: #f2f2f7;
-		border-radius: 20rpx;
-		font-size: 26rpx;
-		color: #636366;
+		padding: $spacing-sm $spacing-lg;
+		background: $color-fill;
+		border-radius: $radius-full;
+		font-size: $font-footnote;
+		color: $color-label-tertiary;
 		font-weight: 500;
-		transition: all 0.2s ease;
+		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
-		&.active { background: #007aff; color: #fff; }
-		&:active { transform: scale(0.95); opacity: 0.7; }
+		&.active { background: $color-label; color: #fff; }
+		&:active { transform: scale(0.94); }
 	}
 }
 
+// --- Bottom Action ---
 .bottom-action {
-	position: fixed;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	padding: 20rpx 32rpx;
-	padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-	background: rgba(242, 242, 247, 0.9);
-	backdrop-filter: blur(20px);
-	-webkit-backdrop-filter: blur(20px);
+	@include bottom-action-bar;
 
-	.save-btn {
-		background: #007aff;
-		color: #fff;
-		text-align: center;
-		padding: 28rpx 0;
-		border-radius: 16rpx;
-		font-size: 32rpx;
-		font-weight: 600;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
-		transition: all 0.15s ease;
-
-		&:active { transform: scale(0.98); opacity: 0.9; }
-		&.loading { opacity: 0.6; }
-	}
+	.save-btn { @include primary-button; }
 }
 </style>

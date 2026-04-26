@@ -42,3 +42,13 @@ func (h *WeightHandler) GetList(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, gin.H{"code": 200, "data": records, "total": total})
 }
+
+func (h *WeightHandler) Delete(c *gin.Context) {
+	userID := c.GetUint("user_id")
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err := h.weightService.Delete(uint(id), userID); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "删除失败"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 200, "message": "删除成功"})
+}

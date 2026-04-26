@@ -31,6 +31,28 @@
 	}
 </script>
 
-<style>
-	page { background-color: #f2f2f7; }
+<style lang="scss">
+	@import './styles/variables.scss';
+
+	page {
+		background-color: $color-bg;
+		font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+			'Helvetica Neue', 'PingFang SC', sans-serif;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		color: $color-label;
+		line-height: 1.4;
+	}
+
+	/* 全局滚动条隐藏 */
+	::-webkit-scrollbar {
+		display: none;
+		width: 0;
+		height: 0;
+	}
+
+	/* 全局 view 盒模型 */
+	view, text {
+		box-sizing: border-box;
+	}
 </style>

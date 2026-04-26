@@ -17,6 +17,9 @@ vital-fitness/backend/main
 vital-fitness/backend/tmp/
 vital-fitness/backend/vendor/
 
+# Config (sensitive)
+vital-fitness/backend/configs/config.yaml
+
 # Node
 vital-fitness/frontend/node_modules/
 vital-fitness/frontend/npminstall-debug.log

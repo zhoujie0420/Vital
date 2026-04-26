@@ -1,0 +1,215 @@
+// ============================================
+// Apple Health Design System - Design Tokens
+// ============================================
+
+// --- Colors (iOS System Colors) ---
+$color-primary: #007AFF;
+$color-primary-light: rgba(0, 122, 255, 0.12);
+$color-green: #34C759;
+$color-green-light: rgba(52, 199, 89, 0.12);
+$color-orange: #FF9500;
+$color-orange-light: rgba(255, 149, 0, 0.12);
+$color-red: #FF3B30;
+$color-red-light: rgba(255, 59, 48, 0.12);
+$color-pink: #FF2D55;
+$color-pink-light: rgba(255, 45, 85, 0.12);
+$color-purple: #AF52DE;
+$color-purple-light: rgba(175, 82, 222, 0.12);
+$color-indigo: #5856D6;
+$color-teal: #5AC8FA;
+$color-yellow: #FFCC00;
+$color-mint: #00C7BE;
+
+// --- Neutral Colors ---
+$color-label: #1C1C1E;
+$color-label-secondary: #3A3A3C;
+$color-label-tertiary: #636366;
+$color-label-quaternary: #8E8E93;
+$color-separator: rgba(60, 60, 67, 0.08);
+$color-separator-opaque: #E5E5EA;
+$color-fill: rgba(120, 120, 128, 0.08);
+$color-fill-secondary: rgba(120, 120, 128, 0.12);
+$color-fill-tertiary: rgba(120, 120, 128, 0.16);
+$color-bg: #F2F2F7;
+$color-bg-elevated: #FFFFFF;
+$color-bg-grouped: #F2F2F7;
+$color-bg-grouped-secondary: #FFFFFF;
+
+// --- Typography ---
+$font-largeTitle: 68rpx;
+$font-title1: 52rpx;
+$font-title2: 44rpx;
+$font-title3: 40rpx;
+$font-headline: 34rpx;
+$font-body: 34rpx;
+$font-callout: 32rpx;
+$font-subhead: 30rpx;
+$font-footnote: 26rpx;
+$font-caption1: 24rpx;
+$font-caption2: 22rpx;
+
+// --- Spacing ---
+$spacing-xs: 8rpx;
+$spacing-sm: 12rpx;
+$spacing-md: 16rpx;
+$spacing-lg: 24rpx;
+$spacing-xl: 32rpx;
+$spacing-2xl: 40rpx;
+$spacing-3xl: 48rpx;
+
+// --- Border Radius ---
+$radius-sm: 12rpx;
+$radius-md: 16rpx;
+$radius-lg: 20rpx;
+$radius-xl: 24rpx;
+$radius-2xl: 28rpx;
+$radius-full: 9999rpx;
+
+// --- Shadows ---
+$shadow-card: 0 1rpx 6rpx rgba(0, 0, 0, 0.04), 0 4rpx 24rpx rgba(0, 0, 0, 0.04);
+$shadow-card-hover: 0 2rpx 8rpx rgba(0, 0, 0, 0.06), 0 8rpx 32rpx rgba(0, 0, 0, 0.06);
+$shadow-button: 0 4rpx 16rpx rgba(0, 122, 255, 0.25);
+$shadow-float: 0 8rpx 40rpx rgba(0, 0, 0, 0.12);
+
+// --- Mixins ---
+@mixin card {
+  background: $color-bg-elevated;
+  border-radius: $radius-xl;
+  padding: $spacing-lg $spacing-xl;
+  box-shadow: $shadow-card;
+}
+
+@mixin card-label {
+  display: block;
+  font-size: $font-footnote;
+  font-weight: 600;
+  color: $color-label-quaternary;
+  text-transform: uppercase;
+  letter-spacing: 1rpx;
+  margin-bottom: $spacing-md;
+}
+
+@mixin nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-lg;
+}
+
+@mixin page-title {
+  font-size: $font-title1;
+  font-weight: 700;
+  color: $color-label;
+  letter-spacing: -1rpx;
+}
+
+@mixin bottom-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-lg $spacing-xl;
+  padding-bottom: calc(#{$spacing-lg} + env(safe-area-inset-bottom));
+  background: rgba(242, 242, 247, 0.8);
+  backdrop-filter: saturate(180%) blur(40px);
+  -webkit-backdrop-filter: saturate(180%) blur(40px);
+  border-top: 0.5rpx solid rgba(0, 0, 0, 0.06);
+}
+
+@mixin primary-button {
+  background: $color-primary;
+  color: #fff;
+  text-align: center;
+  padding: $spacing-lg 0;
+  border-radius: $radius-md;
+  font-size: $font-callout;
+  font-weight: 600;
+  box-shadow: $shadow-button;
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.88;
+  }
+  &.loading {
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
+@mixin press-effect {
+  transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+@mixin segment-control {
+  display: flex;
+  background: $color-fill;
+  border-radius: $radius-md;
+  padding: 4rpx;
+
+  .segment-item {
+    flex: 1;
+    text-align: center;
+    padding: $spacing-md 0;
+    font-size: $font-subhead;
+    font-weight: 500;
+    color: $color-label-tertiary;
+    border-radius: calc(#{$radius-md} - 4rpx);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    &.active {
+      background: $color-bg-elevated;
+      color: $color-label;
+      font-weight: 600;
+      box-shadow: 0 1rpx 8rpx rgba(0, 0, 0, 0.08), 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+    }
+  }
+}
+
+@mixin input-field {
+  display: flex;
+  align-items: center;
+  background: $color-fill;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  transition: all 0.2s ease;
+
+  &:focus-within {
+    background: rgba(0, 122, 255, 0.06);
+    box-shadow: 0 0 0 3rpx rgba(0, 122, 255, 0.2);
+  }
+}
+
+@mixin empty-state {
+  text-align: center;
+  padding: 120rpx 48rpx;
+
+  .empty-icon {
+    display: block;
+    font-size: 88rpx;
+    margin-bottom: $spacing-lg;
+    opacity: 0.9;
+  }
+  .empty-title {
+    display: block;
+    font-size: $font-headline;
+    font-weight: 600;
+    color: $color-label;
+    margin-bottom: $spacing-xs;
+  }
+  .empty-desc {
+    display: block;
+    font-size: $font-footnote;
+    color: $color-label-quaternary;
+    margin-bottom: $spacing-2xl;
+    line-height: 1.5;
+  }
+  .empty-btn {
+    display: inline-block;
+    padding: $spacing-md $spacing-3xl;
+    @include primary-button;
+  }
+}

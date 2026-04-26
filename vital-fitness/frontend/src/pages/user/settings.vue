@@ -3,30 +3,35 @@
 		<view class="nav-bar">
 			<text class="nav-back" @tap="goBack">‹ 返回</text>
 			<text class="nav-title">设置</text>
-			<text class="nav-placeholder"></text>
+			<view class="nav-placeholder"></view>
 		</view>
 
-		<view class="menu-group">
-			<view class="menu-item">
+		<view class="menu-card">
+			<view class="menu-row">
 				<view class="menu-left">
-					<view class="menu-icon icon-purple"><text>📱</text></view>
+					<view class="menu-icon bg-purple"><text>📱</text></view>
 					<text class="menu-text">版本</text>
 				</view>
 				<text class="menu-value">v1.0.0</text>
 			</view>
-			<view class="menu-item last" @tap="clearCache">
+			<view class="menu-row last" @tap="clearCache">
 				<view class="menu-left">
-					<view class="menu-icon icon-orange"><text>🗑️</text></view>
+					<view class="menu-icon bg-orange"><text>🗑️</text></view>
 					<text class="menu-text">清除缓存</text>
 				</view>
-				<text class="arrow">›</text>
+				<text class="sf-chevron">›</text>
 			</view>
+		</view>
+
+		<view class="logout-btn" @tap="handleLogout">
+			<text class="logout-text">退出登录</text>
 		</view>
 	</view>
 </template>
 
 <script setup>
 	import { computed } from 'vue'
+	import { logout } from '../../api/user'
 
 	const topPadding = computed(() => {
 		const app = getApp()
@@ -42,76 +47,110 @@
 			}
 		})
 	}
+	const handleLogout = () => {
+		uni.showModal({
+			title: '退出登录', content: '确定退出当前账号？',
+			success: async (res) => {
+				if (res.confirm) {
+					try { await logout() } catch (e) {}
+					uni.removeStorageSync('token')
+					uni.removeStorageSync('userInfo')
+					uni.redirectTo({ url: '/pages/auth/login' })
+				}
+			}
+		})
+	}
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/variables.scss';
+
 .page {
-	padding: 0 32rpx;
+	padding: 0 $spacing-xl;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: $color-bg;
 }
 
 .nav-bar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 28rpx;
-
-	.nav-back { font-size: 32rpx; color: #007aff; font-weight: 500; }
-	.nav-title { font-size: 34rpx; font-weight: 600; color: #1c1c1e; }
+	@include nav-bar;
+	.nav-back { font-size: $font-callout; color: $color-primary; font-weight: 500; }
+	.nav-title { font-size: $font-headline; font-weight: 600; color: $color-label; }
 	.nav-placeholder { width: 80rpx; }
 }
 
-.menu-group {
-	background: #fff;
-	border-radius: 20rpx;
+.menu-card {
+	@include card;
+	padding: 0;
 	overflow: hidden;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
 
-	.menu-item {
+	.menu-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 24rpx 32rpx;
-		border-bottom: 1rpx solid #f2f2f7;
-		transition: background 0.15s ease;
+		padding: $spacing-lg $spacing-xl;
+		position: relative;
+		@include press-effect;
 
-		&:active { background: #f8f8f8; }
-		&.last { border-bottom: none; }
+		&::after {
+			content: '';
+			position: absolute;
+			bottom: 0;
+			left: 100rpx;
+			right: $spacing-xl;
+			height: 0.5rpx;
+			background: $color-separator;
+		}
+
+		&.last::after { display: none; }
 
 		.menu-left {
 			display: flex;
 			align-items: center;
-			gap: 20rpx;
+			gap: $spacing-md;
 
 			.menu-icon {
-				width: 56rpx;
-				height: 56rpx;
-				border-radius: 14rpx;
+				width: 60rpx;
+				height: 60rpx;
+				border-radius: $radius-sm;
 				display: flex;
 				align-items: center;
 				justify-content: center;
 				font-size: 28rpx;
+				flex-shrink: 0;
 			}
-			.icon-purple { background: rgba(88, 86, 214, 0.1); }
-			.icon-orange { background: rgba(255, 149, 0, 0.1); }
+			.bg-purple { background: $color-purple-light; }
+			.bg-orange { background: $color-orange-light; }
 
 			.menu-text {
-				font-size: 30rpx;
-				color: #1c1c1e;
-				font-weight: 500;
+				font-size: $font-body;
+				color: $color-label;
+				font-weight: 400;
 			}
 		}
 
 		.menu-value {
-			font-size: 28rpx;
-			color: #8e8e93;
+			font-size: $font-subhead;
+			color: $color-label-quaternary;
 		}
-		.arrow {
+		.sf-chevron {
 			font-size: 36rpx;
-			color: #c7c7cc;
+			color: $color-separator-opaque;
 			font-weight: 300;
 		}
+	}
+}
+
+.logout-btn {
+	margin-top: $spacing-2xl;
+	@include card;
+	padding: $spacing-lg 0;
+	text-align: center;
+	@include press-effect;
+
+	.logout-text {
+		font-size: $font-body;
+		color: $color-red;
+		font-weight: 500;
 	}
 }
 </style>

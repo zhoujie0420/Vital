@@ -1,5 +1,6 @@
 <template>
 	<view class="page" :style="{ paddingTop: topPadding + 'px' }">
+		<!-- Header -->
 		<view class="header">
 			<view class="greeting">
 				<text class="greeting-sub">{{ greetingTime }}</text>
@@ -10,29 +11,43 @@
 			</view>
 		</view>
 
-		<!-- 今日概览卡片 -->
-		<view class="hero-card">
-			<view class="hero-bg"></view>
-			<view class="hero-content">
-				<text class="hero-label">今日概览</text>
-				<view class="hero-stats">
-					<view class="hero-stat">
-						<view class="hero-ring">
-							<text class="hero-ring-val">{{ dashboard.today_workouts || 0 }}</text>
+		<!-- 活动环卡片 - Apple Health 风格 -->
+		<view class="activity-card">
+			<view class="activity-header">
+				<text class="activity-label">今日活动</text>
+				<text class="activity-date">{{ todayStr }}</text>
+			</view>
+			<view class="activity-rings">
+				<view class="ring-group">
+					<!-- 训练环 -->
+					<view class="ring-item">
+						<view class="ring ring-move">
+							<view class="ring-inner">
+								<text class="ring-value">{{ dashboard.today_workouts || 0 }}</text>
+								<text class="ring-unit">次</text>
+							</view>
 						</view>
-						<text class="hero-stat-label">训练</text>
+						<text class="ring-label">训练</text>
 					</view>
-					<view class="hero-stat">
-						<view class="hero-ring ring-orange">
-							<text class="hero-ring-val">{{ dashboard.today_calories || 0 }}</text>
+					<!-- 热量环 -->
+					<view class="ring-item">
+						<view class="ring ring-exercise">
+							<view class="ring-inner">
+								<text class="ring-value">{{ dashboard.today_calories || 0 }}</text>
+								<text class="ring-unit">千卡</text>
+							</view>
 						</view>
-						<text class="hero-stat-label">千卡</text>
+						<text class="ring-label">热量</text>
 					</view>
-					<view class="hero-stat">
-						<view class="hero-ring ring-green">
-							<text class="hero-ring-val">{{ dashboard.latest_weight || '--' }}</text>
+					<!-- 体重 -->
+					<view class="ring-item">
+						<view class="ring ring-stand">
+							<view class="ring-inner">
+								<text class="ring-value">{{ dashboard.latest_weight || '--' }}</text>
+								<text class="ring-unit">kg</text>
+							</view>
 						</view>
-						<text class="hero-stat-label">体重kg</text>
+						<text class="ring-label">体重</text>
 					</view>
 				</view>
 			</view>
@@ -41,65 +56,81 @@
 		<!-- 快捷操作 -->
 		<view class="section">
 			<text class="section-title">快捷记录</text>
-			<view class="action-grid">
-				<view class="action-card action-workout" @tap="goTo('/pages/workout/add')">
-					<view class="action-icon-wrap"><text class="action-icon">💪</text></view>
-					<text class="action-label">训练</text>
+			<view class="quick-grid">
+				<view class="quick-card" @tap="goTo('/pages/workout/add')">
+					<view class="quick-icon-bg bg-red">
+						<text class="quick-icon">💪</text>
+					</view>
+					<text class="quick-label">训练</text>
+					<text class="quick-hint">记录运动</text>
 				</view>
-				<view class="action-card action-diet" @tap="goTo('/pages/diet/add')">
-					<view class="action-icon-wrap"><text class="action-icon">🥗</text></view>
-					<text class="action-label">饮食</text>
+				<view class="quick-card" @tap="goTo('/pages/diet/add')">
+					<view class="quick-icon-bg bg-green">
+						<text class="quick-icon">🥗</text>
+					</view>
+					<text class="quick-label">饮食</text>
+					<text class="quick-hint">营养追踪</text>
 				</view>
-				<view class="action-card action-weight" @tap="goTo('/pages/weight/add')">
-					<view class="action-icon-wrap"><text class="action-icon">⚖️</text></view>
-					<text class="action-label">体重</text>
-				</view>
-				<view class="action-card action-mood" @tap="goTo('/pages/mood/add')">
-					<view class="action-icon-wrap"><text class="action-icon">😊</text></view>
-					<text class="action-label">心情</text>
+				<view class="quick-card" @tap="goTo('/pages/weight/add')">
+					<view class="quick-icon-bg bg-orange">
+						<text class="quick-icon">⚖️</text>
+					</view>
+					<text class="quick-label">体重</text>
+					<text class="quick-hint">体态管理</text>
 				</view>
 			</view>
 		</view>
 
-		<!-- 数据卡片 -->
+		<!-- 健康概览 -->
 		<view class="section">
-			<text class="section-title">数据概览</text>
-			<view class="data-cards">
-				<view class="data-card" @tap="goTo('/pages/workout/list')">
-					<view class="data-card-left">
-						<text class="data-card-icon">🏋️</text>
-						<view>
-							<text class="data-card-title">训练次数</text>
-							<text class="data-card-sub">累计记录</text>
+			<text class="section-title">健康概览</text>
+			<view class="overview-list">
+				<view class="overview-card" @tap="goTo('/pages/workout/list')">
+					<view class="overview-left">
+						<view class="overview-icon-bg bg-red">
+							<text class="overview-icon">🏋️</text>
+						</view>
+						<view class="overview-info">
+							<text class="overview-title">训练记录</text>
+							<text class="overview-sub">累计 {{ dashboard.workout_count || 0 }} 次训练</text>
 						</view>
 					</view>
-					<view class="data-card-right">
-						<text class="data-card-value">{{ dashboard.workout_count || 0 }}</text>
-						<text class="data-card-arrow">›</text>
+					<view class="overview-right">
+						<text class="overview-arrow">
+							<text class="sf-chevron">›</text>
+						</text>
 					</view>
 				</view>
-				<view class="data-card" @tap="goTo('/pages/diet/list')">
-					<view class="data-card-left">
-						<text class="data-card-icon">🍽️</text>
-						<view>
-							<text class="data-card-title">饮食记录</text>
-							<text class="data-card-sub">营养追踪</text>
+				<view class="overview-card" @tap="goTo('/pages/diet/list')">
+					<view class="overview-left">
+						<view class="overview-icon-bg bg-green">
+							<text class="overview-icon">🍽️</text>
+						</view>
+						<view class="overview-info">
+							<text class="overview-title">饮食记录</text>
+							<text class="overview-sub">营养摄入追踪</text>
 						</view>
 					</view>
-					<view class="data-card-right">
-						<text class="data-card-arrow">›</text>
+					<view class="overview-right">
+						<text class="overview-arrow">
+							<text class="sf-chevron">›</text>
+						</text>
 					</view>
 				</view>
-				<view class="data-card" @tap="goTo('/pages/weight/list')">
-					<view class="data-card-left">
-						<text class="data-card-icon">📊</text>
-						<view>
-							<text class="data-card-title">体重趋势</text>
-							<text class="data-card-sub">变化追踪</text>
+				<view class="overview-card" @tap="goTo('/pages/weight/list')">
+					<view class="overview-left">
+						<view class="overview-icon-bg bg-orange">
+							<text class="overview-icon">📊</text>
+						</view>
+						<view class="overview-info">
+							<text class="overview-title">体重趋势</text>
+							<text class="overview-sub">身体变化追踪</text>
 						</view>
 					</view>
-					<view class="data-card-right">
-						<text class="data-card-arrow">›</text>
+					<view class="overview-right">
+						<text class="overview-arrow">
+							<text class="sf-chevron">›</text>
+						</text>
 					</view>
 				</view>
 			</view>
@@ -129,6 +160,11 @@
 		return '晚上好'
 	})
 
+	const todayStr = computed(() => {
+		const d = new Date()
+		return `${d.getMonth() + 1}月${d.getDate()}日`
+	})
+
 	const goTo = (url) => {
 		const tabbarPages = ['/pages/index/index', '/pages/workout/list', '/pages/diet/list', '/pages/statistics/index', '/pages/user/index']
 		if (tabbarPages.includes(url)) {
@@ -149,207 +185,279 @@
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/variables.scss';
+
 .page {
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: $color-bg;
 	padding-bottom: 40rpx;
 }
 
+// --- Header ---
 .header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	padding: 12rpx 32rpx 16rpx;
+	padding: $spacing-sm $spacing-xl $spacing-md;
 
 	.greeting {
 		.greeting-sub {
 			display: block;
-			font-size: 28rpx;
-			color: #8e8e93;
+			font-size: $font-subhead;
+			color: $color-label-quaternary;
 			font-weight: 500;
 		}
 		.greeting-name {
 			display: block;
-			font-size: 52rpx;
+			font-size: $font-title1;
 			font-weight: 700;
-			color: #1c1c1e;
-			letter-spacing: -1rpx;
-			margin-top: 4rpx;
+			color: $color-label;
+			letter-spacing: -1.5rpx;
+			margin-top: 2rpx;
 		}
 	}
 
 	.header-avatar {
-		width: 80rpx;
-		height: 80rpx;
+		width: 76rpx;
+		height: 76rpx;
 		border-radius: 50%;
-		background: linear-gradient(135deg, #007aff, #5856d6);
+		background: linear-gradient(135deg, $color-primary, $color-indigo);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
-
-		&:active { transform: scale(0.92); }
+		box-shadow: 0 4rpx 20rpx rgba(0, 122, 255, 0.25);
+		@include press-effect;
 
 		.avatar-letter {
 			color: #fff;
-			font-size: 32rpx;
+			font-size: $font-callout;
 			font-weight: 600;
 		}
 	}
 }
 
-.hero-card {
-	margin: 16rpx 32rpx 32rpx;
-	border-radius: 24rpx;
-	overflow: hidden;
-	position: relative;
+// --- Activity Card (Apple Health Rings Style) ---
+.activity-card {
+	margin: $spacing-md $spacing-xl $spacing-xl;
+	@include card;
+	padding: $spacing-xl;
+	background: linear-gradient(145deg, #1C1C1E 0%, #2C2C2E 100%);
 
-	.hero-bg {
-		position: absolute;
-		top: 0; left: 0; right: 0; bottom: 0;
-		background: linear-gradient(135deg, #007aff 0%, #5856d6 50%, #af52de 100%);
-		opacity: 0.95;
+	.activity-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: $spacing-xl;
+
+		.activity-label {
+			font-size: $font-headline;
+			font-weight: 700;
+			color: #fff;
+		}
+		.activity-date {
+			font-size: $font-footnote;
+			color: rgba(255, 255, 255, 0.45);
+			font-weight: 500;
+		}
 	}
 
-	.hero-content {
-		position: relative;
-		z-index: 1;
-		padding: 36rpx 32rpx;
+	.ring-group {
+		display: flex;
+		justify-content: space-around;
+		align-items: center;
+	}
 
-		.hero-label {
+	.ring-item {
+		text-align: center;
+
+		.ring-label {
 			display: block;
-			font-size: 26rpx;
-			color: rgba(255, 255, 255, 0.75);
-			font-weight: 600;
-			letter-spacing: 1rpx;
-			margin-bottom: 28rpx;
+			font-size: $font-caption1;
+			color: rgba(255, 255, 255, 0.55);
+			font-weight: 500;
+			margin-top: $spacing-sm;
+		}
+	}
+
+	.ring {
+		width: 140rpx;
+		height: 140rpx;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: relative;
+
+		&::before {
+			content: '';
+			position: absolute;
+			inset: 0;
+			border-radius: 50%;
+			border: 8rpx solid rgba(255, 255, 255, 0.08);
 		}
 
-		.hero-stats {
-			display: flex;
-			justify-content: space-around;
+		&::after {
+			content: '';
+			position: absolute;
+			inset: 0;
+			border-radius: 50%;
+			border: 8rpx solid transparent;
 		}
 
-		.hero-stat {
+		.ring-inner {
 			text-align: center;
-
-			.hero-ring {
-				width: 120rpx;
-				height: 120rpx;
-				border-radius: 50%;
-				background: rgba(255, 255, 255, 0.2);
-				border: 4rpx solid rgba(255, 255, 255, 0.4);
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				margin: 0 auto 12rpx;
-
-				.hero-ring-val {
-					font-size: 36rpx;
-					font-weight: 700;
-					color: #fff;
-				}
-			}
-
-			.ring-orange {
-				border-color: rgba(255, 149, 0, 0.6);
-				background: rgba(255, 149, 0, 0.15);
-			}
-
-			.ring-green {
-				border-color: rgba(52, 199, 89, 0.6);
-				background: rgba(52, 199, 89, 0.15);
-			}
-
-			.hero-stat-label {
-				font-size: 24rpx;
-				color: rgba(255, 255, 255, 0.8);
-				font-weight: 500;
-			}
 		}
+
+		.ring-value {
+			display: block;
+			font-size: 40rpx;
+			font-weight: 700;
+			color: #fff;
+			letter-spacing: -1rpx;
+			line-height: 1.1;
+		}
+		.ring-unit {
+			display: block;
+			font-size: $font-caption2;
+			color: rgba(255, 255, 255, 0.5);
+			font-weight: 500;
+		}
+	}
+
+	.ring-move {
+		&::after { border-color: $color-red; border-bottom-color: transparent; }
+	}
+	.ring-exercise {
+		&::after { border-color: $color-green; border-bottom-color: transparent; }
+	}
+	.ring-stand {
+		&::after { border-color: $color-teal; border-bottom-color: transparent; }
 	}
 }
 
+// --- Quick Actions ---
 .section {
-	padding: 0 32rpx;
-	margin-bottom: 32rpx;
+	padding: 0 $spacing-xl;
+	margin-bottom: $spacing-xl;
 
 	.section-title {
 		display: block;
-		font-size: 36rpx;
+		font-size: $font-title2;
 		font-weight: 700;
-		color: #1c1c1e;
-		margin-bottom: 20rpx;
+		color: $color-label;
+		margin-bottom: $spacing-md;
 		letter-spacing: -0.5rpx;
 	}
 }
 
-.action-grid {
+.quick-grid {
 	display: flex;
-	gap: 16rpx;
+	gap: $spacing-sm;
 
-	.action-card {
+	.quick-card {
 		flex: 1;
-		background: #fff;
-		border-radius: 20rpx;
-		padding: 24rpx 0 20rpx;
+		@include card;
+		padding: $spacing-lg $spacing-sm $spacing-md;
 		text-align: center;
-		box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
-		transition: transform 0.15s ease;
+		@include press-effect;
 
-		&:active { transform: scale(0.95); }
-
-		.action-icon-wrap {
-			width: 72rpx;
-			height: 72rpx;
-			border-radius: 20rpx;
+		.quick-icon-bg {
+			width: 80rpx;
+			height: 80rpx;
+			border-radius: $radius-lg;
 			display: flex;
 			align-items: center;
 			justify-content: center;
-			margin: 0 auto 12rpx;
+			margin: 0 auto $spacing-sm;
 		}
 
-		.action-icon { font-size: 36rpx; }
-		.action-label { display: block; font-size: 24rpx; color: #3a3a3c; font-weight: 600; }
-	}
+		.quick-icon { font-size: 36rpx; }
 
-	.action-workout .action-icon-wrap { background: rgba(0, 122, 255, 0.1); }
-	.action-diet .action-icon-wrap { background: rgba(52, 199, 89, 0.1); }
-	.action-weight .action-icon-wrap { background: rgba(255, 149, 0, 0.1); }
-	.action-mood .action-icon-wrap { background: rgba(255, 45, 85, 0.1); }
+		.quick-label {
+			display: block;
+			font-size: $font-footnote;
+			color: $color-label;
+			font-weight: 600;
+			margin-bottom: 2rpx;
+		}
+		.quick-hint {
+			display: block;
+			font-size: $font-caption2;
+			color: $color-label-quaternary;
+			font-weight: 400;
+		}
+	}
 }
 
-.data-cards {
-	.data-card {
+.bg-red { background: $color-red-light; }
+.bg-green { background: $color-green-light; }
+.bg-orange { background: $color-orange-light; }
+.bg-pink { background: $color-pink-light; }
+
+// --- Overview List ---
+.overview-list {
+	@include card;
+	padding: 0;
+	overflow: hidden;
+
+	.overview-card {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		background: #fff;
-		border-radius: 16rpx;
-		padding: 28rpx 32rpx;
-		margin-bottom: 12rpx;
-		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.03);
-		transition: transform 0.15s ease;
+		padding: $spacing-lg $spacing-xl;
+		position: relative;
+		@include press-effect;
 
-		&:active { transform: scale(0.98); }
-
-		.data-card-left {
-			display: flex;
-			align-items: center;
-			gap: 20rpx;
-
-			.data-card-icon { font-size: 40rpx; }
-			.data-card-title { display: block; font-size: 30rpx; font-weight: 600; color: #1c1c1e; }
-			.data-card-sub { display: block; font-size: 22rpx; color: #8e8e93; margin-top: 2rpx; }
+		&::after {
+			content: '';
+			position: absolute;
+			bottom: 0;
+			left: 108rpx;
+			right: $spacing-xl;
+			height: 0.5rpx;
+			background: $color-separator;
 		}
 
-		.data-card-right {
+		&:last-child::after { display: none; }
+
+		.overview-left {
 			display: flex;
 			align-items: center;
-			gap: 12rpx;
+			gap: $spacing-md;
 
-			.data-card-value { font-size: 40rpx; font-weight: 700; color: #007aff; }
-			.data-card-arrow { font-size: 36rpx; color: #c7c7cc; }
+			.overview-icon-bg {
+				width: 64rpx;
+				height: 64rpx;
+				border-radius: $radius-md;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				flex-shrink: 0;
+			}
+			.overview-icon { font-size: 30rpx; }
+
+			.overview-info {
+				.overview-title {
+					display: block;
+					font-size: $font-body;
+					font-weight: 500;
+					color: $color-label;
+				}
+				.overview-sub {
+					display: block;
+					font-size: $font-caption1;
+					color: $color-label-quaternary;
+					margin-top: 2rpx;
+				}
+			}
+		}
+
+		.overview-right {
+			.sf-chevron {
+				font-size: 36rpx;
+				color: $color-separator-opaque;
+				font-weight: 300;
+			}
 		}
 	}
 }

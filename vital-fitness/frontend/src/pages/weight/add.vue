@@ -3,18 +3,22 @@
 		<view class="nav-bar">
 			<text class="nav-back" @tap="goBack">‹ 返回</text>
 			<text class="nav-title">记录体重</text>
-			<text class="nav-placeholder"></text>
+			<view class="nav-placeholder"></view>
 		</view>
 
 		<view class="card weight-card">
 			<text class="card-label">体重</text>
 			<view class="weight-display">
-				<text class="weight-minus" @tap="adjustWeight(-0.1)">−</text>
+				<view class="weight-btn" @tap="adjustWeight(-0.1)">
+					<text class="weight-btn-text">−</text>
+				</view>
 				<view class="weight-center">
 					<input type="digit" v-model="weight" class="weight-num" placeholder="0" />
 					<text class="weight-unit">kg</text>
 				</view>
-				<text class="weight-plus" @tap="adjustWeight(0.1)">+</text>
+				<view class="weight-btn" @tap="adjustWeight(0.1)">
+					<text class="weight-btn-text">+</text>
+				</view>
 			</view>
 			<view class="quick-row">
 				<text class="quick-pill" v-for="w in [50, 55, 60, 65, 70, 75, 80]" :key="w"
@@ -30,11 +34,13 @@
 			</view>
 		</view>
 
-		<view class="card" v-if="bmi > 0">
+		<view class="card bmi-card" v-if="bmi > 0">
 			<view class="bmi-row">
-				<view>
+				<view class="bmi-left">
 					<text class="bmi-label">BMI</text>
-					<text class="bmi-status">{{ bmiStatus }}</text>
+					<view class="bmi-badge" :class="bmiClass">
+						<text>{{ bmiStatus }}</text>
+					</view>
 				</view>
 				<text class="bmi-value">{{ bmi }}</text>
 			</view>
@@ -69,6 +75,13 @@
 				if (b < 24) return '正常'
 				if (b < 28) return '超重'
 				return '肥胖'
+			},
+			bmiClass() {
+				const b = parseFloat(this.bmi)
+				if (b < 18.5) return 'bmi-thin'
+				if (b < 24) return 'bmi-normal'
+				if (b < 28) return 'bmi-over'
+				return 'bmi-obese'
 			}
 		},
 		methods: {
@@ -98,90 +111,142 @@
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/variables.scss';
+
 .page {
-	padding: 0 32rpx;
+	padding: 0 $spacing-xl;
 	padding-bottom: 160rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: $color-bg;
 }
 
 .nav-bar {
-	display: flex; align-items: center; justify-content: space-between; margin-bottom: 28rpx;
-	.nav-back { font-size: 32rpx; color: #007aff; font-weight: 500; }
-	.nav-title { font-size: 34rpx; font-weight: 600; color: #1c1c1e; }
+	@include nav-bar;
+	.nav-back { font-size: $font-callout; color: $color-primary; font-weight: 500; }
+	.nav-title { font-size: $font-headline; font-weight: 600; color: $color-label; }
 	.nav-placeholder { width: 80rpx; }
 }
 
 .card {
-	background: #fff; border-radius: 20rpx; padding: 28rpx 32rpx; margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
-	.card-label {
-		display: block; font-size: 26rpx; font-weight: 600; color: #8e8e93;
-		text-transform: uppercase; letter-spacing: 1rpx; margin-bottom: 20rpx;
-	}
+	@include card;
+	margin-bottom: $spacing-md;
+	.card-label { @include card-label; }
 }
 
+// --- Weight Display ---
 .weight-display {
-	display: flex; align-items: center; justify-content: center; padding: 24rpx 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: $spacing-lg 0;
 
-	.weight-minus, .weight-plus {
-		width: 76rpx; height: 76rpx; line-height: 72rpx; text-align: center;
-		background: #f2f2f7; border-radius: 50%; font-size: 44rpx; color: #007aff; font-weight: 300;
-		transition: all 0.15s ease;
-		&:active { background: #e5e5ea; transform: scale(0.88); }
+	.weight-btn {
+		width: 76rpx;
+		height: 76rpx;
+		border-radius: 50%;
+		background: $color-fill;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		@include press-effect;
+
+		.weight-btn-text {
+			font-size: 44rpx;
+			color: $color-primary;
+			font-weight: 300;
+			line-height: 1;
+		}
 	}
 
 	.weight-center {
-		display: flex; align-items: baseline; margin: 0 48rpx;
+		display: flex;
+		align-items: baseline;
+		margin: 0 $spacing-3xl;
+
 		.weight-num {
-			width: 220rpx; text-align: center; font-size: 88rpx; font-weight: 700;
-			color: #1c1c1e; letter-spacing: -3rpx;
+			width: 240rpx;
+			text-align: center;
+			font-size: 96rpx;
+			font-weight: 700;
+			color: $color-label;
+			letter-spacing: -3rpx;
+			font-variant-numeric: tabular-nums;
 		}
-		.weight-unit { font-size: 32rpx; color: #8e8e93; margin-left: 4rpx; }
+		.weight-unit {
+			font-size: $font-callout;
+			color: $color-label-quaternary;
+			margin-left: 4rpx;
+		}
 	}
 }
 
 .quick-row {
-	display: flex; justify-content: center; flex-wrap: wrap; gap: 12rpx; margin-top: 16rpx;
+	display: flex;
+	justify-content: center;
+	flex-wrap: wrap;
+	gap: $spacing-sm;
+	margin-top: $spacing-md;
+
 	.quick-pill {
-		padding: 12rpx 28rpx; background: #f2f2f7; border-radius: 20rpx;
-		font-size: 26rpx; color: #636366; font-weight: 500;
-		transition: all 0.2s ease;
-		&.active { background: #007aff; color: #fff; box-shadow: 0 4rpx 12rpx rgba(0, 122, 255, 0.3); }
+		padding: $spacing-sm $spacing-lg;
+		background: $color-fill;
+		border-radius: $radius-full;
+		font-size: $font-footnote;
+		color: $color-label-tertiary;
+		font-weight: 500;
+		font-variant-numeric: tabular-nums;
+		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+		&.active { background: $color-label; color: #fff; }
 		&:active { transform: scale(0.92); }
 	}
 }
 
+// --- Input ---
 .input-row {
-	display: flex; align-items: center; background: #f2f2f7; border-radius: 16rpx; padding: 22rpx;
-	transition: box-shadow 0.2s ease;
-	&:focus-within { box-shadow: 0 0 0 4rpx rgba(0, 122, 255, 0.15); }
-	.field-input { flex: 1; font-size: 30rpx; color: #1c1c1e; }
-	.input-suffix { font-size: 28rpx; color: #8e8e93; }
+	@include input-field;
+	.field-input { flex: 1; font-size: $font-body; color: $color-label; }
+	.input-suffix { font-size: $font-subhead; color: $color-label-quaternary; }
 }
 
+// --- BMI ---
 .bmi-row {
-	display: flex; justify-content: space-between; align-items: center;
-	.bmi-label { display: block; font-size: 30rpx; font-weight: 600; color: #1c1c1e; }
-	.bmi-status {
-		display: inline-block; font-size: 22rpx; color: #34c759; margin-top: 6rpx;
-		background: rgba(52, 199, 89, 0.1); padding: 4rpx 16rpx; border-radius: 8rpx;
-		font-weight: 600;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+
+	.bmi-left {
+		.bmi-label {
+			display: block;
+			font-size: $font-body;
+			font-weight: 600;
+			color: $color-label;
+			margin-bottom: $spacing-xs;
+		}
+		.bmi-badge {
+			display: inline-block;
+			font-size: $font-caption2;
+			padding: 4rpx $spacing-md;
+			border-radius: $spacing-xs;
+			font-weight: 600;
+		}
+		.bmi-thin { background: $color-primary-light; color: $color-primary; }
+		.bmi-normal { background: $color-green-light; color: $color-green; }
+		.bmi-over { background: $color-orange-light; color: $color-orange; }
+		.bmi-obese { background: $color-red-light; color: $color-red; }
 	}
-	.bmi-value { font-size: 52rpx; font-weight: 700; color: #007aff; letter-spacing: -2rpx; }
+
+	.bmi-value {
+		font-size: 56rpx;
+		font-weight: 700;
+		color: $color-primary;
+		letter-spacing: -2rpx;
+		font-variant-numeric: tabular-nums;
+	}
 }
 
 .bottom-action {
-	position: fixed; bottom: 0; left: 0; right: 0;
-	padding: 20rpx 32rpx; padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-	background: rgba(242, 242, 247, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-	.save-btn {
-		background: #007aff; color: #fff; text-align: center; padding: 28rpx 0;
-		border-radius: 16rpx; font-size: 32rpx; font-weight: 600;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
-		transition: all 0.15s ease;
-		&:active { transform: scale(0.98); opacity: 0.9; }
-		&.loading { opacity: 0.6; }
-	}
+	@include bottom-action-bar;
+	.save-btn { @include primary-button; }
 }
 </style>

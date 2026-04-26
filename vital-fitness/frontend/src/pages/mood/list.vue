@@ -7,19 +7,21 @@
 		</view>
 
 		<view class="list">
-			<view v-for="(r, i) in moodList" :key="i" class="list-item">
-				<view class="item-top">
-					<text class="item-emoji">{{ getEmoji(r.mood_score) }}</text>
-					<view class="item-meta">
-						<text class="item-mood-text">{{ getMoodText(r.mood_score) }}</text>
-						<text class="item-date">{{ formatDate(r.record_date) }}</text>
+			<view v-for="(r, i) in moodList" :key="i" class="mood-card">
+				<view class="mood-top">
+					<text class="mood-emoji">{{ getEmoji(r.mood_score) }}</text>
+					<view class="mood-meta">
+						<text class="mood-text">{{ getMoodText(r.mood_score) }}</text>
+						<text class="mood-date">{{ formatDate(r.record_date) }}</text>
 					</view>
-					<text class="item-score">{{ r.mood_score }}/10</text>
+					<view class="mood-score-badge">
+						<text class="mood-score">{{ r.mood_score }}/10</text>
+					</view>
 				</view>
-				<view v-if="r.mood_tags" class="item-tags">
-					<text v-for="tag in r.mood_tags.split(',')" :key="tag" class="tag">{{ tag }}</text>
+				<view v-if="r.mood_tags" class="mood-tags">
+					<text v-for="tag in r.mood_tags.split(',')" :key="tag" class="mood-tag">{{ tag }}</text>
 				</view>
-				<text v-if="r.description" class="item-desc">{{ r.description }}</text>
+				<text v-if="r.description" class="mood-desc">{{ r.description }}</text>
 			</view>
 		</view>
 
@@ -79,127 +81,114 @@
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/variables.scss';
+
 .page {
-	padding: 0 32rpx;
+	padding: 0 $spacing-xl;
 	padding-bottom: 40rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: $color-bg;
 }
 
 .page-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 28rpx;
+	margin-bottom: $spacing-lg;
 
 	.nav-back {
 		font-size: 48rpx;
-		color: #007aff;
+		color: $color-primary;
 		font-weight: 300;
 		line-height: 1;
+		width: 60rpx;
 	}
-
 	.page-title {
-		font-size: 34rpx;
+		font-size: $font-headline;
 		font-weight: 600;
-		color: #1c1c1e;
+		color: $color-label;
 	}
 	.header-action {
-		font-size: 30rpx;
-		color: #007aff;
+		font-size: $font-subhead;
+		color: $color-primary;
 		font-weight: 600;
+		width: 60rpx;
+		text-align: right;
 	}
 }
 
-.list-item {
-	background: #fff;
-	border-radius: 20rpx;
-	padding: 28rpx 32rpx;
-	margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
-	transition: transform 0.15s ease;
+// --- Mood Card ---
+.mood-card {
+	@include card;
+	margin-bottom: $spacing-sm;
+	@include press-effect;
 
-	&:active { transform: scale(0.98); }
-
-	.item-top {
+	.mood-top {
 		display: flex;
 		align-items: center;
 
-		.item-emoji {
-			font-size: 64rpx;
-			margin-right: 20rpx;
+		.mood-emoji {
+			font-size: 56rpx;
+			margin-right: $spacing-md;
 		}
 
-		.item-meta {
+		.mood-meta {
 			flex: 1;
 
-			.item-mood-text {
+			.mood-text {
 				display: block;
-				font-size: 32rpx;
+				font-size: $font-headline;
 				font-weight: 600;
-				color: #1c1c1e;
+				color: $color-label;
 			}
-			.item-date {
+			.mood-date {
 				display: block;
-				font-size: 24rpx;
-				color: #8e8e93;
-				margin-top: 4rpx;
+				font-size: $font-caption1;
+				color: $color-label-quaternary;
+				margin-top: 2rpx;
 			}
 		}
 
-		.item-score {
-			font-size: 28rpx;
-			font-weight: 700;
-			color: #8e8e93;
-			background: #f2f2f7;
-			padding: 8rpx 16rpx;
-			border-radius: 12rpx;
+		.mood-score-badge {
+			background: $color-fill;
+			padding: $spacing-xs $spacing-md;
+			border-radius: $spacing-xs;
+
+			.mood-score {
+				font-size: $font-subhead;
+				font-weight: 700;
+				color: $color-label-quaternary;
+				font-variant-numeric: tabular-nums;
+			}
 		}
 	}
 
-	.item-tags {
+	.mood-tags {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 12rpx;
-		margin-top: 20rpx;
+		gap: $spacing-xs;
+		margin-top: $spacing-md;
 
-		.tag {
-			padding: 8rpx 20rpx;
-			background: rgba(0, 122, 255, 0.08);
-			color: #007aff;
-			border-radius: 20rpx;
-			font-size: 24rpx;
+		.mood-tag {
+			padding: 6rpx $spacing-md;
+			background: $color-primary-light;
+			color: $color-primary;
+			border-radius: $radius-full;
+			font-size: $font-caption1;
 			font-weight: 500;
 		}
 	}
 
-	.item-desc {
+	.mood-desc {
 		display: block;
-		font-size: 28rpx;
-		color: #636366;
-		margin-top: 16rpx;
+		font-size: $font-subhead;
+		color: $color-label-tertiary;
+		margin-top: $spacing-md;
 		line-height: 1.6;
 	}
 }
 
 .empty {
-	text-align: center;
-	padding: 120rpx 0;
-
-	.empty-icon { display: block; font-size: 96rpx; margin-bottom: 24rpx; }
-	.empty-title { display: block; font-size: 34rpx; font-weight: 600; color: #1c1c1e; margin-bottom: 8rpx; }
-	.empty-desc { display: block; font-size: 26rpx; color: #8e8e93; margin-bottom: 40rpx; }
-	.empty-btn {
-		display: inline-block;
-		padding: 20rpx 56rpx;
-		background: #007aff;
-		color: #fff;
-		border-radius: 16rpx;
-		font-size: 30rpx;
-		font-weight: 600;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
-
-		&:active { transform: scale(0.95); opacity: 0.9; }
-	}
+	@include empty-state;
 }
 </style>

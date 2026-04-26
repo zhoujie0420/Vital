@@ -37,7 +37,7 @@ func SetupRouter(mode string, wxCfg config.WeChat) *gin.Engine {
 	authHandler := handler.NewAuthHandler(wxCfg)
 	workoutHandler := handler.NewWorkoutHandler()
 	weightHandler := handler.NewWeightHandler()
-	moodHandler := handler.NewMoodHandler()
+	// moodHandler := handler.NewMoodHandler() // 心情模块暂时关闭
 	dietHandler := handler.NewDietHandler()
 	statsHandler := handler.NewStatsHandler()
 
@@ -83,18 +83,19 @@ func SetupRouter(mode string, wxCfg config.WeChat) *gin.Engine {
 				exercises.POST("/", workoutHandler.CreateExercise)
 			}
 
-			// 心情记录接口
-			moods := authorized.Group("/moods")
-			{
-				moods.POST("/", moodHandler.Create)
-				moods.GET("/", moodHandler.GetList)
-			}
+			// 心情记录接口（暂时关闭）
+			// moods := authorized.Group("/moods")
+			// {
+			// 	moods.POST("/", moodHandler.Create)
+			// 	moods.GET("/", moodHandler.GetList)
+			// }
 
 			// 体重记录接口
 			weights := authorized.Group("/weights")
 			{
 				weights.POST("/", weightHandler.Create)
 				weights.GET("/", weightHandler.GetList)
+				weights.DELETE("/:id", weightHandler.Delete)
 			}
 
 			// 饮食记录接口
@@ -102,6 +103,7 @@ func SetupRouter(mode string, wxCfg config.WeChat) *gin.Engine {
 			{
 				diets.POST("/", dietHandler.CreateRecord)
 				diets.GET("/", dietHandler.GetRecords)
+				diets.PUT("/:id", dietHandler.UpdateRecord)
 				diets.DELETE("/:id", dietHandler.DeleteRecord)
 			}
 

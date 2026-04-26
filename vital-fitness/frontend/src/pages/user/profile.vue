@@ -3,7 +3,7 @@
 		<view class="nav-bar">
 			<text class="nav-back" @tap="goBack">‹ 返回</text>
 			<text class="nav-title">个人资料</text>
-			<text class="nav-placeholder"></text>
+			<view class="nav-placeholder"></view>
 		</view>
 
 		<view class="card">
@@ -86,7 +86,6 @@
 						height: parseFloat(this.form.height) || 0,
 						weight: parseFloat(this.form.weight) || 0
 					})
-					// 同步更新 store 里的用户信息
 					const userStore = useUserStore()
 					const updated = { ...userStore.userInfo, nickname: this.form.nickname, gender: this.form.gender }
 					userStore.userInfo = updated
@@ -100,105 +99,38 @@
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/variables.scss';
+
 .page {
-	padding: 0 32rpx;
+	padding: 0 $spacing-xl;
 	padding-bottom: 160rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: $color-bg;
 }
 
 .nav-bar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 28rpx;
-
-	.nav-back { font-size: 32rpx; color: #007aff; font-weight: 500; }
-	.nav-title { font-size: 34rpx; font-weight: 600; color: #1c1c1e; }
+	@include nav-bar;
+	.nav-back { font-size: $font-callout; color: $color-primary; font-weight: 500; }
+	.nav-title { font-size: $font-headline; font-weight: 600; color: $color-label; }
 	.nav-placeholder { width: 80rpx; }
 }
 
 .card {
-	background: #fff;
-	border-radius: 20rpx;
-	padding: 28rpx 32rpx;
-	margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
-
-	.card-label {
-		display: block;
-		font-size: 26rpx;
-		font-weight: 600;
-		color: #8e8e93;
-		text-transform: uppercase;
-		letter-spacing: 1rpx;
-		margin-bottom: 16rpx;
-	}
+	@include card;
+	margin-bottom: $spacing-md;
+	.card-label { @include card-label; }
 }
 
 .input-row {
-	display: flex;
-	align-items: center;
-	background: #f2f2f7;
-	border-radius: 16rpx;
-	padding: 22rpx;
-	transition: box-shadow 0.2s ease;
-
-	&:focus-within { box-shadow: 0 0 0 4rpx rgba(0, 122, 255, 0.15); }
-
-	.field-input { flex: 1; font-size: 30rpx; color: #1c1c1e; }
-	.input-suffix { font-size: 28rpx; color: #8e8e93; }
+	@include input-field;
+	.field-input { flex: 1; font-size: $font-body; color: $color-label; }
+	.input-suffix { font-size: $font-subhead; color: $color-label-quaternary; }
 }
 
-.segment {
-	display: flex;
-	background: #f2f2f7;
-	border-radius: 16rpx;
-	padding: 4rpx;
-
-	.segment-item {
-		flex: 1;
-		text-align: center;
-		padding: 16rpx 0;
-		font-size: 28rpx;
-		font-weight: 500;
-		color: #636366;
-		border-radius: 14rpx;
-		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-
-		&.active {
-			background: #fff;
-			color: #1c1c1e;
-			font-weight: 600;
-			box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.1);
-		}
-	}
-}
+.segment { @include segment-control; }
 
 .bottom-action {
-	position: fixed;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	padding: 20rpx 32rpx;
-	padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-	background: rgba(242, 242, 247, 0.85);
-	backdrop-filter: blur(20px);
-	-webkit-backdrop-filter: blur(20px);
-
-	.save-btn {
-		background: #007aff;
-		color: #fff;
-		text-align: center;
-		padding: 28rpx 0;
-		border-radius: 16rpx;
-		font-size: 32rpx;
-		font-weight: 600;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
-		transition: all 0.15s ease;
-
-		&:active { transform: scale(0.98); opacity: 0.9; }
-		&.loading { opacity: 0.6; }
-	}
+	@include bottom-action-bar;
+	.save-btn { @include primary-button; }
 }
 </style>

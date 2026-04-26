@@ -5,7 +5,7 @@
 			<text class="header-action" @tap="addDiet">+ 添加</text>
 		</view>
 
-		<!-- 按天分组的卡片 -->
+		<!-- 按天分组 -->
 		<view class="day-list">
 			<view v-for="(day, i) in groupedDays" :key="i" class="day-card" @tap="goToDetail(day.date)">
 				<view class="day-header">
@@ -13,9 +13,9 @@
 						<text class="day-label">{{ day.label }}</text>
 						<text class="day-date">{{ day.dateStr }}</text>
 					</view>
-					<view class="day-summary">
-						<text class="day-cal">{{ day.totalCal }}千卡</text>
-						<text class="day-arrow">›</text>
+					<view class="day-meta">
+						<text class="day-cal">{{ day.totalCal }} 千卡</text>
+						<text class="sf-chevron">›</text>
 					</view>
 				</view>
 				<view class="day-meals">
@@ -41,7 +41,7 @@
 	const mealNames = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐' }
 
 	export default {
-		data() { return { dietList: [] } },
+		data() { return { dietList: [], page: 1, pageSize: 20, total: 0, loading: false } },
 		computed: {
 			topPadding() {
 				const app = getApp()
@@ -77,13 +77,34 @@
 				})
 			}
 		},
-		onShow() { this.load() },
+		onShow() { this.refresh() },
+		onPullDownRefresh() { this.refresh().then(() => uni.stopPullDownRefresh()) },
+		onReachBottom() { this.loadMore() },
 		methods: {
+			async refresh() {
+				this.page = 1
+				this.dietList = []
+				await this.load()
+			},
+			async loadMore() {
+				if (this.loading || this.dietList.length >= this.total) return
+				this.page++
+				await this.load()
+			},
 			async load() {
+				if (this.loading) return
+				this.loading = true
 				try {
-					const res = await getDietRecords({ page: 1, page_size: 200 })
-					this.dietList = res.data || []
+					const res = await getDietRecords({ page: this.page, page_size: this.pageSize })
+					const list = res.data || []
+					if (this.page === 1) {
+						this.dietList = list
+					} else {
+						this.dietList = [...this.dietList, ...list]
+					}
+					this.total = res.total || 0
 				} catch (e) {}
+				this.loading = false
 			},
 			addDiet() { uni.navigateTo({ url: '/pages/diet/add' }) },
 			goToDetail(date) {
@@ -94,90 +115,91 @@
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/variables.scss';
+
 .page {
-	padding: 0 32rpx;
+	padding: 0 $spacing-xl;
 	padding-bottom: 40rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: $color-bg;
 }
 
 .page-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: baseline;
-	margin-bottom: 28rpx;
+	margin-bottom: $spacing-lg;
 
-	.page-title { font-size: 52rpx; font-weight: 700; color: #1c1c1e; letter-spacing: -1rpx; }
-	.header-action { font-size: 30rpx; color: #007aff; font-weight: 600; }
+	.page-title { @include page-title; }
+	.header-action { font-size: $font-subhead; color: $color-primary; font-weight: 600; }
 }
 
+// --- Day Card ---
 .day-card {
-	background: #fff;
-	border-radius: 20rpx;
-	padding: 28rpx 32rpx;
-	margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
-	transition: transform 0.15s ease;
-
-	&:active { transform: scale(0.98); }
+	@include card;
+	margin-bottom: $spacing-sm;
+	@include press-effect;
 
 	.day-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 16rpx;
+		margin-bottom: $spacing-md;
 
 		.day-date-wrap {
-			.day-label { display: block; font-size: 32rpx; font-weight: 600; color: #1c1c1e; }
-			.day-date { display: block; font-size: 22rpx; color: #8e8e93; margin-top: 4rpx; }
+			.day-label {
+				display: block;
+				font-size: $font-headline;
+				font-weight: 600;
+				color: $color-label;
+			}
+			.day-date {
+				display: block;
+				font-size: $font-caption2;
+				color: $color-label-quaternary;
+				margin-top: 4rpx;
+			}
 		}
-		.day-summary {
+		.day-meta {
 			display: flex;
 			align-items: center;
-			gap: 8rpx;
+			gap: $spacing-xs;
 
-			.day-cal { font-size: 30rpx; font-weight: 700; color: #ff9500; }
-			.day-arrow { font-size: 36rpx; color: #c7c7cc; font-weight: 300; }
+			.day-cal {
+				font-size: $font-subhead;
+				font-weight: 700;
+				color: $color-orange;
+				font-variant-numeric: tabular-nums;
+			}
+			.sf-chevron {
+				font-size: 36rpx;
+				color: $color-separator-opaque;
+				font-weight: 300;
+			}
 		}
 	}
 
 	.day-meals {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 10rpx;
+		gap: $spacing-xs;
 
 		.meal-tag {
-			padding: 8rpx 20rpx;
-			border-radius: 12rpx;
-			font-size: 24rpx;
+			padding: 6rpx $spacing-md;
+			border-radius: $spacing-xs;
+			font-size: $font-caption1;
 			font-weight: 500;
-			background: #f2f2f7;
-			color: #8e8e93;
+			background: $color-fill;
+			color: $color-label-quaternary;
 		}
-		.meal-breakfast { background: rgba(255, 149, 0, 0.1); color: #ff9500; }
-		.meal-lunch { background: rgba(52, 199, 89, 0.1); color: #34c759; }
-		.meal-dinner { background: rgba(0, 122, 255, 0.1); color: #007aff; }
-		.meal-snack { background: rgba(255, 45, 85, 0.1); color: #ff2d55; }
+		.meal-breakfast { background: $color-orange-light; color: $color-orange; }
+		.meal-lunch { background: $color-green-light; color: $color-green; }
+		.meal-dinner { background: $color-primary-light; color: $color-primary; }
+		.meal-snack { background: $color-pink-light; color: $color-pink; }
 	}
 }
 
 .empty {
-	text-align: center;
-	padding: 120rpx 0;
-
-	.empty-icon { display: block; font-size: 96rpx; margin-bottom: 24rpx; }
-	.empty-title { display: block; font-size: 34rpx; font-weight: 600; color: #1c1c1e; margin-bottom: 8rpx; }
-	.empty-desc { display: block; font-size: 26rpx; color: #8e8e93; margin-bottom: 40rpx; }
-	.empty-btn {
-		display: inline-block;
-		padding: 20rpx 56rpx;
-		background: #007aff;
-		color: #fff;
-		border-radius: 16rpx;
-		font-size: 30rpx;
-		font-weight: 600;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
-		&:active { transform: scale(0.95); opacity: 0.9; }
-	}
+	@include empty-state;
 }
 </style>

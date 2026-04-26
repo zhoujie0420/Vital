@@ -4,45 +4,46 @@
 			<text class="page-title">我的</text>
 		</view>
 
-		<view class="user-card" @tap="goTo('/pages/user/profile')">
-			<view class="avatar">
+		<!-- 用户卡片 -->
+		<view class="profile-card" @tap="goTo('/pages/user/profile')">
+			<view class="profile-avatar">
 				<text class="avatar-text">{{ (userStore.userInfo?.nickname || '用')[0] }}</text>
 			</view>
-			<view class="user-info">
-				<text class="user-name">{{ userStore.userInfo?.nickname || '微信用户' }}</text>
-				<text class="user-sub">查看和编辑个人资料</text>
+			<view class="profile-info">
+				<text class="profile-name">{{ userStore.userInfo?.nickname || '微信用户' }}</text>
+				<text class="profile-sub">查看和编辑个人资料</text>
 			</view>
-			<text class="arrow">›</text>
+			<text class="sf-chevron">›</text>
 		</view>
 
-		<view class="menu-group">
-			<view class="menu-item" @tap="goTo('/pages/user/profile')">
+		<!-- 功能菜单 -->
+		<view class="menu-card">
+			<view class="menu-row" @tap="goTo('/pages/user/profile')">
 				<view class="menu-left">
-					<view class="menu-icon icon-blue"><text>👤</text></view>
+					<view class="menu-icon bg-blue"><text>👤</text></view>
 					<text class="menu-text">个人资料</text>
 				</view>
-				<text class="arrow">›</text>
+				<text class="sf-chevron">›</text>
 			</view>
-			<view class="menu-item" @tap="goTo('/pages/statistics/index')">
+			<view class="menu-row" @tap="goTo('/pages/statistics/index')">
 				<view class="menu-left">
-					<view class="menu-icon icon-green"><text>📊</text></view>
+					<view class="menu-icon bg-green"><text>📊</text></view>
 					<text class="menu-text">数据统计</text>
 				</view>
-				<text class="arrow">›</text>
+				<text class="sf-chevron">›</text>
 			</view>
-			<view class="menu-item last" @tap="goTo('/pages/user/settings')">
+			<view class="menu-row last" @tap="goTo('/pages/user/settings')">
 				<view class="menu-left">
-					<view class="menu-icon icon-gray"><text>⚙️</text></view>
+					<view class="menu-icon bg-gray"><text>⚙️</text></view>
 					<text class="menu-text">设置</text>
 				</view>
-				<text class="arrow">›</text>
+				<text class="sf-chevron">›</text>
 			</view>
 		</view>
 
-		<view class="logout-wrap">
-			<view class="logout-btn" @tap="logout">
-				<text>退出登录</text>
-			</view>
+		<!-- 退出登录 -->
+		<view class="logout-card" @tap="logout">
+			<text class="logout-text">退出登录</text>
 		</view>
 	</view>
 </template>
@@ -82,147 +83,147 @@
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/variables.scss';
+
 .page {
-	padding: 0 32rpx;
+	padding: 0 $spacing-xl;
 	padding-bottom: 40rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: $color-bg;
 }
 
 .page-header {
-	margin-bottom: 28rpx;
+	margin-bottom: $spacing-lg;
 
 	.page-title {
-		font-size: 52rpx;
-		font-weight: 700;
-		color: #1c1c1e;
-		letter-spacing: -1rpx;
+		@include page-title;
 	}
 }
 
-.user-card {
+// --- Profile Card ---
+.profile-card {
 	display: flex;
 	align-items: center;
-	background: #fff;
-	border-radius: 20rpx;
-	padding: 32rpx;
-	margin-bottom: 24rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
-	transition: transform 0.15s ease;
+	@include card;
+	padding: $spacing-xl;
+	margin-bottom: $spacing-lg;
+	@include press-effect;
 
-	&:active { transform: scale(0.98); }
-
-	.avatar {
-		width: 100rpx;
-		height: 100rpx;
+	.profile-avatar {
+		width: 108rpx;
+		height: 108rpx;
 		border-radius: 50%;
-		background: linear-gradient(135deg, #007aff, #5856d6);
+		background: linear-gradient(135deg, $color-primary, $color-indigo);
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		margin-right: 24rpx;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
+		margin-right: $spacing-lg;
+		box-shadow: 0 4rpx 20rpx rgba(0, 122, 255, 0.25);
+		flex-shrink: 0;
 
 		.avatar-text {
 			color: #fff;
-			font-size: 40rpx;
+			font-size: 44rpx;
 			font-weight: 600;
 		}
 	}
 
-	.user-info {
+	.profile-info {
 		flex: 1;
 
-		.user-name {
+		.profile-name {
 			display: block;
-			font-size: 36rpx;
+			font-size: $font-title3;
 			font-weight: 600;
-			color: #1c1c1e;
+			color: $color-label;
 		}
-		.user-sub {
+		.profile-sub {
 			display: block;
-			font-size: 24rpx;
-			color: #8e8e93;
+			font-size: $font-caption1;
+			color: $color-label-quaternary;
 			margin-top: 4rpx;
 		}
 	}
 
-	.arrow {
-		font-size: 40rpx;
-		color: #c7c7cc;
+	.sf-chevron {
+		font-size: 44rpx;
+		color: $color-separator-opaque;
 		font-weight: 300;
 	}
 }
 
-.menu-group {
-	background: #fff;
-	border-radius: 20rpx;
-	margin-bottom: 24rpx;
+// --- Menu Card ---
+.menu-card {
+	@include card;
+	padding: 0;
 	overflow: hidden;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+	margin-bottom: $spacing-xl;
 
-	.menu-item {
+	.menu-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 24rpx 32rpx;
-		border-bottom: 1rpx solid #f2f2f7;
-		transition: background 0.15s ease;
+		padding: $spacing-lg $spacing-xl;
+		position: relative;
+		@include press-effect;
 
-		&:active { background: #f8f8f8; }
-		&.last { border-bottom: none; }
+		&::after {
+			content: '';
+			position: absolute;
+			bottom: 0;
+			left: 100rpx;
+			right: $spacing-xl;
+			height: 0.5rpx;
+			background: $color-separator;
+		}
+
+		&.last::after { display: none; }
 
 		.menu-left {
 			display: flex;
 			align-items: center;
-			gap: 20rpx;
+			gap: $spacing-md;
 
 			.menu-icon {
-				width: 56rpx;
-				height: 56rpx;
-				border-radius: 14rpx;
+				width: 60rpx;
+				height: 60rpx;
+				border-radius: $radius-sm;
 				display: flex;
 				align-items: center;
 				justify-content: center;
 				font-size: 28rpx;
+				flex-shrink: 0;
 			}
-			.icon-blue { background: rgba(0, 122, 255, 0.1); }
-			.icon-green { background: rgba(52, 199, 89, 0.1); }
-			.icon-gray { background: rgba(142, 142, 147, 0.1); }
+			.bg-blue { background: $color-primary-light; }
+			.bg-green { background: $color-green-light; }
+			.bg-gray { background: $color-fill-secondary; }
 
 			.menu-text {
-				font-size: 30rpx;
-				color: #1c1c1e;
-				font-weight: 500;
+				font-size: $font-body;
+				color: $color-label;
+				font-weight: 400;
 			}
 		}
 
-		.arrow {
+		.sf-chevron {
 			font-size: 36rpx;
-			color: #c7c7cc;
+			color: $color-separator-opaque;
 			font-weight: 300;
 		}
 	}
 }
 
-.logout-wrap {
-	padding: 0 32rpx;
+// --- Logout ---
+.logout-card {
+	@include card;
+	text-align: center;
+	padding: $spacing-lg;
+	@include press-effect;
 
-	.logout-btn {
-		background: #fff;
-		border-radius: 16rpx;
-		padding: 28rpx 0;
-		text-align: center;
-		box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
-		transition: transform 0.15s ease;
-
-		&:active { transform: scale(0.98); }
-
-		text {
-			font-size: 30rpx;
-			color: #ff3b30;
-			font-weight: 500;
-		}
+	.logout-text {
+		font-size: $font-body;
+		color: $color-red;
+		font-weight: 400;
 	}
 }
 </style>

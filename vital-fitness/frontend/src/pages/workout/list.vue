@@ -6,7 +6,7 @@
 		</view>
 
 		<!-- 分类筛选 -->
-		<scroll-view scroll-x class="filter-scroll">
+		<scroll-view scroll-x class="filter-scroll" :show-scrollbar="false">
 			<view class="filter-bar">
 				<text v-for="(tab, index) in tabList" :key="index" class="filter-pill"
 					:class="{ active: currentTab === index }" @tap="changeTab(index)">
@@ -15,7 +15,7 @@
 			</view>
 		</scroll-view>
 
-		<!-- 按天分组的卡片 -->
+		<!-- 按天分组 -->
 		<view class="day-list">
 			<view v-for="(day, i) in groupedDays" :key="i" class="day-card" @tap="goToDetail(day.date)">
 				<view class="day-header">
@@ -23,12 +23,12 @@
 						<text class="day-label">{{ day.label }}</text>
 						<text class="day-date">{{ day.dateStr }}</text>
 					</view>
-					<view class="day-summary">
-						<text class="day-count">{{ day.workouts.length }}个动作</text>
-						<text class="day-arrow">›</text>
+					<view class="day-meta">
+						<text class="day-count">{{ day.workouts.length }} 个动作</text>
+						<text class="sf-chevron">›</text>
 					</view>
 				</view>
-				<view class="day-exercises">
+				<view class="day-tags">
 					<text v-for="(w, j) in day.workouts.slice(0, 4)" :key="j" class="exercise-tag">
 						{{ w.exercise.name }}
 					</text>
@@ -60,10 +60,16 @@
 					{ name: '腿部' }, { name: '肩部' }, { name: '手臂' }
 				],
 				currentTab: 0,
-				workoutList: []
+				workoutList: [],
+				page: 1,
+				pageSize: 20,
+				total: 0,
+				loading: false
 			}
 		},
-		onShow() { this.loadWorkouts() },
+		onShow() { this.refresh() },
+		onPullDownRefresh() { this.refresh().then(() => uni.stopPullDownRefresh()) },
+		onReachBottom() { this.loadMore() },
 		computed: {
 			topPadding() {
 				const app = getApp()
@@ -97,17 +103,36 @@
 		methods: {
 			changeTab(index) {
 				this.currentTab = index
-				this.loadWorkouts()
+				this.refresh()
+			},
+			async refresh() {
+				this.page = 1
+				this.workoutList = []
+				await this.loadWorkouts()
+			},
+			async loadMore() {
+				if (this.loading || this.workoutList.length >= this.total) return
+				this.page++
+				await this.loadWorkouts()
 			},
 			async loadWorkouts() {
+				if (this.loading) return
+				this.loading = true
 				try {
 					const category = this.tabList[this.currentTab].name
 					const res = await getWorkouts({
 						category: category === '全部' ? '' : category,
-						page: 1, page_size: 200
+						page: this.page, page_size: this.pageSize
 					})
-					this.workoutList = res.data || []
+					const list = res.data || []
+					if (this.page === 1) {
+						this.workoutList = list
+					} else {
+						this.workoutList = [...this.workoutList, ...list]
+					}
+					this.total = res.total || 0
 				} catch (e) {}
+				this.loading = false
 			},
 			addWorkout() { uni.navigateTo({ url: '/pages/workout/add' }) },
 			goToDetail(date) {
@@ -118,138 +143,128 @@
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/variables.scss';
+
 .page {
-	padding: 0 32rpx;
+	padding: 0 $spacing-xl;
 	padding-bottom: 40rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: $color-bg;
 }
 
 .page-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: baseline;
-	margin-bottom: 24rpx;
+	margin-bottom: $spacing-lg;
 
-	.page-title { font-size: 52rpx; font-weight: 700; color: #1c1c1e; letter-spacing: -1rpx; }
-	.header-action { font-size: 30rpx; color: #007aff; font-weight: 600; }
+	.page-title { @include page-title; }
+	.header-action {
+		font-size: $font-subhead;
+		color: $color-primary;
+		font-weight: 600;
+	}
 }
 
+// --- Filter ---
 .filter-scroll {
 	white-space: nowrap;
-	margin-bottom: 20rpx;
+	margin: 0 -#{$spacing-xl};
+	padding: 0 $spacing-xl;
+	margin-bottom: $spacing-lg;
 
 	.filter-bar {
 		display: inline-flex;
-		gap: 12rpx;
+		gap: $spacing-sm;
 
 		.filter-pill {
 			display: inline-block;
-			padding: 12rpx 28rpx;
-			border-radius: 24rpx;
-			background: rgba(0, 0, 0, 0.04);
-			font-size: 26rpx;
-			color: #636366;
+			padding: $spacing-sm $spacing-lg;
+			border-radius: $radius-full;
+			background: $color-fill;
+			font-size: $font-footnote;
+			color: $color-label-tertiary;
 			font-weight: 500;
+			transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
 			&.active {
-				background: #007aff;
+				background: $color-label;
 				color: #fff;
-				box-shadow: 0 4rpx 12rpx rgba(0, 122, 255, 0.3);
 			}
-			&:active { transform: scale(0.95); }
+			&:active { transform: scale(0.94); }
 		}
 	}
 }
 
+// --- Day Card ---
 .day-card {
-	background: #fff;
-	border-radius: 20rpx;
-	padding: 28rpx 32rpx;
-	margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
-	transition: transform 0.15s ease;
-
-	&:active { transform: scale(0.98); }
+	@include card;
+	margin-bottom: $spacing-sm;
+	@include press-effect;
 
 	.day-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 16rpx;
+		margin-bottom: $spacing-md;
 
 		.day-date-wrap {
 			.day-label {
 				display: block;
-				font-size: 32rpx;
+				font-size: $font-headline;
 				font-weight: 600;
-				color: #1c1c1e;
+				color: $color-label;
 			}
 			.day-date {
 				display: block;
-				font-size: 22rpx;
-				color: #8e8e93;
+				font-size: $font-caption2;
+				color: $color-label-quaternary;
 				margin-top: 4rpx;
 			}
 		}
 
-		.day-summary {
+		.day-meta {
 			display: flex;
 			align-items: center;
-			gap: 8rpx;
+			gap: $spacing-xs;
 
 			.day-count {
-				font-size: 26rpx;
-				color: #8e8e93;
+				font-size: $font-footnote;
+				color: $color-label-quaternary;
 				font-weight: 500;
 			}
-			.day-arrow {
+			.sf-chevron {
 				font-size: 36rpx;
-				color: #c7c7cc;
+				color: $color-separator-opaque;
 				font-weight: 300;
 			}
 		}
 	}
 
-	.day-exercises {
+	.day-tags {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 10rpx;
+		gap: $spacing-xs;
 
 		.exercise-tag {
-			padding: 8rpx 20rpx;
-			background: rgba(0, 122, 255, 0.08);
-			color: #007aff;
-			border-radius: 12rpx;
-			font-size: 24rpx;
+			padding: 6rpx $spacing-md;
+			background: $color-primary-light;
+			color: $color-primary;
+			border-radius: $spacing-xs;
+			font-size: $font-caption1;
 			font-weight: 500;
 		}
 		.exercise-more {
-			padding: 8rpx 16rpx;
-			color: #8e8e93;
-			font-size: 24rpx;
+			padding: 6rpx $spacing-sm;
+			color: $color-label-quaternary;
+			font-size: $font-caption1;
 			font-weight: 500;
 		}
 	}
 }
 
+// --- Empty ---
 .empty {
-	text-align: center;
-	padding: 120rpx 0;
-
-	.empty-icon { display: block; font-size: 96rpx; margin-bottom: 24rpx; }
-	.empty-title { display: block; font-size: 34rpx; font-weight: 600; color: #1c1c1e; margin-bottom: 8rpx; }
-	.empty-desc { display: block; font-size: 26rpx; color: #8e8e93; margin-bottom: 40rpx; }
-	.empty-btn {
-		display: inline-block;
-		padding: 20rpx 56rpx;
-		background: #007aff;
-		color: #fff;
-		border-radius: 16rpx;
-		font-size: 30rpx;
-		font-weight: 600;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
-		&:active { transform: scale(0.95); opacity: 0.9; }
-	}
+	@include empty-state;
 }
 </style>

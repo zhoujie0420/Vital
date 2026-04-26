@@ -38,9 +38,16 @@ func main() {
 	sqlDB, _ := db.DB()
 	defer sqlDB.Close()
 
-	// 自动迁移（添加新字段和表）
-	db.Exec("ALTER TABLE users ADD COLUMN IF NOT EXISTS open_id VARCHAR(100) UNIQUE AFTER deleted_at")
-	db.AutoMigrate(&model.Food{})
+	// 自动迁移数据库表
+	db.AutoMigrate(
+		&model.User{},
+		&model.Exercise{},
+		&model.Workout{},
+		&model.WeightRecord{},
+		&model.MoodRecord{},
+		&model.DietRecord{},
+		&model.Food{},
+	)
 
 	// 初始化JWT
 	middleware.InitJWT(cfg.JWT)

@@ -34,21 +34,25 @@
 				<view class="meal-badge" :class="'badge-' + r.meal_type">
 					<text>{{ getMealName(r.meal_type) }}</text>
 				</view>
-				<text class="meal-cal">{{ r.total_calories }}kcal</text>
+				<text class="meal-cal">{{ r.total_calories }} kcal</text>
 			</view>
 			<view class="meal-macros">
-				<text class="meal-macro">蛋白{{ r.protein }}g</text>
-				<text class="meal-macro">碳水{{ r.carbs }}g</text>
-				<text class="meal-macro">脂肪{{ r.fat }}g</text>
+				<text class="meal-macro">蛋白 {{ r.protein }}g</text>
+				<text class="meal-sep">·</text>
+				<text class="meal-macro">碳水 {{ r.carbs }}g</text>
+				<text class="meal-sep">·</text>
+				<text class="meal-macro">脂肪 {{ r.fat }}g</text>
 			</view>
 			<text v-if="r.notes" class="meal-notes">{{ r.notes }}</text>
 			<view class="meal-actions">
-				<text class="action-btn delete" @tap="confirmDelete(r)">删除</text>
+				<text class="action-link action-delete" @tap="confirmDelete(r)">删除</text>
 			</view>
 		</view>
 
 		<view v-if="records.length === 0" class="empty">
-			<text class="empty-text">当天暂无饮食记录</text>
+			<text class="empty-icon">🍽️</text>
+			<text class="empty-title">当天暂无饮食记录</text>
+			<text class="empty-desc">点击右上角添加记录</text>
 		</view>
 	</view>
 </template>
@@ -117,118 +121,145 @@
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/variables.scss';
+
 .page {
-	padding: 0 32rpx;
+	padding: 0 $spacing-xl;
 	padding-bottom: 40rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: $color-bg;
 }
 
 .nav-bar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 28rpx;
-
-	.nav-back { font-size: 32rpx; color: #007aff; font-weight: 500; }
-	.nav-title { font-size: 34rpx; font-weight: 600; color: #1c1c1e; }
-	.nav-action { font-size: 30rpx; color: #007aff; font-weight: 600; }
+	@include nav-bar;
+	.nav-back { font-size: $font-callout; color: $color-primary; font-weight: 500; }
+	.nav-title { font-size: $font-headline; font-weight: 600; color: $color-label; }
+	.nav-action { font-size: $font-subhead; color: $color-primary; font-weight: 600; }
 }
 
+// --- Summary Card ---
 .summary-card {
-	background: linear-gradient(135deg, #ff9500, #ff6b00);
-	border-radius: 20rpx;
-	padding: 32rpx;
-	margin-bottom: 20rpx;
+	border-radius: $radius-xl;
+	padding: $spacing-xl;
+	margin-bottom: $spacing-md;
+	background: linear-gradient(145deg, #1C1C1E 0%, #2C2C2E 100%);
 
 	.summary-main {
 		display: flex;
 		align-items: baseline;
-		margin-bottom: 16rpx;
+		margin-bottom: $spacing-md;
 
-		.summary-val { font-size: 56rpx; font-weight: 700; color: #fff; letter-spacing: -2rpx; }
-		.summary-unit { font-size: 26rpx; color: rgba(255,255,255,0.8); margin-left: 8rpx; }
+		.summary-val {
+			font-size: 60rpx;
+			font-weight: 700;
+			color: #fff;
+			letter-spacing: -2rpx;
+			font-variant-numeric: tabular-nums;
+		}
+		.summary-unit {
+			font-size: $font-footnote;
+			color: rgba(255, 255, 255, 0.5);
+			margin-left: $spacing-xs;
+		}
 	}
 
 	.summary-macros {
 		display: flex;
-		gap: 24rpx;
+		gap: $spacing-lg;
 
 		.macro {
 			display: flex;
 			align-items: center;
-			gap: 8rpx;
+			gap: $spacing-xs;
 
-			.macro-dot { width: 12rpx; height: 12rpx; border-radius: 50%; }
-			.dot-blue { background: rgba(255,255,255,0.9); }
-			.dot-orange { background: rgba(255,255,255,0.7); }
-			.dot-yellow { background: rgba(255,255,255,0.5); }
-			.macro-text { font-size: 24rpx; color: rgba(255,255,255,0.85); font-weight: 500; }
+			.macro-dot {
+				width: 12rpx;
+				height: 12rpx;
+				border-radius: 50%;
+			}
+			.dot-blue { background: $color-teal; }
+			.dot-orange { background: $color-orange; }
+			.dot-yellow { background: $color-yellow; }
+			.macro-text {
+				font-size: $font-caption1;
+				color: rgba(255, 255, 255, 0.65);
+				font-weight: 500;
+			}
 		}
 	}
 }
 
+// --- Meal Card ---
 .meal-card {
-	background: #fff;
-	border-radius: 20rpx;
-	padding: 28rpx 32rpx;
-	margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+	@include card;
+	margin-bottom: $spacing-sm;
 
 	.meal-header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 16rpx;
+		margin-bottom: $spacing-md;
 
 		.meal-badge {
-			padding: 6rpx 20rpx;
-			border-radius: 12rpx;
-			font-size: 24rpx;
+			padding: 6rpx $spacing-md;
+			border-radius: $spacing-xs;
+			font-size: $font-caption1;
 			font-weight: 600;
 		}
-		.badge-breakfast { background: rgba(255, 149, 0, 0.12); color: #ff9500; }
-		.badge-lunch { background: rgba(52, 199, 89, 0.12); color: #34c759; }
-		.badge-dinner { background: rgba(0, 122, 255, 0.12); color: #007aff; }
-		.badge-snack { background: rgba(255, 45, 85, 0.12); color: #ff2d55; }
+		.badge-breakfast { background: $color-orange-light; color: $color-orange; }
+		.badge-lunch { background: $color-green-light; color: $color-green; }
+		.badge-dinner { background: $color-primary-light; color: $color-primary; }
+		.badge-snack { background: $color-pink-light; color: $color-pink; }
 
-		.meal-cal { font-size: 32rpx; font-weight: 700; color: #1c1c1e; }
+		.meal-cal {
+			font-size: $font-headline;
+			font-weight: 700;
+			color: $color-label;
+			font-variant-numeric: tabular-nums;
+		}
 	}
 
 	.meal-macros {
 		display: flex;
-		gap: 20rpx;
-		margin-bottom: 12rpx;
+		align-items: center;
+		gap: $spacing-xs;
+		margin-bottom: $spacing-sm;
 
-		.meal-macro { font-size: 24rpx; color: #8e8e93; font-weight: 500; }
+		.meal-macro {
+			font-size: $font-caption1;
+			color: $color-label-quaternary;
+			font-weight: 500;
+		}
+		.meal-sep {
+			font-size: $font-caption1;
+			color: $color-separator-opaque;
+		}
 	}
 
 	.meal-notes {
 		display: block;
-		font-size: 26rpx;
-		color: #8e8e93;
-		margin-bottom: 12rpx;
+		font-size: $font-footnote;
+		color: $color-label-quaternary;
+		margin-bottom: $spacing-sm;
 		line-height: 1.5;
 	}
 
 	.meal-actions {
-		padding-top: 16rpx;
-		border-top: 1rpx solid #f2f2f7;
+		padding-top: $spacing-md;
+		border-top: 0.5rpx solid $color-separator;
 
-		.action-btn {
-			font-size: 28rpx;
+		.action-link {
+			font-size: $font-subhead;
 			font-weight: 500;
-			padding: 8rpx 0;
+			padding: $spacing-xs 0;
 
-			&.delete { color: #ff3b30; }
-			&:active { opacity: 0.6; }
+			&.action-delete { color: $color-red; }
+			&:active { opacity: 0.5; }
 		}
 	}
 }
 
 .empty {
-	text-align: center;
-	padding: 80rpx 0;
-	.empty-text { font-size: 28rpx; color: #8e8e93; }
+	@include empty-state;
 }
 </style>

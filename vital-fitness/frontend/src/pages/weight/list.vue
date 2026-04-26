@@ -7,18 +7,18 @@
 		</view>
 
 		<view class="list">
-			<view v-for="(r, i) in weightList" :key="i" class="list-item">
-				<view class="item-row">
-					<view class="item-left">
-						<view class="item-main">
-							<text class="item-weight">{{ r.weight }}</text>
-							<text class="item-unit">kg</text>
+			<view v-for="(r, i) in weightList" :key="i" class="weight-card">
+				<view class="weight-row">
+					<view class="weight-left">
+						<view class="weight-main">
+							<text class="weight-val">{{ r.weight }}</text>
+							<text class="weight-unit">kg</text>
 						</view>
-						<text v-if="r.bmi" class="item-bmi">BMI {{ r.bmi }}</text>
+						<text v-if="r.bmi" class="weight-bmi">BMI {{ r.bmi }}</text>
 					</view>
-					<view class="item-right">
-						<text class="item-date">{{ formatDate(r.record_date) }}</text>
-						<view v-if="i < weightList.length - 1" class="item-trend">
+					<view class="weight-right">
+						<text class="weight-date">{{ formatDate(r.record_date) }}</text>
+						<view v-if="i < weightList.length - 1" class="weight-trend">
 							<text :class="getTrend(r, weightList[i+1]).cls">{{ getTrend(r, weightList[i+1]).text }}</text>
 						</view>
 					</view>
@@ -41,20 +41,41 @@
 	import { getWeights } from '../../api/weight'
 
 	export default {
-		data() { return { weightList: [] } },
+		data() { return { weightList: [], page: 1, pageSize: 20, total: 0, loading: false } },
 		computed: {
 			topPadding() {
 				const app = getApp()
 				return (app.globalData?.customBarHeight || 88) + 8
 			}
 		},
-		onShow() { this.load() },
+		onShow() { this.refresh() },
+		onPullDownRefresh() { this.refresh().then(() => uni.stopPullDownRefresh()) },
+		onReachBottom() { this.loadMore() },
 		methods: {
+			async refresh() {
+				this.page = 1
+				this.weightList = []
+				await this.load()
+			},
+			async loadMore() {
+				if (this.loading || this.weightList.length >= this.total) return
+				this.page++
+				await this.load()
+			},
 			async load() {
+				if (this.loading) return
+				this.loading = true
 				try {
-					const res = await getWeights({ page: 1, page_size: 50 })
-					this.weightList = res.data || []
+					const res = await getWeights({ page: this.page, page_size: this.pageSize })
+					const list = res.data || []
+					if (this.page === 1) {
+						this.weightList = list
+					} else {
+						this.weightList = [...this.weightList, ...list]
+					}
+					this.total = res.total || 0
 				} catch (e) {}
+				this.loading = false
 			},
 			addWeight() { uni.navigateTo({ url: '/pages/weight/add' }) },
 			goBack() { uni.navigateBack() },
@@ -74,117 +95,102 @@
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/variables.scss';
+
 .page {
-	padding: 0 32rpx;
+	padding: 0 $spacing-xl;
 	padding-bottom: 40rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: $color-bg;
 }
 
 .page-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 28rpx;
+	margin-bottom: $spacing-lg;
 
 	.nav-back {
 		font-size: 48rpx;
-		color: #007aff;
+		color: $color-primary;
 		font-weight: 300;
 		line-height: 1;
+		width: 60rpx;
 	}
-
 	.page-title {
-		font-size: 34rpx;
+		font-size: $font-headline;
 		font-weight: 600;
-		color: #1c1c1e;
+		color: $color-label;
 	}
 	.header-action {
-		font-size: 30rpx;
-		color: #007aff;
+		font-size: $font-subhead;
+		color: $color-primary;
 		font-weight: 600;
+		width: 60rpx;
+		text-align: right;
 	}
 }
 
-.list-item {
-	background: #fff;
-	border-radius: 20rpx;
-	padding: 28rpx 32rpx;
-	margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
-	transition: transform 0.15s ease;
+// --- Weight Card ---
+.weight-card {
+	@include card;
+	margin-bottom: $spacing-sm;
+	@include press-effect;
 
-	&:active { transform: scale(0.98); }
-
-	.item-row {
+	.weight-row {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 	}
 
-	.item-left {
-		.item-main {
+	.weight-left {
+		.weight-main {
 			display: flex;
 			align-items: baseline;
 
-			.item-weight {
-				font-size: 56rpx;
+			.weight-val {
+				font-size: 52rpx;
 				font-weight: 700;
-				color: #1c1c1e;
+				color: $color-label;
 				letter-spacing: -2rpx;
+				font-variant-numeric: tabular-nums;
 			}
-			.item-unit {
-				font-size: 26rpx;
-				color: #8e8e93;
+			.weight-unit {
+				font-size: $font-footnote;
+				color: $color-label-quaternary;
 				margin-left: 6rpx;
 			}
 		}
-		.item-bmi {
+		.weight-bmi {
 			display: block;
-			font-size: 24rpx;
-			color: #8e8e93;
-			margin-top: 4rpx;
+			font-size: $font-caption1;
+			color: $color-label-quaternary;
+			margin-top: 2rpx;
 		}
 	}
 
-	.item-right {
+	.weight-right {
 		text-align: right;
 
-		.item-date {
+		.weight-date {
 			display: block;
-			font-size: 26rpx;
-			color: #8e8e93;
+			font-size: $font-footnote;
+			color: $color-label-quaternary;
 		}
-		.item-trend {
+		.weight-trend {
 			margin-top: 6rpx;
-			font-size: 26rpx;
+			font-size: $font-footnote;
 			font-weight: 600;
+			font-variant-numeric: tabular-nums;
 
-			.trend-up { color: #ff3b30; }
-			.trend-down { color: #34c759; }
-			.trend-flat { color: #8e8e93; }
+			.trend-up { color: $color-red; }
+			.trend-down { color: $color-green; }
+			.trend-flat { color: $color-label-quaternary; }
 		}
 	}
 }
 
 .empty {
-	text-align: center;
-	padding: 120rpx 0;
-
-	.empty-icon { display: block; font-size: 96rpx; margin-bottom: 24rpx; }
-	.empty-title { display: block; font-size: 34rpx; font-weight: 600; color: #1c1c1e; margin-bottom: 8rpx; }
-	.empty-desc { display: block; font-size: 26rpx; color: #8e8e93; margin-bottom: 40rpx; }
-	.empty-btn {
-		display: inline-block;
-		padding: 20rpx 56rpx;
-		background: #007aff;
-		color: #fff;
-		border-radius: 16rpx;
-		font-size: 30rpx;
-		font-weight: 600;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
-
-		&:active { transform: scale(0.95); opacity: 0.9; }
-	}
+	@include empty-state;
 }
 </style>

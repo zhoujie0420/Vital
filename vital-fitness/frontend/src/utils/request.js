@@ -7,7 +7,7 @@
 const BASE_URL = '/api/v1'
 // #endif
 // #ifndef H5
-const BASE_URL = 'http://115.191.3.226:8080/api/v1'
+const BASE_URL = 'https://api.bodysynclab.fun/api/v1'
 // #endif
 
 const request = (options) => {

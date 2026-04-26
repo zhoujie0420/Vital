@@ -8,19 +8,23 @@
 
 		<view class="workout-list">
 			<view v-for="(w, i) in workouts" :key="w.id" class="workout-card">
-				<view class="card-header">
+				<view class="card-top">
 					<text class="card-name">{{ w.exercise.name }}</text>
-					<text class="card-category">{{ w.exercise.category }}</text>
+					<view class="card-badge">
+						<text>{{ w.exercise.category }}</text>
+					</view>
 				</view>
 				<view class="card-stats">
 					<view class="stat">
 						<text class="stat-val">{{ w.weight }}</text>
 						<text class="stat-unit">kg</text>
 					</view>
+					<view class="stat-divider"></view>
 					<view class="stat">
 						<text class="stat-val">{{ w.sets }}</text>
 						<text class="stat-unit">组</text>
 					</view>
+					<view class="stat-divider"></view>
 					<view class="stat">
 						<text class="stat-val">{{ w.reps }}</text>
 						<text class="stat-unit">次</text>
@@ -28,39 +32,54 @@
 				</view>
 				<text v-if="w.notes" class="card-notes">{{ w.notes }}</text>
 				<view class="card-actions">
-					<text class="action-btn edit" @tap="startEdit(w)">编辑</text>
-					<text class="action-btn delete" @tap="confirmDelete(w)">删除</text>
+					<text class="action-link action-edit" @tap="startEdit(w)">编辑</text>
+					<text class="action-link action-delete" @tap="confirmDelete(w)">删除</text>
 				</view>
 			</view>
 		</view>
 
 		<view v-if="workouts.length === 0" class="empty">
-			<text class="empty-text">当天暂无训练记录</text>
+			<text class="empty-icon">🏋️</text>
+			<text class="empty-title">当天暂无训练记录</text>
+			<text class="empty-desc">点击右上角添加训练</text>
 		</view>
 
 		<!-- 编辑弹窗 -->
 		<view class="mask" v-if="showEdit" @tap="showEdit = false"></view>
-		<view class="edit-popup" v-if="showEdit">
-			<text class="popup-title">编辑训练</text>
-			<view class="popup-field">
-				<text class="popup-label">重量 (kg)</text>
-				<input type="digit" v-model="editForm.weight" class="popup-input" />
+		<view class="edit-sheet" v-if="showEdit">
+			<view class="sheet-handle"></view>
+			<text class="sheet-title">编辑训练</text>
+			<view class="sheet-field">
+				<text class="sheet-label">重量 (kg)</text>
+				<view class="sheet-input-wrap">
+					<input type="digit" v-model="editForm.weight" class="sheet-input" />
+				</view>
 			</view>
-			<view class="popup-field">
-				<text class="popup-label">组数</text>
-				<input type="number" v-model="editForm.sets" class="popup-input" />
+			<view class="sheet-field">
+				<text class="sheet-label">组数</text>
+				<view class="sheet-input-wrap">
+					<input type="number" v-model="editForm.sets" class="sheet-input" />
+				</view>
 			</view>
-			<view class="popup-field">
-				<text class="popup-label">次数</text>
-				<input type="number" v-model="editForm.reps" class="popup-input" />
+			<view class="sheet-field">
+				<text class="sheet-label">次数</text>
+				<view class="sheet-input-wrap">
+					<input type="number" v-model="editForm.reps" class="sheet-input" />
+				</view>
 			</view>
-			<view class="popup-field">
-				<text class="popup-label">备注</text>
-				<input v-model="editForm.notes" placeholder="可选" class="popup-input" />
+			<view class="sheet-field">
+				<text class="sheet-label">备注</text>
+				<view class="sheet-input-wrap">
+					<input v-model="editForm.notes" placeholder="可选" class="sheet-input" />
+				</view>
 			</view>
-			<view class="popup-actions">
-				<text class="popup-cancel" @tap="showEdit = false">取消</text>
-				<text class="popup-save" @tap="saveEdit">保存</text>
+			<view class="sheet-actions">
+				<view class="sheet-cancel" @tap="showEdit = false">
+					<text>取消</text>
+				</view>
+				<view class="sheet-save" @tap="saveEdit">
+					<text>保存</text>
+				</view>
 			</view>
 		</view>
 	</view>
@@ -95,9 +114,7 @@
 				return (d.getMonth() + 1) + '月' + d.getDate() + '日训练'
 			}
 		},
-		onLoad(opts) {
-			this.date = opts.date || ''
-		},
+		onLoad(opts) { this.date = opts.date || '' },
 		onShow() { this.load() },
 		methods: {
 			goBack() { uni.navigateBack() },
@@ -156,56 +173,53 @@
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/variables.scss';
+
 .page {
-	padding: 0 32rpx;
+	padding: 0 $spacing-xl;
 	padding-bottom: 40rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: $color-bg;
 }
 
 .nav-bar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 28rpx;
-
-	.nav-back { font-size: 32rpx; color: #007aff; font-weight: 500; }
-	.nav-title { font-size: 34rpx; font-weight: 600; color: #1c1c1e; }
-	.nav-action { font-size: 30rpx; color: #007aff; font-weight: 600; }
+	@include nav-bar;
+	.nav-back { font-size: $font-callout; color: $color-primary; font-weight: 500; }
+	.nav-title { font-size: $font-headline; font-weight: 600; color: $color-label; }
+	.nav-action { font-size: $font-subhead; color: $color-primary; font-weight: 600; }
 }
 
+// --- Workout Card ---
 .workout-card {
-	background: #fff;
-	border-radius: 20rpx;
-	padding: 28rpx 32rpx;
-	margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+	@include card;
+	margin-bottom: $spacing-sm;
 
-	.card-header {
+	.card-top {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 20rpx;
+		margin-bottom: $spacing-md;
 
 		.card-name {
-			font-size: 34rpx;
+			font-size: $font-headline;
 			font-weight: 600;
-			color: #1c1c1e;
+			color: $color-label;
 		}
-		.card-category {
-			font-size: 24rpx;
-			color: #007aff;
-			background: rgba(0, 122, 255, 0.08);
-			padding: 6rpx 16rpx;
-			border-radius: 10rpx;
+		.card-badge {
+			padding: 6rpx $spacing-md;
+			border-radius: $spacing-xs;
+			font-size: $font-caption1;
 			font-weight: 500;
+			background: $color-primary-light;
+			color: $color-primary;
 		}
 	}
 
 	.card-stats {
 		display: flex;
-		gap: 40rpx;
-		margin-bottom: 16rpx;
+		align-items: center;
+		gap: $spacing-lg;
+		margin-bottom: $spacing-md;
 
 		.stat {
 			display: flex;
@@ -213,119 +227,129 @@
 			gap: 4rpx;
 
 			.stat-val {
-				font-size: 40rpx;
+				font-size: 44rpx;
 				font-weight: 700;
-				color: #1c1c1e;
+				color: $color-label;
+				font-variant-numeric: tabular-nums;
 			}
 			.stat-unit {
-				font-size: 24rpx;
-				color: #8e8e93;
+				font-size: $font-caption1;
+				color: $color-label-quaternary;
 			}
+		}
+
+		.stat-divider {
+			width: 1rpx;
+			height: 32rpx;
+			background: $color-separator;
 		}
 	}
 
 	.card-notes {
 		display: block;
-		font-size: 26rpx;
-		color: #8e8e93;
-		margin-bottom: 16rpx;
+		font-size: $font-footnote;
+		color: $color-label-quaternary;
+		margin-bottom: $spacing-md;
 		line-height: 1.5;
 	}
 
 	.card-actions {
 		display: flex;
-		gap: 24rpx;
-		padding-top: 16rpx;
-		border-top: 1rpx solid #f2f2f7;
+		gap: $spacing-lg;
+		padding-top: $spacing-md;
+		border-top: 0.5rpx solid $color-separator;
 
-		.action-btn {
-			font-size: 28rpx;
+		.action-link {
+			font-size: $font-subhead;
 			font-weight: 500;
-			padding: 8rpx 0;
+			padding: $spacing-xs 0;
 
-			&.edit { color: #007aff; }
-			&.delete { color: #ff3b30; }
-			&:active { opacity: 0.6; }
+			&.action-edit { color: $color-primary; }
+			&.action-delete { color: $color-red; }
+			&:active { opacity: 0.5; }
 		}
 	}
 }
 
 .empty {
-	text-align: center;
-	padding: 80rpx 0;
-
-	.empty-text { font-size: 28rpx; color: #8e8e93; }
+	@include empty-state;
 }
 
+// --- Edit Sheet ---
 .mask {
 	position: fixed;
 	top: 0; left: 0; right: 0; bottom: 0;
-	background: rgba(0, 0, 0, 0.4);
+	background: rgba(0, 0, 0, 0.35);
 	z-index: 100;
 }
 
-.edit-popup {
+.edit-sheet {
 	position: fixed;
 	bottom: 0;
 	left: 0;
 	right: 0;
-	background: #fff;
-	border-radius: 24rpx 24rpx 0 0;
-	padding: 40rpx 32rpx;
-	padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
+	background: $color-bg-elevated;
+	border-radius: $radius-xl $radius-xl 0 0;
+	padding: $spacing-md $spacing-xl $spacing-2xl;
+	padding-bottom: calc(#{$spacing-2xl} + env(safe-area-inset-bottom));
 	z-index: 101;
 
-	.popup-title {
+	.sheet-handle {
+		width: 72rpx;
+		height: 8rpx;
+		background: $color-fill-tertiary;
+		border-radius: 4rpx;
+		margin: 0 auto $spacing-lg;
+	}
+
+	.sheet-title {
 		display: block;
-		font-size: 36rpx;
+		font-size: $font-title3;
 		font-weight: 700;
-		color: #1c1c1e;
+		color: $color-label;
 		text-align: center;
-		margin-bottom: 32rpx;
+		margin-bottom: $spacing-xl;
 	}
 
-	.popup-field {
-		margin-bottom: 20rpx;
+	.sheet-field {
+		margin-bottom: $spacing-md;
 
-		.popup-label {
+		.sheet-label {
 			display: block;
-			font-size: 26rpx;
-			color: #8e8e93;
+			font-size: $font-footnote;
+			color: $color-label-quaternary;
 			font-weight: 500;
-			margin-bottom: 8rpx;
+			margin-bottom: $spacing-xs;
 		}
-		.popup-input {
-			background: #f2f2f7;
-			border-radius: 14rpx;
-			padding: 22rpx;
-			font-size: 30rpx;
-			color: #1c1c1e;
+		.sheet-input-wrap {
+			@include input-field;
+		}
+		.sheet-input {
+			flex: 1;
+			font-size: $font-body;
+			color: $color-label;
 		}
 	}
 
-	.popup-actions {
+	.sheet-actions {
 		display: flex;
-		gap: 20rpx;
-		margin-top: 24rpx;
+		gap: $spacing-md;
+		margin-top: $spacing-lg;
 
-		.popup-cancel, .popup-save {
+		.sheet-cancel, .sheet-save {
 			flex: 1;
 			text-align: center;
-			padding: 28rpx 0;
-			border-radius: 16rpx;
-			font-size: 32rpx;
+			padding: $spacing-lg 0;
+			border-radius: $radius-md;
+			font-size: $font-callout;
 			font-weight: 600;
 		}
-		.popup-cancel {
-			background: #f2f2f7;
-			color: #636366;
+		.sheet-cancel {
+			background: $color-fill;
+			color: $color-label-tertiary;
 		}
-		.popup-save {
-			background: #007aff;
-			color: #fff;
-			box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
-
-			&:active { transform: scale(0.98); opacity: 0.9; }
+		.sheet-save {
+			@include primary-button;
 		}
 	}
 }

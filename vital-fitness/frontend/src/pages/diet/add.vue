@@ -3,7 +3,7 @@
 		<view class="nav-bar">
 			<text class="nav-back" @tap="goBack">‹ 返回</text>
 			<text class="nav-title">记录饮食</text>
-			<text class="nav-placeholder"></text>
+			<view class="nav-placeholder"></view>
 		</view>
 
 		<!-- 餐次选择 -->
@@ -25,11 +25,13 @@
 				<input class="search-input" v-model="keyword" placeholder="搜索食物" @input="searchFoods" />
 			</view>
 
-			<scroll-view scroll-x class="cat-scroll">
-				<text v-for="c in categories" :key="c" class="cat-pill"
-					:class="{ active: currentCat === c }" @tap="currentCat = c; searchFoods()">
-					{{ c }}
-				</text>
+			<scroll-view scroll-x class="cat-scroll" :show-scrollbar="false">
+				<view class="cat-bar">
+					<text v-for="c in categories" :key="c" class="cat-pill"
+						:class="{ active: currentCat === c }" @tap="currentCat = c; searchFoods()">
+						{{ c }}
+					</text>
+				</view>
 			</scroll-view>
 
 			<view class="food-list">
@@ -38,7 +40,9 @@
 						<text class="food-name">{{ f.name }}</text>
 						<text class="food-detail">{{ f.calories }}kcal · 蛋白{{ f.protein }}g · 碳水{{ f.carbs }}g · 脂肪{{ f.fat }}g</text>
 					</view>
-					<text class="food-add">+</text>
+					<view class="food-add-btn">
+						<text class="food-add-icon">+</text>
+					</view>
 				</view>
 			</view>
 
@@ -53,10 +57,12 @@
 			<view v-for="(sf, i) in selectedFoods" :key="i" class="selected-row">
 				<text class="sf-name">{{ sf.name }}</text>
 				<text class="sf-cal">{{ sf.calories }}kcal</text>
-				<text class="sf-remove" @tap="selectedFoods.splice(i, 1)">✕</text>
+				<view class="sf-remove" @tap="selectedFoods.splice(i, 1)">
+					<text class="sf-remove-icon">✕</text>
+				</view>
 			</view>
 			<view class="total-bar">
-				<text class="total-text">合计 {{ totalCalories }}千卡</text>
+				<text class="total-val">{{ totalCalories }} 千卡</text>
 				<text class="total-detail">蛋白{{ totalProtein }}g · 碳水{{ totalCarbs }}g · 脂肪{{ totalFat }}g</text>
 			</view>
 		</view>
@@ -73,34 +79,44 @@
 		</view>
 
 		<!-- 自定义食物弹窗 -->
-		<u-popup :show="showCustom" mode="bottom" round="24" @close="showCustom = false">
-			<view class="popup">
-				<text class="popup-title">自定义食物</text>
-				<view class="popup-field">
-					<text class="popup-label">名称</text>
-					<input v-model="customFood.name" placeholder="食物名称" class="popup-input" />
-				</view>
-				<view class="popup-field">
-					<text class="popup-label">热量</text>
-					<input v-model="customFood.calories" type="digit" placeholder="kcal / 100g" class="popup-input" />
-				</view>
-				<view class="popup-field">
-					<text class="popup-label">蛋白质</text>
-					<input v-model="customFood.protein" type="digit" placeholder="g / 100g" class="popup-input" />
-				</view>
-				<view class="popup-field">
-					<text class="popup-label">碳水</text>
-					<input v-model="customFood.carbs" type="digit" placeholder="g / 100g" class="popup-input" />
-				</view>
-				<view class="popup-field">
-					<text class="popup-label">脂肪</text>
-					<input v-model="customFood.fat" type="digit" placeholder="g / 100g" class="popup-input" />
-				</view>
-				<view class="popup-btn" @tap="saveCustomFood">
-					<text>保存</text>
+		<view class="mask" v-if="showCustom" @tap="showCustom = false"></view>
+		<view class="custom-sheet" v-if="showCustom">
+			<view class="sheet-handle"></view>
+			<text class="sheet-title">自定义食物</text>
+			<view class="sheet-field">
+				<text class="sheet-label">名称</text>
+				<view class="sheet-input-wrap">
+					<input v-model="customFood.name" placeholder="食物名称" class="sheet-input" />
 				</view>
 			</view>
-		</u-popup>
+			<view class="sheet-field">
+				<text class="sheet-label">热量</text>
+				<view class="sheet-input-wrap">
+					<input v-model="customFood.calories" type="digit" placeholder="kcal / 100g" class="sheet-input" />
+				</view>
+			</view>
+			<view class="sheet-field">
+				<text class="sheet-label">蛋白质</text>
+				<view class="sheet-input-wrap">
+					<input v-model="customFood.protein" type="digit" placeholder="g / 100g" class="sheet-input" />
+				</view>
+			</view>
+			<view class="sheet-field">
+				<text class="sheet-label">碳水</text>
+				<view class="sheet-input-wrap">
+					<input v-model="customFood.carbs" type="digit" placeholder="g / 100g" class="sheet-input" />
+				</view>
+			</view>
+			<view class="sheet-field">
+				<text class="sheet-label">脂肪</text>
+				<view class="sheet-input-wrap">
+					<input v-model="customFood.fat" type="digit" placeholder="g / 100g" class="sheet-input" />
+				</view>
+			</view>
+			<view class="sheet-save" @tap="saveCustomFood">
+				<text>保存</text>
+			</view>
+		</view>
 	</view>
 </template>
 
@@ -189,108 +205,68 @@
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/variables.scss';
+
 .page {
-	padding: 0 32rpx;
+	padding: 0 $spacing-xl;
 	padding-bottom: 160rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: $color-bg;
 }
 
 .nav-bar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 28rpx;
-
-	.nav-back { font-size: 32rpx; color: #007aff; font-weight: 500; }
-	.nav-title { font-size: 34rpx; font-weight: 600; color: #1c1c1e; }
+	@include nav-bar;
+	.nav-back { font-size: $font-callout; color: $color-primary; font-weight: 500; }
+	.nav-title { font-size: $font-headline; font-weight: 600; color: $color-label; }
 	.nav-placeholder { width: 80rpx; }
 }
 
 .card {
-	background: #fff;
-	border-radius: 20rpx;
-	padding: 28rpx 32rpx;
-	margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
-
-	.card-label {
-		display: block;
-		font-size: 26rpx;
-		font-weight: 600;
-		color: #8e8e93;
-		text-transform: uppercase;
-		letter-spacing: 1rpx;
-		margin-bottom: 20rpx;
-	}
+	@include card;
+	margin-bottom: $spacing-md;
+	.card-label { @include card-label; }
 }
 
-.segment {
-	display: flex;
-	background: #f2f2f7;
-	border-radius: 16rpx;
-	padding: 4rpx;
+// --- Segment ---
+.segment { @include segment-control; }
 
-	.segment-item {
-		flex: 1;
-		text-align: center;
-		padding: 16rpx 0;
-		font-size: 28rpx;
-		font-weight: 500;
-		color: #636366;
-		border-radius: 14rpx;
-		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-
-		&.active {
-			background: #fff;
-			color: #1c1c1e;
-			font-weight: 600;
-			box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.1);
-		}
-	}
-}
-
+// --- Search ---
 .search-bar {
-	display: flex;
-	align-items: center;
-	background: #f2f2f7;
-	border-radius: 16rpx;
-	padding: 18rpx 24rpx;
-	margin-bottom: 16rpx;
-	transition: box-shadow 0.2s ease;
+	@include input-field;
+	margin-bottom: $spacing-md;
 
-	&:focus-within {
-		box-shadow: 0 0 0 4rpx rgba(0, 122, 255, 0.15);
-	}
-
-	.search-icon { font-size: 28rpx; margin-right: 12rpx; }
-	.search-input { flex: 1; font-size: 28rpx; color: #1c1c1e; }
+	.search-icon { font-size: 28rpx; margin-right: $spacing-sm; }
+	.search-input { flex: 1; font-size: $font-subhead; color: $color-label; }
 }
 
+// --- Category Scroll ---
 .cat-scroll {
 	white-space: nowrap;
-	margin-bottom: 16rpx;
+	margin: 0 -#{$spacing-xl};
+	padding: 0 $spacing-xl;
+	margin-bottom: $spacing-md;
+
+	.cat-bar {
+		display: inline-flex;
+		gap: $spacing-sm;
+	}
 
 	.cat-pill {
 		display: inline-block;
-		padding: 10rpx 24rpx;
-		border-radius: 20rpx;
-		background: #f2f2f7;
-		font-size: 26rpx;
-		color: #636366;
-		margin-right: 12rpx;
+		padding: $spacing-xs $spacing-lg;
+		border-radius: $radius-full;
+		background: $color-fill;
+		font-size: $font-footnote;
+		color: $color-label-tertiary;
 		font-weight: 500;
-		transition: all 0.2s ease;
+		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
-		&.active {
-			background: #007aff;
-			color: #fff;
-			box-shadow: 0 4rpx 12rpx rgba(0, 122, 255, 0.3);
-		}
-		&:active { transform: scale(0.95); }
+		&.active { background: $color-label; color: #fff; }
+		&:active { transform: scale(0.94); }
 	}
 }
 
+// --- Food List ---
 .food-list {
 	max-height: 400rpx;
 	overflow-y: auto;
@@ -298,169 +274,180 @@
 	.food-row {
 		display: flex;
 		align-items: center;
-		padding: 20rpx 0;
-		border-bottom: 1rpx solid #f2f2f7;
-		transition: background 0.15s ease;
+		padding: $spacing-md 0;
+		position: relative;
 
-		&:last-child { border-bottom: none; }
-		&:active { background: rgba(0, 0, 0, 0.02); }
+		&::after {
+			content: '';
+			position: absolute;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			height: 0.5rpx;
+			background: $color-separator;
+		}
+		&:last-child::after { display: none; }
+		&:active { opacity: 0.7; }
 
 		.food-info {
 			flex: 1;
-			.food-name { display: block; font-size: 30rpx; font-weight: 500; color: #1c1c1e; }
-			.food-detail { display: block; font-size: 22rpx; color: #8e8e93; margin-top: 4rpx; }
+			.food-name { display: block; font-size: $font-body; font-weight: 500; color: $color-label; }
+			.food-detail { display: block; font-size: $font-caption2; color: $color-label-quaternary; margin-top: 4rpx; }
 		}
-		.food-add {
-			width: 56rpx;
-			height: 56rpx;
-			line-height: 52rpx;
-			text-align: center;
-			background: rgba(0, 122, 255, 0.1);
+		.food-add-btn {
+			width: 52rpx;
+			height: 52rpx;
 			border-radius: 50%;
-			font-size: 36rpx;
-			color: #007aff;
-			font-weight: 400;
-			transition: all 0.15s ease;
+			background: $color-green-light;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			flex-shrink: 0;
+			@include press-effect;
 
-			&:active { transform: scale(0.85); background: rgba(0, 122, 255, 0.2); }
+			.food-add-icon {
+				font-size: 32rpx;
+				color: $color-green;
+				font-weight: 400;
+				line-height: 1;
+			}
 		}
 	}
 }
 
 .custom-link {
 	text-align: center;
-	padding: 20rpx 0 4rpx;
-	font-size: 28rpx;
-	color: #007aff;
+	padding: $spacing-md 0 4rpx;
+	font-size: $font-subhead;
+	color: $color-primary;
 	font-weight: 500;
-
-	&:active { opacity: 0.6; }
+	&:active { opacity: 0.5; }
 }
 
+// --- Selected Foods ---
 .selected-row {
 	display: flex;
 	align-items: center;
-	padding: 16rpx 0;
-	border-bottom: 1rpx solid #f2f2f7;
+	padding: $spacing-md 0;
+	position: relative;
 
-	.sf-name { flex: 1; font-size: 30rpx; color: #1c1c1e; font-weight: 500; }
-	.sf-cal { font-size: 26rpx; color: #8e8e93; margin-right: 20rpx; }
+	&::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		height: 0.5rpx;
+		background: $color-separator;
+	}
+
+	.sf-name { flex: 1; font-size: $font-body; color: $color-label; font-weight: 500; }
+	.sf-cal { font-size: $font-footnote; color: $color-label-quaternary; margin-right: $spacing-md; font-variant-numeric: tabular-nums; }
 	.sf-remove {
-		width: 44rpx;
-		height: 44rpx;
-		line-height: 44rpx;
-		text-align: center;
-		font-size: 22rpx;
-		color: #ff3b30;
-		background: rgba(255, 59, 48, 0.1);
+		width: 40rpx;
+		height: 40rpx;
 		border-radius: 50%;
-		transition: all 0.15s ease;
+		background: $color-red-light;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		@include press-effect;
 
-		&:active { transform: scale(0.85); }
+		.sf-remove-icon {
+			font-size: $font-caption2;
+			color: $color-red;
+		}
 	}
 }
 
 .total-bar {
-	margin-top: 20rpx;
-	padding-top: 20rpx;
-	border-top: 1rpx solid #f2f2f7;
+	margin-top: $spacing-lg;
+	padding-top: $spacing-lg;
+	border-top: 0.5rpx solid $color-separator;
 
-	.total-text {
+	.total-val {
 		display: block;
-		font-size: 36rpx;
+		font-size: $font-title2;
 		font-weight: 700;
-		color: #1c1c1e;
+		color: $color-label;
 		letter-spacing: -1rpx;
+		font-variant-numeric: tabular-nums;
 	}
 	.total-detail {
 		display: block;
-		font-size: 24rpx;
-		color: #8e8e93;
-		margin-top: 6rpx;
+		font-size: $font-caption1;
+		color: $color-label-quaternary;
+		margin-top: 4rpx;
 	}
 }
 
 .notes-area {
 	width: 100%;
 	height: 120rpx;
-	font-size: 28rpx;
-	color: #1c1c1e;
+	font-size: $font-subhead;
+	color: $color-label;
 	line-height: 1.6;
 }
 
+// --- Bottom Action ---
 .bottom-action {
+	@include bottom-action-bar;
+	.save-btn { @include primary-button; }
+}
+
+// --- Custom Food Sheet ---
+.mask {
+	position: fixed;
+	top: 0; left: 0; right: 0; bottom: 0;
+	background: rgba(0, 0, 0, 0.35);
+	z-index: 100;
+}
+
+.custom-sheet {
 	position: fixed;
 	bottom: 0;
 	left: 0;
 	right: 0;
-	padding: 20rpx 32rpx;
-	padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-	background: rgba(242, 242, 247, 0.85);
-	backdrop-filter: blur(20px);
-	-webkit-backdrop-filter: blur(20px);
+	background: $color-bg-elevated;
+	border-radius: $radius-xl $radius-xl 0 0;
+	padding: $spacing-md $spacing-xl $spacing-2xl;
+	padding-bottom: calc(#{$spacing-2xl} + env(safe-area-inset-bottom));
+	z-index: 101;
 
-	.save-btn {
-		background: #007aff;
-		color: #fff;
-		text-align: center;
-		padding: 28rpx 0;
-		border-radius: 16rpx;
-		font-size: 32rpx;
-		font-weight: 600;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
-		transition: all 0.15s ease;
-
-		&:active { transform: scale(0.98); opacity: 0.9; }
-		&.loading { opacity: 0.6; }
+	.sheet-handle {
+		width: 72rpx;
+		height: 8rpx;
+		background: $color-fill-tertiary;
+		border-radius: 4rpx;
+		margin: 0 auto $spacing-lg;
 	}
-}
 
-.popup {
-	padding: 40rpx 32rpx;
-	padding-bottom: calc(40rpx + env(safe-area-inset-bottom));
-
-	.popup-title {
+	.sheet-title {
 		display: block;
-		font-size: 36rpx;
+		font-size: $font-title3;
 		font-weight: 700;
-		color: #1c1c1e;
+		color: $color-label;
 		text-align: center;
-		margin-bottom: 32rpx;
+		margin-bottom: $spacing-xl;
 	}
-	.popup-field {
-		margin-bottom: 20rpx;
 
-		.popup-label {
+	.sheet-field {
+		margin-bottom: $spacing-md;
+
+		.sheet-label {
 			display: block;
-			font-size: 26rpx;
-			color: #8e8e93;
+			font-size: $font-footnote;
+			color: $color-label-quaternary;
 			font-weight: 500;
-			margin-bottom: 8rpx;
+			margin-bottom: $spacing-xs;
 		}
-		.popup-input {
-			background: #f2f2f7;
-			border-radius: 14rpx;
-			padding: 22rpx;
-			font-size: 30rpx;
-			color: #1c1c1e;
-			transition: box-shadow 0.2s ease;
-
-			&:focus { box-shadow: 0 0 0 4rpx rgba(0, 122, 255, 0.15); }
-		}
+		.sheet-input-wrap { @include input-field; }
+		.sheet-input { flex: 1; font-size: $font-body; color: $color-label; }
 	}
-	.popup-btn {
-		background: #007aff;
-		color: #fff;
-		text-align: center;
-		padding: 28rpx 0;
-		border-radius: 16rpx;
-		font-size: 32rpx;
-		font-weight: 600;
-		margin-top: 16rpx;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
-		transition: all 0.15s ease;
 
-		&:active { transform: scale(0.98); opacity: 0.9; }
+	.sheet-save {
+		@include primary-button;
+		margin-top: $spacing-lg;
 	}
 }
 </style>

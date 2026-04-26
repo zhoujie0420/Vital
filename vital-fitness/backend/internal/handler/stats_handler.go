@@ -52,8 +52,19 @@ func (h *StatsHandler) GetDashboard(c *gin.Context) {
 func (h *StatsHandler) GetStats(c *gin.Context) {
 	userID := c.GetUint("user_id")
 	db := utils.GetDB()
+	period := c.DefaultQuery("period", "week")
 
-	// 最近7天训练次数
+	var interval string
+	switch period {
+	case "month":
+		interval = "30 DAY"
+	case "year":
+		interval = "365 DAY"
+	default:
+		interval = "7 DAY"
+	}
+
+	// 训练次数
 	type DayStat struct {
 		Day   string `json:"day"`
 		Count int    `json:"count"`
@@ -61,10 +72,10 @@ func (h *StatsHandler) GetStats(c *gin.Context) {
 	var workoutStats []DayStat
 	db.Raw(`SELECT DATE(workout_date) as day, COUNT(*) as count 
 		FROM workouts WHERE user_id = ? AND deleted_at IS NULL 
-		AND workout_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+		AND workout_date >= DATE_SUB(CURDATE(), INTERVAL `+interval+`)
 		GROUP BY DATE(workout_date) ORDER BY day`, userID).Scan(&workoutStats)
 
-	// 最近体重趋势
+	// 体重趋势
 	type WeightPoint struct {
 		Day    string  `json:"day"`
 		Weight float64 `json:"weight"`
@@ -72,9 +83,10 @@ func (h *StatsHandler) GetStats(c *gin.Context) {
 	var weightTrend []WeightPoint
 	db.Raw(`SELECT DATE(record_date) as day, weight 
 		FROM weight_records WHERE user_id = ? AND deleted_at IS NULL 
-		ORDER BY record_date DESC LIMIT 10`, userID).Scan(&weightTrend)
+		AND record_date >= DATE_SUB(CURDATE(), INTERVAL `+interval+`)
+		ORDER BY record_date ASC`, userID).Scan(&weightTrend)
 
-	// 最近7天饮食热量
+	// 饮食热量
 	type CalStat struct {
 		Day      string  `json:"day"`
 		Calories float64 `json:"calories"`
@@ -82,7 +94,7 @@ func (h *StatsHandler) GetStats(c *gin.Context) {
 	var dietStats []CalStat
 	db.Raw(`SELECT DATE(record_date) as day, SUM(total_calories) as calories 
 		FROM diet_records WHERE user_id = ? AND deleted_at IS NULL 
-		AND record_date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+		AND record_date >= DATE_SUB(CURDATE(), INTERVAL `+interval+`)
 		GROUP BY DATE(record_date) ORDER BY day`, userID).Scan(&dietStats)
 
 	c.JSON(http.StatusOK, gin.H{

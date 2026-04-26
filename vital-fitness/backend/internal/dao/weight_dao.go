@@ -27,3 +27,7 @@ func (d *WeightDAO) FindLatest(userID uint) (*model.WeightRecord, error) {
 	err := d.db.Where("user_id = ?", userID).Order("record_date DESC").First(&r).Error
 	return &r, err
 }
+
+func (d *WeightDAO) Delete(id uint, userID uint) error {
+	return d.db.Where("id = ? AND user_id = ?", id, userID).Delete(&model.WeightRecord{}).Error
+}

@@ -34,3 +34,7 @@ func (s *WeightService) GetList(userID uint, page, pageSize int) ([]model.Weight
 	}
 	return s.weightDAO.FindByUserID(userID, page, pageSize)
 }
+
+func (s *WeightService) Delete(id uint, userID uint) error {
+	return s.weightDAO.Delete(id, userID)
+}

@@ -3,15 +3,15 @@
 		<view class="nav-bar">
 			<text class="nav-back" @tap="goBack">‹ 返回</text>
 			<text class="nav-title">记录心情</text>
-			<text class="nav-placeholder"></text>
+			<view class="nav-placeholder"></view>
 		</view>
 
 		<view class="card">
 			<text class="card-label">今天心情怎么样？</text>
 			<view class="mood-grid">
-				<view v-for="exp in moods" :key="exp.score" class="mood-card"
+				<view v-for="exp in moods" :key="exp.score" class="mood-item"
 					:class="{ selected: score === exp.score }" @tap="score = exp.score">
-					<text class="emoji">{{ exp.emoji }}</text>
+					<text class="mood-emoji">{{ exp.emoji }}</text>
 					<text class="mood-text">{{ exp.label }}</text>
 				</view>
 			</view>
@@ -89,97 +89,84 @@
 </script>
 
 <style lang="scss" scoped>
+@import '../../styles/variables.scss';
+
 .page {
-	padding: 0 32rpx;
+	padding: 0 $spacing-xl;
 	padding-bottom: 160rpx;
 	min-height: 100vh;
-	background: #f2f2f7;
+	background: $color-bg;
 }
 
 .nav-bar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	margin-bottom: 28rpx;
-
-	.nav-back { font-size: 32rpx; color: #007aff; font-weight: 500; }
-	.nav-title { font-size: 34rpx; font-weight: 600; color: #1c1c1e; }
+	@include nav-bar;
+	.nav-back { font-size: $font-callout; color: $color-primary; font-weight: 500; }
+	.nav-title { font-size: $font-headline; font-weight: 600; color: $color-label; }
 	.nav-placeholder { width: 80rpx; }
 }
 
 .card {
-	background: #fff;
-	border-radius: 20rpx;
-	padding: 28rpx 32rpx;
-	margin-bottom: 16rpx;
-	box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
-
-	.card-label {
-		display: block;
-		font-size: 26rpx;
-		font-weight: 600;
-		color: #8e8e93;
-		text-transform: uppercase;
-		letter-spacing: 1rpx;
-		margin-bottom: 20rpx;
-	}
+	@include card;
+	margin-bottom: $spacing-md;
+	.card-label { @include card-label; }
 }
 
+// --- Mood Grid ---
 .mood-grid {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 16rpx;
+	gap: $spacing-sm;
 	justify-content: center;
 
-	.mood-card {
-		width: 160rpx;
+	.mood-item {
+		width: 152rpx;
 		text-align: center;
-		padding: 28rpx 12rpx;
-		border-radius: 24rpx;
-		background: #f2f2f7;
-		border: 3rpx solid transparent;
-		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+		padding: $spacing-lg $spacing-sm;
+		border-radius: $radius-xl;
+		background: $color-fill;
+		border: 2.5rpx solid transparent;
+		transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
 		&.selected {
-			background: #fff;
-			border-color: #007aff;
-			box-shadow: 0 6rpx 24rpx rgba(0, 122, 255, 0.2);
-			transform: scale(1.05);
+			background: $color-bg-elevated;
+			border-color: $color-primary;
+			box-shadow: 0 4rpx 24rpx rgba(0, 122, 255, 0.18);
+			transform: scale(1.06);
 		}
 		&:active { transform: scale(0.92); }
 
-		.emoji {
+		.mood-emoji {
 			display: block;
-			font-size: 64rpx;
-			margin-bottom: 10rpx;
+			font-size: 56rpx;
+			margin-bottom: $spacing-xs;
 		}
 		.mood-text {
 			display: block;
-			font-size: 24rpx;
-			color: #636366;
+			font-size: $font-caption1;
+			color: $color-label-tertiary;
 			font-weight: 600;
 		}
 	}
 }
 
+// --- Tags ---
 .tag-grid {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 12rpx;
+	gap: $spacing-sm;
 
 	.tag-pill {
-		padding: 14rpx 28rpx;
-		border-radius: 24rpx;
-		background: #f2f2f7;
-		font-size: 26rpx;
-		color: #636366;
+		padding: $spacing-sm $spacing-lg;
+		border-radius: $radius-full;
+		background: $color-fill;
+		font-size: $font-footnote;
+		color: $color-label-tertiary;
 		font-weight: 500;
-		transition: all 0.2s ease;
+		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
 		&.active {
-			background: #007aff;
+			background: $color-label;
 			color: #fff;
-			box-shadow: 0 4rpx 12rpx rgba(0, 122, 255, 0.3);
 		}
 		&:active { transform: scale(0.92); }
 	}
@@ -188,35 +175,13 @@
 .desc-area {
 	width: 100%;
 	height: 160rpx;
-	font-size: 30rpx;
-	color: #1c1c1e;
+	font-size: $font-body;
+	color: $color-label;
 	line-height: 1.6;
 }
 
 .bottom-action {
-	position: fixed;
-	bottom: 0;
-	left: 0;
-	right: 0;
-	padding: 20rpx 32rpx;
-	padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
-	background: rgba(242, 242, 247, 0.85);
-	backdrop-filter: blur(20px);
-	-webkit-backdrop-filter: blur(20px);
-
-	.save-btn {
-		background: #007aff;
-		color: #fff;
-		text-align: center;
-		padding: 28rpx 0;
-		border-radius: 16rpx;
-		font-size: 32rpx;
-		font-weight: 600;
-		box-shadow: 0 4rpx 16rpx rgba(0, 122, 255, 0.3);
-		transition: all 0.15s ease;
-
-		&:active { transform: scale(0.98); opacity: 0.9; }
-		&.loading { opacity: 0.6; }
-	}
+	@include bottom-action-bar;
+	.save-btn { @include primary-button; }
 }
 </style>

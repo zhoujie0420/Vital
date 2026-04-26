@@ -33,6 +33,38 @@ func (s *DietService) DeleteRecord(id uint, userID uint) error {
 	return s.dietDAO.Delete(id, userID)
 }
 
+func (s *DietService) UpdateRecord(id uint, userID uint, req *model.UpdateDietRequest) (*model.DietRecord, error) {
+	updates := map[string]interface{}{}
+	if req.MealType != "" {
+		updates["meal_type"] = req.MealType
+	}
+	if req.FoodItems != "" {
+		updates["food_items"] = req.FoodItems
+	}
+	if req.TotalCalories > 0 {
+		updates["total_calories"] = req.TotalCalories
+	}
+	if req.Protein > 0 {
+		updates["protein"] = req.Protein
+	}
+	if req.Carbs > 0 {
+		updates["carbs"] = req.Carbs
+	}
+	if req.Fat > 0 {
+		updates["fat"] = req.Fat
+	}
+	if req.WaterIntake > 0 {
+		updates["water_intake"] = req.WaterIntake
+	}
+	if req.Notes != "" {
+		updates["notes"] = req.Notes
+	}
+	if len(updates) == 0 {
+		return nil, errors.New("没有可更新的字段")
+	}
+	return s.dietDAO.Update(id, userID, updates)
+}
+
 func (s *DietService) GetRecords(userID uint, page, pageSize int) ([]model.DietRecord, int64, error) {
 	if page < 1 {
 		page = 1
