@@ -1,38 +1,11 @@
-name: 构建并部署
+name: 部署
 
 on:
   push:
     branches: [main]
 
 jobs:
-  build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - name: 拉取代码
-        uses: actions/checkout@v4
-
-      - name: 登录 Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: 构建并推送 API 镜像
-        uses: docker/build-push-action@v5
-        with:
-          context: ./vital-fitness/backend
-          push: true
-          tags: jiezhou8917/vital-api:latest
-
-      - name: 构建并推送 Web 镜像
-        uses: docker/build-push-action@v5
-        with:
-          context: ./vital-fitness/frontend
-          push: true
-          tags: jiezhou8917/vital-web:latest
-
   deploy:
-    needs: build-and-push
     runs-on: ubuntu-latest
     steps:
       - name: 部署到服务器
@@ -41,9 +14,10 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          command_timeout: 10m
+          command_timeout: 15m
           script: |
             cd /opt/vital-fitness
-            docker compose pull api web
-            docker compose up -d --force-recreate api web
+            git pull origin main
+            cd vital-fitness
+            docker compose up -d --build --force-recreate api web
             docker image prune -f
