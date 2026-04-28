@@ -9,7 +9,9 @@
 		<view class="list">
 			<view v-for="(r, i) in moodList" :key="i" class="mood-card">
 				<view class="mood-top">
-					<text class="mood-emoji">{{ getEmoji(r.mood_score) }}</text>
+					<view class="mood-face" :style="{ background: getMoodColor(r.mood_score) }">
+						<text class="mood-face-score">{{ r.mood_score }}</text>
+					</view>
 					<view class="mood-meta">
 						<text class="mood-text">{{ getMoodText(r.mood_score) }}</text>
 						<text class="mood-date">{{ formatDate(r.record_date) }}</text>
@@ -26,7 +28,9 @@
 		</view>
 
 		<view v-if="moodList.length === 0" class="empty">
-			<text class="empty-icon">😊</text>
+			<view class="empty-icon">
+				<text class="empty-icon-letter">M</text>
+			</view>
 			<text class="empty-title">暂无心情记录</text>
 			<text class="empty-desc">记录每天的心情，关注内心变化</text>
 			<view class="empty-btn" @tap="addMood">
@@ -63,11 +67,11 @@
 				return (date.getMonth()+1) + '月' + date.getDate() + '日'
 			},
 			getEmoji(score) {
-				if (score >= 9) return '😍'
-				if (score >= 7) return '😊'
-				if (score >= 5) return '😐'
-				if (score >= 3) return '😔'
-				return '😫'
+				if (score >= 9) return ':D'
+				if (score >= 7) return ':)'
+				if (score >= 5) return '-'
+				if (score >= 3) return ':|'
+				return ':('
 			},
 			getMoodText(score) {
 				if (score >= 9) return '极佳'
@@ -75,6 +79,13 @@
 				if (score >= 5) return '一般'
 				if (score >= 3) return '较差'
 				return '糟糕'
+			},
+			getMoodColor(score) {
+				if (score >= 9) return '#EC4899'
+				if (score >= 7) return '#10B981'
+				if (score >= 5) return '#EAB308'
+				if (score >= 3) return '#F97316'
+				return '#EF4444'
 			}
 		}
 	}
@@ -127,9 +138,21 @@
 		display: flex;
 		align-items: center;
 
-		.mood-emoji {
-			font-size: 56rpx;
+		.mood-face {
+			width: 56rpx;
+			height: 56rpx;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
 			margin-right: $spacing-md;
+			flex-shrink: 0;
+			opacity: 0.85;
+		}
+		.mood-face-score {
+			font-size: $font-subhead;
+			font-weight: 700;
+			color: #fff;
 		}
 
 		.mood-meta {
@@ -190,5 +213,11 @@
 
 .empty {
 	@include empty-state;
+
+	.empty-icon-letter {
+		font-size: 44rpx;
+		font-weight: 700;
+		color: $color-label-quaternary;
+	}
 }
 </style>

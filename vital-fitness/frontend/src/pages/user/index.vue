@@ -20,21 +20,36 @@
 		<view class="menu-card">
 			<view class="menu-row" @tap="goTo('/pages/user/profile')">
 				<view class="menu-left">
-					<view class="menu-icon bg-blue"><text>👤</text></view>
+					<view class="menu-icon bg-primary">
+						<text class="menu-icon-letter">P</text>
+					</view>
 					<text class="menu-text">个人资料</text>
 				</view>
 				<text class="sf-chevron">›</text>
 			</view>
 			<view class="menu-row" @tap="goTo('/pages/statistics/index')">
 				<view class="menu-left">
-					<view class="menu-icon bg-green"><text>📊</text></view>
+					<view class="menu-icon bg-green">
+						<text class="menu-icon-letter">S</text>
+					</view>
 					<text class="menu-text">数据统计</text>
+				</view>
+				<text class="sf-chevron">›</text>
+			</view>
+			<view class="menu-row" @tap="goTo('/pages/diet/plan')">
+				<view class="menu-left">
+					<view class="menu-icon bg-teal">
+						<text class="menu-icon-letter">D</text>
+					</view>
+					<text class="menu-text">饮食规划</text>
 				</view>
 				<text class="sf-chevron">›</text>
 			</view>
 			<view class="menu-row last" @tap="goTo('/pages/user/settings')">
 				<view class="menu-left">
-					<view class="menu-icon bg-gray"><text>⚙️</text></view>
+					<view class="menu-icon bg-gray">
+						<text class="menu-icon-letter">G</text>
+					</view>
 					<text class="menu-text">设置</text>
 				</view>
 				<text class="sf-chevron">›</text>
@@ -94,10 +109,7 @@
 
 .page-header {
 	margin-bottom: $spacing-lg;
-
-	.page-title {
-		@include page-title;
-	}
+	.page-title { @include page-title; }
 }
 
 // --- Profile Card ---
@@ -113,12 +125,12 @@
 		width: 108rpx;
 		height: 108rpx;
 		border-radius: 50%;
-		background: linear-gradient(135deg, $color-primary, $color-indigo);
+		background: $color-primary;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		margin-right: $spacing-lg;
-		box-shadow: 0 4rpx 20rpx rgba(0, 122, 255, 0.25);
+		box-shadow: 0 4rpx 16rpx rgba(16, 185, 129, 0.25);
 		flex-shrink: 0;
 
 		.avatar-text {
@@ -136,6 +148,7 @@
 			font-size: $font-title3;
 			font-weight: 600;
 			color: $color-label;
+			letter-spacing: -0.5rpx;
 		}
 		.profile-sub {
 			display: block;
@@ -191,12 +204,28 @@
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				font-size: 28rpx;
 				flex-shrink: 0;
 			}
-			.bg-blue { background: $color-primary-light; }
-			.bg-green { background: $color-green-light; }
-			.bg-gray { background: $color-fill-secondary; }
+			.menu-icon-letter {
+				font-size: $font-subhead;
+				font-weight: 700;
+			}
+			.bg-primary {
+				background: $color-primary-light;
+				.menu-icon-letter { color: $color-primary; }
+			}
+			.bg-green {
+				background: $color-green-light;
+				.menu-icon-letter { color: $color-green; }
+			}
+			.bg-teal {
+				background: $color-teal-light;
+				.menu-icon-letter { color: $color-teal; }
+			}
+			.bg-gray {
+				background: $color-fill-secondary;
+				.menu-icon-letter { color: $color-label-tertiary; }
+			}
 
 			.menu-text {
 				font-size: $font-body;
@@ -223,7 +252,7 @@
 	.logout-text {
 		font-size: $font-body;
 		color: $color-red;
-		font-weight: 400;
+		font-weight: 500;
 	}
 }
 </style>

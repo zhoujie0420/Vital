@@ -3,15 +3,12 @@
 		<view class="bg-layer">
 			<view class="bg-orb orb-1"></view>
 			<view class="bg-orb orb-2"></view>
-			<view class="bg-orb orb-3"></view>
 		</view>
 
 		<view class="content">
 			<view class="logo-section">
-				<view class="logo-ring">
-					<view class="logo-ring-inner">
-						<text class="logo-emoji">💪</text>
-					</view>
+				<view class="logo-mark">
+					<text class="logo-letter">V</text>
 				</view>
 				<text class="app-title">Vital Fitness</text>
 				<text class="app-subtitle">记录每一个进步的瞬间</text>
@@ -62,7 +59,7 @@
 
 .page {
 	min-height: 100vh;
-	background: #000;
+	background: #111110;
 	position: relative;
 	overflow: hidden;
 }
@@ -74,22 +71,17 @@
 	.bg-orb {
 		position: absolute;
 		border-radius: 50%;
-		filter: blur(100rpx);
+		filter: blur(120rpx);
 	}
 	.orb-1 {
-		width: 480rpx; height: 480rpx;
-		background: rgba(0, 122, 255, 0.45);
-		top: -80rpx; right: -80rpx;
+		width: 520rpx; height: 520rpx;
+		background: rgba(16, 185, 129, 0.20);
+		top: -100rpx; right: -120rpx;
 	}
 	.orb-2 {
-		width: 560rpx; height: 560rpx;
-		background: rgba(88, 86, 214, 0.35);
-		top: 320rpx; left: -180rpx;
-	}
-	.orb-3 {
-		width: 380rpx; height: 380rpx;
-		background: rgba(175, 82, 222, 0.25);
-		bottom: 120rpx; right: -40rpx;
+		width: 480rpx; height: 480rpx;
+		background: rgba(20, 184, 166, 0.12);
+		bottom: 80rpx; left: -160rpx;
 	}
 }
 
@@ -107,67 +99,63 @@
 	text-align: center;
 	margin-bottom: 120rpx;
 
-	.logo-ring {
-		width: 160rpx;
-		height: 160rpx;
-		border-radius: 50%;
-		border: 3rpx solid rgba(255, 255, 255, 0.12);
+	.logo-mark {
+		width: 140rpx;
+		height: 140rpx;
+		border-radius: $radius-2xl;
+		background: $color-primary;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		margin: 0 auto 32rpx;
+		margin: 0 auto 36rpx;
+		box-shadow: 0 8rpx 40rpx rgba(16, 185, 129, 0.3);
 
-		.logo-ring-inner {
-			width: 130rpx;
-			height: 130rpx;
-			border-radius: 50%;
-			background: rgba(255, 255, 255, 0.06);
-			backdrop-filter: blur(20px);
-			-webkit-backdrop-filter: blur(20px);
-			display: flex;
-			align-items: center;
-			justify-content: center;
-		}
-
-		.logo-emoji {
+		.logo-letter {
 			font-size: 64rpx;
+			font-weight: 700;
+			color: #fff;
+			letter-spacing: -2rpx;
 		}
 	}
 
 	.app-title {
 		display: block;
-		font-size: 56rpx;
+		font-size: 52rpx;
 		font-weight: 700;
-		color: #fff;
-		letter-spacing: -1rpx;
+		color: #FAFAF9;
+		letter-spacing: -1.5rpx;
 		margin-bottom: $spacing-sm;
 	}
 	.app-subtitle {
 		display: block;
 		font-size: $font-subhead;
-		color: rgba(255, 255, 255, 0.45);
+		color: rgba(250, 250, 249, 0.35);
 		font-weight: 400;
+		letter-spacing: 0.5rpx;
 	}
 }
 
 .login-section {
 	.login-btn {
-		background: rgba(255, 255, 255, 0.12);
-		border: 0.5rpx solid rgba(255, 255, 255, 0.15);
+		background: rgba(250, 250, 249, 0.08);
+		border: 0.5rpx solid rgba(250, 250, 249, 0.10);
 		backdrop-filter: saturate(180%) blur(40px);
 		-webkit-backdrop-filter: saturate(180%) blur(40px);
 		border-radius: $radius-lg;
 		padding: $spacing-xl 0;
 		text-align: center;
-		transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+		transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 
-		&:active { transform: scale(0.98); background: rgba(255, 255, 255, 0.18); }
+		&:active {
+			transform: scale(0.97);
+			background: rgba(250, 250, 249, 0.14);
+		}
 		&.loading { opacity: 0.5; pointer-events: none; }
 
 		.btn-text {
 			font-size: $font-callout;
 			font-weight: 600;
-			color: #fff;
+			color: #FAFAF9;
 		}
 	}
 
@@ -175,7 +163,7 @@
 		display: block;
 		text-align: center;
 		font-size: $font-caption1;
-		color: rgba(255, 255, 255, 0.25);
+		color: rgba(250, 250, 249, 0.2);
 		margin-top: $spacing-lg;
 	}
 }

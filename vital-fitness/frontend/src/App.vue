@@ -41,7 +41,8 @@
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
 		color: $color-label;
-		line-height: 1.4;
+		line-height: 1.5;
+		letter-spacing: -0.2rpx;
 	}
 
 	/* 全局滚动条隐藏 */
@@ -54,5 +55,10 @@
 	/* 全局 view 盒模型 */
 	view, text {
 		box-sizing: border-box;
+	}
+
+	/* 全局数字等宽 */
+	.tabular-nums {
+		font-variant-numeric: tabular-nums;
 	}
 </style>

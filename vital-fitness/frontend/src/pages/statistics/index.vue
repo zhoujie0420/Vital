@@ -16,23 +16,26 @@
 		<view class="stat-card">
 			<view class="stat-header">
 				<view class="stat-header-left">
-					<view class="stat-dot dot-blue"></view>
+					<view class="stat-dot dot-red"></view>
 					<text class="stat-label">训练次数</text>
 				</view>
-				<text class="stat-icon">💪</text>
+				<text class="stat-summary" v-if="workoutTotal > 0">共 {{ workoutTotal }} 次</text>
 			</view>
 			<view v-if="stats.workout_stats && stats.workout_stats.length > 0" class="chart-area">
 				<view class="bar-chart">
 					<view v-for="(s, i) in stats.workout_stats" :key="i" class="bar-col">
 						<text class="bar-val" v-if="s.count > 0">{{ s.count }}</text>
 						<view class="bar-track">
-							<view class="bar-fill fill-blue" :style="{ height: getWorkoutBarHeight(s.count) }"></view>
+							<view class="bar-fill fill-red" :style="{ height: getWorkoutBarHeight(s.count) }"></view>
 						</view>
 						<text class="bar-day">{{ formatDay(s.day) }}</text>
 					</view>
 				</view>
 			</view>
 			<view v-else class="no-data">
+				<view class="no-data-icon">
+					<text class="no-data-letter">W</text>
+				</view>
 				<text class="no-data-text">暂无训练数据</text>
 			</view>
 		</view>
@@ -44,7 +47,9 @@
 					<view class="stat-dot dot-green"></view>
 					<text class="stat-label">体重趋势</text>
 				</view>
-				<text class="stat-icon">⚖️</text>
+				<text class="stat-summary" v-if="stats.weight_trend && stats.weight_trend.length > 0">
+					{{ stats.weight_trend[0].weight }} kg
+				</text>
 			</view>
 			<view v-if="stats.weight_trend && stats.weight_trend.length > 0" class="trend-area">
 				<view v-for="(w, i) in stats.weight_trend" :key="i" class="trend-row">
@@ -56,6 +61,9 @@
 				</view>
 			</view>
 			<view v-else class="no-data">
+				<view class="no-data-icon">
+					<text class="no-data-letter">B</text>
+				</view>
 				<text class="no-data-text">暂无体重数据</text>
 			</view>
 		</view>
@@ -67,7 +75,7 @@
 					<view class="stat-dot dot-orange"></view>
 					<text class="stat-label">热量摄入</text>
 				</view>
-				<text class="stat-icon">🍽️</text>
+				<text class="stat-summary" v-if="dietTotal > 0">日均 {{ dietAvg }} kcal</text>
 			</view>
 			<view v-if="stats.diet_stats && stats.diet_stats.length > 0" class="chart-area">
 				<view class="bar-chart">
@@ -81,6 +89,9 @@
 				</view>
 			</view>
 			<view v-else class="no-data">
+				<view class="no-data-icon">
+					<text class="no-data-letter">D</text>
+				</view>
 				<text class="no-data-text">暂无饮食数据</text>
 			</view>
 		</view>
@@ -106,6 +117,17 @@
 			topPadding() {
 				const app = getApp()
 				return (app.globalData?.customBarHeight || 88) + 8
+			},
+			workoutTotal() {
+				return (this.stats.workout_stats || []).reduce((s, i) => s + i.count, 0)
+			},
+			dietTotal() {
+				return (this.stats.diet_stats || []).reduce((s, i) => s + i.calories, 0)
+			},
+			dietAvg() {
+				const list = (this.stats.diet_stats || []).filter(i => i.calories > 0)
+				if (list.length === 0) return 0
+				return Math.round(list.reduce((s, i) => s + i.calories, 0) / list.length)
 			}
 		},
 		onShow() { this.load() },
@@ -154,37 +176,13 @@
 
 .page-header {
 	margin-bottom: $spacing-lg;
-
-	.page-title {
-		@include page-title;
-	}
+	.page-title { @include page-title; }
 }
 
 // --- Period Selector ---
 .period-bar {
-	display: flex;
-	background: $color-fill;
-	border-radius: $radius-md;
-	padding: 4rpx;
+	@include segment-control;
 	margin-bottom: $spacing-xl;
-
-	.period-item {
-		flex: 1;
-		text-align: center;
-		padding: $spacing-sm 0;
-		font-size: $font-footnote;
-		font-weight: 500;
-		color: $color-label-tertiary;
-		border-radius: calc(#{$radius-md} - 4rpx);
-		transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-
-		&.active {
-			background: $color-bg-elevated;
-			color: $color-label;
-			font-weight: 600;
-			box-shadow: 0 1rpx 8rpx rgba(0, 0, 0, 0.08), 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
-		}
-	}
 }
 
 // --- Stat Card ---
@@ -206,21 +204,25 @@
 		}
 
 		.stat-dot {
-			width: 16rpx;
-			height: 16rpx;
+			width: 14rpx;
+			height: 14rpx;
 			border-radius: 50%;
 		}
-		.dot-blue { background: $color-primary; }
+		.dot-red { background: $color-red; }
 		.dot-green { background: $color-green; }
-		.dot-orange { background: $color-orange; }
+		.dot-orange { background: $color-accent; }
 
 		.stat-label {
 			font-size: $font-headline;
 			font-weight: 600;
 			color: $color-label;
+			letter-spacing: -0.3rpx;
 		}
-		.stat-icon {
-			font-size: 28rpx;
+		.stat-summary {
+			font-size: $font-caption1;
+			color: $color-label-quaternary;
+			font-weight: 500;
+			font-variant-numeric: tabular-nums;
 		}
 	}
 }
@@ -229,6 +231,21 @@
 	padding: $spacing-2xl 0;
 	text-align: center;
 
+	.no-data-icon {
+		width: 72rpx;
+		height: 72rpx;
+		border-radius: 50%;
+		background: $color-fill;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0 auto $spacing-sm;
+	}
+	.no-data-letter {
+		font-size: $font-headline;
+		font-weight: 700;
+		color: $color-label-quaternary;
+	}
 	.no-data-text {
 		font-size: $font-subhead;
 		color: $color-separator-opaque;
@@ -261,9 +278,9 @@
 		}
 
 		.bar-track {
-			width: 36rpx;
+			width: 32rpx;
 			background: $color-fill;
-			border-radius: 18rpx;
+			border-radius: 16rpx;
 			overflow: hidden;
 			display: flex;
 			align-items: flex-end;
@@ -272,15 +289,15 @@
 
 		.bar-fill {
 			width: 100%;
-			border-radius: 18rpx;
+			border-radius: 16rpx;
 			min-height: 8rpx;
-			transition: height 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+			transition: height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 		}
-		.fill-blue {
-			background: linear-gradient(180deg, $color-primary, #0062cc);
+		.fill-red {
+			background: linear-gradient(180deg, $color-red, #DC2626);
 		}
 		.fill-orange {
-			background: linear-gradient(180deg, $color-orange, #e07800);
+			background: linear-gradient(180deg, $color-accent, #EA580C);
 		}
 
 		.bar-day {
@@ -314,18 +331,18 @@
 
 	.trend-bar-track {
 		flex: 1;
-		height: 24rpx;
+		height: 20rpx;
 		background: $color-fill;
-		border-radius: 12rpx;
+		border-radius: 10rpx;
 		margin: 0 $spacing-md;
 		overflow: hidden;
 
 		.trend-bar-fill {
 			height: 100%;
 			background: linear-gradient(90deg, $color-green, $color-mint);
-			border-radius: 12rpx;
+			border-radius: 10rpx;
 			min-width: 8rpx;
-			transition: width 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+			transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 		}
 	}
 

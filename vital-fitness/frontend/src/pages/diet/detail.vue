@@ -8,49 +8,52 @@
 
 		<!-- 当天汇总 -->
 		<view class="summary-card" v-if="records.length > 0">
-			<view class="summary-main">
-				<text class="summary-val">{{ totalCal }}</text>
+			<view class="summary-top">
+				<text class="summary-cal">{{ totalCal }}</text>
 				<text class="summary-unit">千卡</text>
 			</view>
 			<view class="summary-macros">
-				<view class="macro">
-					<view class="macro-dot dot-blue"></view>
-					<text class="macro-text">蛋白 {{ totalProtein }}g</text>
+				<view class="macro-col">
+					<view class="macro-track"><view class="macro-fill fill-teal" :style="{ width: macroPercent(totalProtein, 120) }"></view></view>
+					<text class="macro-label">蛋白 {{ totalProtein }}g</text>
 				</view>
-				<view class="macro">
-					<view class="macro-dot dot-orange"></view>
-					<text class="macro-text">碳水 {{ totalCarbs }}g</text>
+				<view class="macro-col">
+					<view class="macro-track"><view class="macro-fill fill-orange" :style="{ width: macroPercent(totalCarbs, 250) }"></view></view>
+					<text class="macro-label">碳水 {{ totalCarbs }}g</text>
 				</view>
-				<view class="macro">
-					<view class="macro-dot dot-yellow"></view>
-					<text class="macro-text">脂肪 {{ totalFat }}g</text>
+				<view class="macro-col">
+					<view class="macro-track"><view class="macro-fill fill-yellow" :style="{ width: macroPercent(totalFat, 65) }"></view></view>
+					<text class="macro-label">脂肪 {{ totalFat }}g</text>
 				</view>
 			</view>
 		</view>
 
-		<!-- 每餐记录 -->
-		<view v-for="(r, i) in records" :key="r.id" class="meal-card">
-			<view class="meal-header">
-				<view class="meal-badge" :class="'badge-' + r.meal_type">
-					<text>{{ getMealName(r.meal_type) }}</text>
+		<!-- 按餐次分组 -->
+		<view v-for="meal in mealOrder" :key="meal.type">
+			<view v-if="getMealRecords(meal.type).length > 0" class="meal-group">
+				<view class="meal-group-header">
+					<view class="meal-group-left">
+						<view class="meal-dot" :class="'dot-' + meal.type"></view>
+						<text class="meal-group-title">{{ meal.name }}</text>
+					</view>
+					<text class="meal-group-cal">{{ getMealCal(meal.type) }} kcal</text>
 				</view>
-				<text class="meal-cal">{{ r.total_calories }} kcal</text>
-			</view>
-			<view class="meal-macros">
-				<text class="meal-macro">蛋白 {{ r.protein }}g</text>
-				<text class="meal-sep">·</text>
-				<text class="meal-macro">碳水 {{ r.carbs }}g</text>
-				<text class="meal-sep">·</text>
-				<text class="meal-macro">脂肪 {{ r.fat }}g</text>
-			</view>
-			<text v-if="r.notes" class="meal-notes">{{ r.notes }}</text>
-			<view class="meal-actions">
-				<text class="action-link action-delete" @tap="confirmDelete(r)">删除</text>
+
+				<view v-for="r in getMealRecords(meal.type)" :key="r.id" class="meal-record">
+					<view class="meal-record-info">
+						<text class="meal-record-cal">{{ r.total_calories }} kcal</text>
+						<text class="meal-record-macro">蛋白{{ r.protein }}g · 碳水{{ r.carbs }}g · 脂肪{{ r.fat }}g</text>
+						<text v-if="r.notes" class="meal-record-notes">{{ r.notes }}</text>
+					</view>
+					<text class="meal-record-delete" @tap="confirmDelete(r)">删除</text>
+				</view>
 			</view>
 		</view>
 
 		<view v-if="records.length === 0" class="empty">
-			<text class="empty-icon">🍽️</text>
+			<view class="empty-icon">
+				<text class="empty-icon-letter">D</text>
+			</view>
 			<text class="empty-title">当天暂无饮食记录</text>
 			<text class="empty-desc">点击右上角添加记录</text>
 		</view>
@@ -61,7 +64,17 @@
 	import { getDietRecords, deleteDietRecord } from '../../api/diet'
 
 	export default {
-		data() { return { date: '', records: [] } },
+		data() {
+			return {
+				date: '', records: [],
+				mealOrder: [
+					{ type: 'breakfast', name: '早餐' },
+					{ type: 'lunch', name: '午餐' },
+					{ type: 'dinner', name: '晚餐' },
+					{ type: 'snack', name: '加餐' }
+				]
+			}
+		},
 		computed: {
 			topPadding() {
 				const app = getApp()
@@ -78,17 +91,19 @@
 				return (d.getMonth() + 1) + '月' + d.getDate() + '日饮食'
 			},
 			totalCal() { return this.records.reduce((s, r) => s + (r.total_calories || 0), 0).toFixed(0) },
-			totalProtein() { return this.records.reduce((s, r) => s + (r.protein || 0), 0).toFixed(1) },
-			totalCarbs() { return this.records.reduce((s, r) => s + (r.carbs || 0), 0).toFixed(1) },
-			totalFat() { return this.records.reduce((s, r) => s + (r.fat || 0), 0).toFixed(1) }
+			totalProtein() { return this.records.reduce((s, r) => s + (r.protein || 0), 0).toFixed(0) },
+			totalCarbs() { return this.records.reduce((s, r) => s + (r.carbs || 0), 0).toFixed(0) },
+			totalFat() { return this.records.reduce((s, r) => s + (r.fat || 0), 0).toFixed(0) }
 		},
 		onLoad(opts) { this.date = opts.date || '' },
 		onShow() { this.load() },
 		methods: {
 			goBack() { uni.navigateBack() },
 			goAdd() { uni.navigateTo({ url: '/pages/diet/add' }) },
-			getMealName(t) {
-				return { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐' }[t] || t
+			getMealRecords(type) { return this.records.filter(r => r.meal_type === type) },
+			getMealCal(type) { return this.getMealRecords(type).reduce((s, r) => s + (r.total_calories || 0), 0).toFixed(0) },
+			macroPercent(val, target) {
+				return Math.min((parseFloat(val) / target) * 100, 100) + '%'
 			},
 			async load() {
 				if (!this.date) return
@@ -102,9 +117,10 @@
 				} catch (e) {}
 			},
 			confirmDelete(r) {
+				const name = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐' }[r.meal_type] || ''
 				uni.showModal({
 					title: '确认删除',
-					content: `删除这条${this.getMealName(r.meal_type)}记录？`,
+					content: `删除这条${name}记录？`,
 					success: async (res) => {
 						if (res.confirm) {
 							try {
@@ -139,127 +155,156 @@
 
 // --- Summary Card ---
 .summary-card {
-	border-radius: $radius-xl;
+	@include card;
 	padding: $spacing-xl;
-	margin-bottom: $spacing-md;
-	background: linear-gradient(145deg, #1C1C1E 0%, #2C2C2E 100%);
+	margin-bottom: $spacing-lg;
 
-	.summary-main {
+	.summary-top {
 		display: flex;
 		align-items: baseline;
-		margin-bottom: $spacing-md;
+		margin-bottom: $spacing-lg;
 
-		.summary-val {
-			font-size: 60rpx;
+		.summary-cal {
+			font-size: 56rpx;
 			font-weight: 700;
-			color: #fff;
+			color: $color-primary;
 			letter-spacing: -2rpx;
 			font-variant-numeric: tabular-nums;
 		}
 		.summary-unit {
 			font-size: $font-footnote;
-			color: rgba(255, 255, 255, 0.5);
+			color: $color-label-quaternary;
 			margin-left: $spacing-xs;
 		}
 	}
 
 	.summary-macros {
 		display: flex;
-		gap: $spacing-lg;
-
-		.macro {
-			display: flex;
-			align-items: center;
-			gap: $spacing-xs;
-
-			.macro-dot {
-				width: 12rpx;
-				height: 12rpx;
-				border-radius: 50%;
-			}
-			.dot-blue { background: $color-teal; }
-			.dot-orange { background: $color-orange; }
-			.dot-yellow { background: $color-yellow; }
-			.macro-text {
-				font-size: $font-caption1;
-				color: rgba(255, 255, 255, 0.65);
-				font-weight: 500;
-			}
-		}
+		gap: $spacing-md;
 	}
 }
 
-// --- Meal Card ---
-.meal-card {
+.macro-col {
+	flex: 1;
+
+	.macro-label {
+		display: block;
+		font-size: $font-caption2;
+		color: $color-label-tertiary;
+		font-weight: 500;
+		margin-top: $spacing-xs;
+		text-align: center;
+	}
+}
+
+.macro-track {
+	height: 12rpx;
+	background: $color-fill;
+	border-radius: 6rpx;
+	overflow: hidden;
+}
+
+.macro-fill {
+	height: 100%;
+	border-radius: 6rpx;
+	min-width: 4rpx;
+	transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.fill-teal { background: $color-teal; }
+.fill-orange { background: $color-orange; }
+.fill-yellow { background: $color-yellow; }
+
+// --- Meal Group ---
+.meal-group {
 	@include card;
+	padding: $spacing-lg $spacing-xl;
 	margin-bottom: $spacing-sm;
+}
 
-	.meal-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-bottom: $spacing-md;
+.meal-group-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
 
-		.meal-badge {
-			padding: 6rpx $spacing-md;
-			border-radius: $spacing-xs;
-			font-size: $font-caption1;
+.meal-group-left {
+	display: flex;
+	align-items: center;
+	gap: $spacing-sm;
+}
+
+.meal-dot {
+	width: 14rpx;
+	height: 14rpx;
+	border-radius: 50%;
+}
+.dot-breakfast { background: $color-orange; }
+.dot-lunch { background: $color-green; }
+.dot-dinner { background: $color-primary; }
+.dot-snack { background: $color-pink; }
+
+.meal-group-title {
+	font-size: $font-headline;
+	font-weight: 600;
+	color: $color-label;
+}
+
+.meal-group-cal {
+	font-size: $font-subhead;
+	font-weight: 700;
+	color: $color-accent;
+	font-variant-numeric: tabular-nums;
+}
+
+.meal-record {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: $spacing-md 0;
+	border-top: 0.5rpx solid $color-separator;
+	margin-top: $spacing-md;
+
+	.meal-record-info {
+		flex: 1;
+
+		.meal-record-cal {
+			display: block;
+			font-size: $font-body;
 			font-weight: 600;
-		}
-		.badge-breakfast { background: $color-orange-light; color: $color-orange; }
-		.badge-lunch { background: $color-green-light; color: $color-green; }
-		.badge-dinner { background: $color-primary-light; color: $color-primary; }
-		.badge-snack { background: $color-pink-light; color: $color-pink; }
-
-		.meal-cal {
-			font-size: $font-headline;
-			font-weight: 700;
 			color: $color-label;
 			font-variant-numeric: tabular-nums;
 		}
-	}
-
-	.meal-macros {
-		display: flex;
-		align-items: center;
-		gap: $spacing-xs;
-		margin-bottom: $spacing-sm;
-
-		.meal-macro {
-			font-size: $font-caption1;
+		.meal-record-macro {
+			display: block;
+			font-size: $font-caption2;
 			color: $color-label-quaternary;
-			font-weight: 500;
+			margin-top: 4rpx;
 		}
-		.meal-sep {
+		.meal-record-notes {
+			display: block;
 			font-size: $font-caption1;
-			color: $color-separator-opaque;
+			color: $color-label-tertiary;
+			margin-top: 4rpx;
+			line-height: 1.4;
 		}
 	}
 
-	.meal-notes {
-		display: block;
-		font-size: $font-footnote;
-		color: $color-label-quaternary;
-		margin-bottom: $spacing-sm;
-		line-height: 1.5;
-	}
-
-	.meal-actions {
-		padding-top: $spacing-md;
-		border-top: 0.5rpx solid $color-separator;
-
-		.action-link {
-			font-size: $font-subhead;
-			font-weight: 500;
-			padding: $spacing-xs 0;
-
-			&.action-delete { color: $color-red; }
-			&:active { opacity: 0.5; }
-		}
+	.meal-record-delete {
+		font-size: $font-caption1;
+		color: $color-red;
+		font-weight: 500;
+		padding: $spacing-xs $spacing-sm;
+		&:active { opacity: 0.5; }
 	}
 }
 
 .empty {
 	@include empty-state;
+
+	.empty-icon-letter {
+		font-size: 44rpx;
+		font-weight: 700;
+		color: $color-label-quaternary;
+	}
 }
 </style>

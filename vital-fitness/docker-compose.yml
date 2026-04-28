@@ -38,6 +38,8 @@ services:
       - DB_NAME=vital_fitness
       - JWT_SECRET=vital_fitness_secret_key
       - JWT_EXPIRE=24
+      - WX_APP_ID=wxcfe982f21211f9c6
+      - WX_APP_SECRET=7a72fe7769b53e048bb7a8e1b10ccfaa
     depends_on:
       - mysql
     networks:

@@ -26,29 +26,50 @@
 			</view>
 		</view>
 
+		<!-- 组数记录 — Hevy/Strong 风格 -->
 		<view class="card" v-if="selectedExercise">
-			<text class="card-label">重量</text>
-			<view class="weight-display">
-				<view class="weight-btn" @tap="adjustWeight(-2.5)">
-					<text class="weight-btn-text">−</text>
+			<view class="exercise-header">
+				<text class="exercise-title">{{ selectedExercise.name }}</text>
+				<text class="exercise-cat">{{ selectedExercise.category }}</text>
+			</view>
+
+			<!-- 表头 -->
+			<view class="set-table-header">
+				<text class="col-set">组</text>
+				<text class="col-prev">上次</text>
+				<text class="col-weight">重量(kg)</text>
+				<text class="col-reps">次数</text>
+				<text class="col-action"></text>
+			</view>
+
+			<!-- 每组数据 -->
+			<view v-for="(set, i) in sets" :key="i" class="set-row" :class="{ done: set.done }">
+				<text class="col-set set-num">{{ i + 1 }}</text>
+				<text class="col-prev set-prev">—</text>
+				<view class="col-weight">
+					<input type="digit" v-model="set.weight" class="set-input" placeholder="0"
+						:class="{ filled: set.weight }" />
 				</view>
-				<view class="weight-center">
-					<input type="digit" v-model="weight" class="weight-num" placeholder="0" />
-					<text class="weight-unit">kg</text>
+				<view class="col-reps">
+					<input type="number" v-model="set.reps" class="set-input" placeholder="0"
+						:class="{ filled: set.reps }" />
 				</view>
-				<view class="weight-btn" @tap="adjustWeight(2.5)">
-					<text class="weight-btn-text">+</text>
+				<view class="col-action">
+					<view class="check-btn" :class="{ checked: set.done }" @tap="set.done = !set.done">
+						<text class="check-icon">✓</text>
+					</view>
 				</view>
 			</view>
-			<view class="quick-row">
-				<text class="quick-pill" v-for="w in [20, 40, 60, 80, 100]" :key="w"
-					:class="{ active: parseFloat(weight) === w }" @tap="weight = w">{{ w }}kg</text>
+
+			<!-- 添加组 -->
+			<view class="add-set-btn" @tap="addSet">
+				<text class="add-set-text">+ 添加一组</text>
 			</view>
 		</view>
 
 		<view class="bottom-action" v-if="selectedExercise">
 			<view class="save-btn" :class="{ loading: saving }" @tap="saveWorkout">
-				<text>{{ saving ? '保存中...' : '保存记录' }}</text>
+				<text>{{ saving ? '保存中...' : '保存训练' }}</text>
 			</view>
 		</view>
 	</view>
@@ -68,7 +89,22 @@
 	const currentCategory = ref('全部')
 	const exercises = ref([])
 	const selectedExercise = ref(null)
-	const weight = ref('')
+
+	const sets = ref([
+		{ weight: '', reps: '', done: false },
+		{ weight: '', reps: '', done: false },
+		{ weight: '', reps: '', done: false }
+	])
+
+	const addSet = () => {
+		// 复制上一组的重量和次数
+		const last = sets.value[sets.value.length - 1]
+		sets.value.push({
+			weight: last ? last.weight : '',
+			reps: last ? last.reps : '',
+			done: false
+		})
+	}
 
 	const filteredExercises = computed(() => {
 		if (currentCategory.value === '全部') return exercises.value
@@ -76,23 +112,33 @@
 	})
 
 	const goBack = () => uni.navigateBack()
-	const selectExercise = (ex) => { selectedExercise.value = ex }
-	const adjustWeight = (d) => {
-		const c = parseFloat(weight.value) || 0
-		if (c + d >= 0) weight.value = c + d
+
+	const selectExercise = (ex) => {
+		selectedExercise.value = ex
+		sets.value = [
+			{ weight: '', reps: '', done: false },
+			{ weight: '', reps: '', done: false },
+			{ weight: '', reps: '', done: false }
+		]
 	}
 
 	const saveWorkout = async () => {
-		if (!weight.value || parseFloat(weight.value) <= 0) {
-			uni.showToast({ title: '请输入重量', icon: 'none' }); return
+		const validSets = sets.value.filter(s => parseFloat(s.weight) > 0 && parseInt(s.reps) > 0)
+		if (validSets.length === 0) {
+			uni.showToast({ title: '请至少填写一组数据', icon: 'none' }); return
 		}
 		saving.value = true
 		try {
-			await createWorkout({
-				exercise_id: selectedExercise.value.id,
-				workout_date: new Date().toISOString(),
-				weight: parseFloat(weight.value), sets: 1, reps: 1
-			})
+			// 保存每一组有效数据
+			for (const s of validSets) {
+				await createWorkout({
+					exercise_id: selectedExercise.value.id,
+					workout_date: new Date().toISOString(),
+					weight: parseFloat(s.weight),
+					sets: validSets.length,
+					reps: parseInt(s.reps)
+				})
+			}
 			uni.showToast({ title: '保存成功', icon: 'success' })
 			setTimeout(() => uni.navigateBack(), 1000)
 		} catch (e) {} finally { saving.value = false }
@@ -118,7 +164,6 @@
 
 .nav-bar {
 	@include nav-bar;
-
 	.nav-back { font-size: $font-callout; color: $color-primary; font-weight: 500; }
 	.nav-title { font-size: $font-headline; font-weight: 600; color: $color-label; }
 	.nav-placeholder { width: 80rpx; }
@@ -127,7 +172,6 @@
 .card {
 	@include card;
 	margin-bottom: $spacing-md;
-
 	.card-label { @include card-label; }
 }
 
@@ -138,10 +182,7 @@
 	padding: 0 $spacing-xl;
 	margin-bottom: $spacing-md;
 
-	.cat-bar {
-		display: inline-flex;
-		gap: $spacing-sm;
-	}
+	.cat-bar { display: inline-flex; gap: $spacing-sm; }
 
 	.cat-pill {
 		display: inline-block;
@@ -151,12 +192,9 @@
 		font-size: $font-footnote;
 		color: $color-label-tertiary;
 		font-weight: 500;
-		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+		transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 
-		&.active {
-			background: $color-label;
-			color: #fff;
-		}
+		&.active { background: $color-label; color: #fff; }
 		&:active { transform: scale(0.94); }
 	}
 }
@@ -172,94 +210,150 @@
 		border-radius: $radius-md;
 		background: $color-fill;
 		border: 2rpx solid transparent;
-		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+		transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 
-		&.selected {
-			background: $color-primary-light;
-			border-color: $color-primary;
-		}
+		&.selected { background: $color-primary-light; border-color: $color-primary; }
 		&:active { transform: scale(0.94); }
 
-		.exercise-name {
-			font-size: $font-subhead;
-			color: $color-label;
-			font-weight: 500;
-		}
+		.exercise-name { font-size: $font-subhead; color: $color-label; font-weight: 500; }
 	}
 }
 
-// --- Weight Display ---
-.weight-display {
+// --- Exercise Header ---
+.exercise-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: $spacing-lg;
+
+	.exercise-title {
+		font-size: $font-headline;
+		font-weight: 700;
+		color: $color-primary;
+	}
+	.exercise-cat {
+		font-size: $font-caption1;
+		color: $color-label-quaternary;
+		font-weight: 500;
+		background: $color-fill;
+		padding: 4rpx $spacing-md;
+		border-radius: $spacing-xs;
+	}
+}
+
+// --- Set Table ---
+.set-table-header {
+	display: flex;
+	align-items: center;
+	padding: 0 0 $spacing-sm;
+	border-bottom: 0.5rpx solid $color-separator;
+
+	text {
+		font-size: $font-caption2;
+		font-weight: 600;
+		color: $color-label-quaternary;
+		text-transform: uppercase;
+		letter-spacing: 1rpx;
+	}
+}
+
+.col-set { width: 60rpx; text-align: center; }
+.col-prev { width: 100rpx; text-align: center; }
+.col-weight { flex: 1; text-align: center; }
+.col-reps { flex: 1; text-align: center; }
+.col-action { width: 64rpx; text-align: center; }
+
+.set-row {
+	display: flex;
+	align-items: center;
+	padding: $spacing-sm 0;
+	border-bottom: 0.5rpx solid $color-separator;
+	transition: background 0.2s ease;
+
+	&.done {
+		background: rgba(16, 185, 129, 0.04);
+		border-radius: $radius-sm;
+	}
+
+	&:last-of-type {
+		border-bottom: none;
+	}
+
+	.set-num {
+		font-size: $font-subhead;
+		font-weight: 700;
+		color: $color-label-tertiary;
+		text-align: center;
+	}
+	.set-prev {
+		font-size: $font-caption1;
+		color: $color-separator-opaque;
+		text-align: center;
+	}
+}
+
+.set-input {
+	width: 100%;
+	height: 64rpx;
+	background: $color-fill;
+	border-radius: $radius-sm;
+	text-align: center;
+	font-size: $font-subhead;
+	font-weight: 600;
+	color: $color-label;
+	font-variant-numeric: tabular-nums;
+	margin: 0 $spacing-xs;
+	transition: all 0.2s ease;
+
+	&.filled {
+		background: $color-primary-light;
+		color: $color-primary;
+	}
+}
+
+.check-btn {
+	width: 48rpx;
+	height: 48rpx;
+	border-radius: 50%;
+	border: 2rpx solid $color-separator-opaque;
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	padding: $spacing-lg 0;
+	margin: 0 auto;
+	transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
-	.weight-btn {
-		width: 72rpx;
-		height: 72rpx;
-		border-radius: 50%;
-		background: $color-fill;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		@include press-effect;
-
-		.weight-btn-text {
-			font-size: 44rpx;
-			color: $color-primary;
-			font-weight: 300;
-			line-height: 1;
-		}
+	.check-icon {
+		font-size: $font-caption1;
+		color: transparent;
+		font-weight: 700;
 	}
 
-	.weight-center {
-		display: flex;
-		align-items: baseline;
-		margin: 0 $spacing-xl;
+	&.checked {
+		background: $color-primary;
+		border-color: $color-primary;
 
-		.weight-num {
-			width: 180rpx;
-			text-align: center;
-			font-size: $font-largeTitle;
-			font-weight: 700;
-			color: $color-label;
-			letter-spacing: -2rpx;
-			font-variant-numeric: tabular-nums;
-		}
-		.weight-unit {
-			font-size: $font-subhead;
-			color: $color-label-quaternary;
-			margin-left: 4rpx;
-		}
+		.check-icon { color: #fff; }
 	}
+
+	&:active { transform: scale(0.9); }
 }
 
-.quick-row {
-	display: flex;
-	justify-content: center;
-	flex-wrap: wrap;
-	gap: $spacing-sm;
-	margin-top: $spacing-md;
+// --- Add Set ---
+.add-set-btn {
+	padding: $spacing-md 0 $spacing-xs;
+	text-align: center;
+	@include press-effect;
 
-	.quick-pill {
-		padding: $spacing-sm $spacing-lg;
-		background: $color-fill;
-		border-radius: $radius-full;
-		font-size: $font-footnote;
-		color: $color-label-tertiary;
-		font-weight: 500;
-		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-
-		&.active { background: $color-label; color: #fff; }
-		&:active { transform: scale(0.94); }
+	.add-set-text {
+		font-size: $font-subhead;
+		color: $color-primary;
+		font-weight: 600;
 	}
 }
 
 // --- Bottom Action ---
 .bottom-action {
 	@include bottom-action-bar;
-
 	.save-btn { @include primary-button; }
 }
 </style>

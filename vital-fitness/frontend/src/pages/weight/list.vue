@@ -27,7 +27,9 @@
 		</view>
 
 		<view v-if="weightList.length === 0" class="empty">
-			<text class="empty-icon">⚖️</text>
+			<view class="empty-icon">
+				<text class="empty-icon-letter">B</text>
+			</view>
 			<text class="empty-title">暂无体重记录</text>
 			<text class="empty-desc">定期记录体重，追踪你的变化</text>
 			<view class="empty-btn" @tap="addWeight">
@@ -192,5 +194,11 @@
 
 .empty {
 	@include empty-state;
+
+	.empty-icon-letter {
+		font-size: 44rpx;
+		font-weight: 700;
+		color: $color-label-quaternary;
+	}
 }
 </style>

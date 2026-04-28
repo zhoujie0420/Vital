@@ -9,14 +9,18 @@
 		<view class="menu-card">
 			<view class="menu-row">
 				<view class="menu-left">
-					<view class="menu-icon bg-purple"><text>📱</text></view>
+					<view class="menu-icon bg-purple">
+						<text class="menu-icon-letter">V</text>
+					</view>
 					<text class="menu-text">版本</text>
 				</view>
 				<text class="menu-value">v1.0.0</text>
 			</view>
 			<view class="menu-row last" @tap="clearCache">
 				<view class="menu-left">
-					<view class="menu-icon bg-orange"><text>🗑️</text></view>
+					<view class="menu-icon bg-orange">
+						<text class="menu-icon-letter">C</text>
+					</view>
 					<text class="menu-text">清除缓存</text>
 				</view>
 				<text class="sf-chevron">›</text>
@@ -115,11 +119,20 @@
 				display: flex;
 				align-items: center;
 				justify-content: center;
-				font-size: 28rpx;
 				flex-shrink: 0;
 			}
-			.bg-purple { background: $color-purple-light; }
-			.bg-orange { background: $color-orange-light; }
+			.menu-icon-letter {
+				font-size: $font-subhead;
+				font-weight: 700;
+			}
+			.bg-purple {
+				background: $color-purple-light;
+				.menu-icon-letter { color: $color-purple; }
+			}
+			.bg-orange {
+				background: $color-orange-light;
+				.menu-icon-letter { color: $color-orange; }
+			}
 
 			.menu-text {
 				font-size: $font-body;

@@ -2,234 +2,220 @@
 
 ## 项目简介
 
-Vital Fitness 是一个全栈的健康管理应用，帮助用户记录和追踪健身训练、心理状态、体重变化和饮食情况。采用前后端分离架构，支持多端访问。
+Vital Fitness 是一个全栈健康管理微信小程序，帮助用户记录和追踪健身训练、饮食营养、体重变化和心理状态。采用前后端分离架构，支持微信小程序和 H5 双端访问。
 
 ## 技术栈
 
-### 前端 (uni-app)
-- 框架: uni-app (支持微信小程序、H5等多端)
-- UI库: uView UI
-- 状态管理: Vuex
-- 构建工具: Vite
-- 包管理: npm
+### 前端
+- **框架**: Vue 3 + uni-app 3.x（微信小程序 + H5）
+- **状态管理**: Pinia
+- **构建工具**: Vite 5
+- **样式**: SCSS 设计系统（翡翠绿主色调，健康感视觉风格）
+- **包管理**: npm
 
-### 后端 (Go)
-- 语言: Go 1.25
-- Web框架: Gin
-- 数据库: MySQL 8.0
-- ORM: GORM
-- 缓存: Redis 7
-- API文档: Swagger
-- 日志: zap
+### 后端
+- **语言**: Go 1.25
+- **Web 框架**: Gin
+- **数据库**: MySQL 8.0
+- **ORM**: GORM
+- **认证**: JWT（golang-jwt/v5）
+- **配置**: Viper（YAML + 环境变量）
+- **日志**: zap
+- **API 文档**: Swagger
 
 ### 部署
-- 容器化: Docker + Docker Compose
-- 反向代理: Nginx
-- 数据库管理: phpMyAdmin
-- 缓存管理: Redis Commander
+- **容器化**: Docker + Docker Compose
+- **反向代理**: Nginx
+- **域名**: api.bodysynclab.fun
 
 ## 项目结构
 
 ```
 vital-fitness/
-├── frontend/                 # 前端项目 (uni-app)
-│   ├── pages/                # 页面目录
-│   │   ├── auth/             # 认证相关页面
-│   │   ├── index/            # 首页
-│   │   ├── workout/          # 训练记录页面
-│   │   ├── mood/             # 心情记录页面
-│   │   ├── weight/           # 体重记录页面
-│   │   ├── diet/             # 饮食记录页面
-│   │   ├── statistics/       # 统计数据页面
-│   │   └── user/             # 用户中心页面
-│   ├── components/           # 组件目录
-│   ├── store/                # Vuex状态管理
-│   ├── utils/                # 工具函数
-│   ├── static/               # 静态资源
-│   ├── App.vue               # 应用入口
-│   ├── main.js               # 主配置文件
-│   ├── package.json          # 依赖配置
-│   ├── Dockerfile            # 前端Docker配置
-│   └── nginx.conf            # Nginx配置
-├── backend/                  # 后端项目 (Go)
-│   ├── cmd/                  # 应用入口
-│   ├── internal/             # 内部代码
-│   │   ├── config/           # 配置管理
-│   │   ├── router/           # 路由配置
-│   │   ├── handler/          # 请求处理器
-│   │   ├── service/          # 业务逻辑层
-│   │   ├── dao/              # 数据访问层
-│   │   ├── model/            # 数据模型
-│   │   └── utils/            # 工具函数
-│   ├── configs/              # 配置文件
-│   ├── docs/                 # 文档
-│   ├── deploy/               # 部署脚本
-│   ├── go.mod                # Go模块文件
-│   ├── go.sum                # Go依赖校验
-│   └── Dockerfile            # 后端Docker配置
-├── mysql/                    # 数据库初始化脚本
-│   └── init/                 # 初始化SQL脚本
-├── docker-compose.yml        # Docker编排配置
-└── README.md                 # 项目说明文档
+├── frontend/                   # 前端项目 (uni-app)
+│   ├── src/
+│   │   ├── pages/              # 页面（17个）
+│   │   │   ├── auth/           # 登录、注册
+│   │   │   ├── index/          # 首页仪表盘
+│   │   │   ├── workout/        # 训练（列表、添加、详情）
+│   │   │   ├── diet/           # 饮食（列表、添加、详情）
+│   │   │   ├── mood/           # 心情（列表、添加）
+│   │   │   ├── weight/         # 体重（列表、添加）
+│   │   │   ├── statistics/     # 数据统计
+│   │   │   └── user/           # 个人中心、资料、设置
+│   │   ├── api/                # API 请求层（6 个模块）
+│   │   ├── store/              # Pinia 状态管理
+│   │   ├── styles/             # 设计系统（SCSS 变量 + Mixins）
+│   │   ├── utils/              # 工具函数（请求封装、日期格式化）
+│   │   └── static/             # 静态资源（tabbar 图标）
+│   ├── package.json
+│   ├── Dockerfile
+│   └── nginx.conf
+├── backend/                    # 后端项目 (Go + Gin)
+│   ├── cmd/main.go             # 入口（AutoMigrate 7 张表）
+│   ├── internal/
+│   │   ├── config/             # 配置管理（Viper）
+│   │   ├── router/             # 路由定义
+│   │   ├── handler/            # 请求处理器（6 个）
+│   │   ├── service/            # 业务逻辑层（6 个）
+│   │   ├── dao/                # 数据访问层（5 个）
+│   │   ├── model/              # 数据模型（6 个 + 请求/响应结构体）
+│   │   ├── middleware/         # JWT 认证、CORS
+│   │   └── utils/              # 数据库连接、日志
+│   ├── configs/config.yaml
+│   ├── go.mod / go.sum
+│   └── Dockerfile
+├── docker-compose.yml          # MySQL + API + Web
+└── deploy.sh
 ```
 
 ## 功能模块
 
-### 1. 用户系统
-- 用户注册/登录
-- 第三方登录 (微信、QQ、Apple)
-- 个人资料管理
-- 隐私设置
+### 用户认证
+- 微信小程序一键登录（code2session → 自动注册）
+- JWT Token 认证（Bearer 方式）
+- 个人资料管理（昵称、性别、身高、体重）
 
-### 2. 健身记录
-- 训练动作库管理
-- 每次训练详细记录 (重量、组数、次数)
-- 训练感受评分
-- 训练照片上传
+### 训练记录
+- 动作库管理（按分类：胸/背/腿/肩/手臂/核心）
+- Hevy/Strong 风格组表格记录（逐组填写重量和次数）
+- 按日期分组展示、按分类筛选
+- 训练详情编辑（重量/组数/次数并排输入）和删除
+- 分页加载 + 骨架屏
 
-### 3. 心理状态
-- 每日心情打卡 (1-10分)
-- 心情标签标记
+### 饮食记录
+- 四餐记录（早餐/午餐/晚餐/加餐）
+- 食物库搜索（关键词 + 分类）+ 自定义食物
+- 份量选择（快捷克数 + 自定义输入 + 实时营养计算）
+- 今日热量概览 + 三大营养素进度条
+- 按餐次分区展示（薄荷健康风格）
+
+### 体重管理
+- 大号数字输入 + ±0.1 步进 + 快捷选择
+- BMI 自动计算（带状态标签：偏瘦/正常/超重/肥胖）
+- 体重趋势列表（涨跌标识）
+
+### 心情日记
+- 心情评分（1-10 分 + 彩色分数圆点）
+- 心情标签多选（开心、焦虑、放松等）
 - 心情描述记录
-- 心情趋势图表
 
-### 4. 体重管理
-- 每日体重记录
-- BMI自动计算
-- 体重变化趋势图
-- 目标体重设置
+### 数据统计
+- 首页仪表盘（深色活动环卡片：训练/热量/体重）
+- 训练次数柱状图（周/月/年切换）
+- 体重趋势条形图
+- 热量摄入柱状图 + 日均热量
 
-### 5. 饮食记录
-- 三餐记录 (早餐、午餐、晚餐、加餐)
-- 食物数据库查询
-- 卡路里自动计算
-- 营养成分分析
-- 饮水记录
-
-### 6. 数据统计
-- 综合数据概览
-- 训练趋势分析
-- 体重变化图表
-- 营养摄入分析
-- 自定义时间范围统计
+### 饮食规划（开发中）
+- 5 个系统预设模板：均衡饮食、碳循环、碳水渐降、高蛋白增肌、低碳减脂
+- 三种方案类型：固定比例（fixed）、碳循环（carb_cycle）、碳水渐降（carb_taper）
+- 基于体重自动计算每日营养目标（热量、蛋白质、碳水、脂肪）
+- 碳循环：按星期区分高碳日（训练日）和低碳日（休息日）
+- 碳水渐降：按周递减碳水摄入，最低 50g 保底
+- 自定义模板创建和管理
+- 首页饮食进度模块（剩余热量、营养素进度条、快捷记录）
+- 数据通过 localStorage 持久化，后续迁移后端 API
 
 ## 快速开始
 
 ### 环境要求
-- Docker 20.0+
-- Docker Compose 1.29+
+- Node.js 18+
+- Go 1.25+
+- MySQL 8.0+
+- Docker 20.0+（可选）
 
-### 启动项目
+### 前端开发
 
-1. 克隆项目代码
 ```bash
-git clone <repository-url>
-cd vital-fitness
-```
-
-2. 启动所有服务
-```bash
-docker-compose up -d
-```
-
-3. 访问应用
-- 前端页面: http://localhost
-- API文档: http://localhost:8080/swagger/index.html
-- 数据库管理: http://localhost:8081
-- Redis管理: http://localhost:8082
-
-### 开发环境
-
-#### 后端开发
-```bash
-cd backend
-go run cmd/main.go
-```
-
-#### 前端开发
-```bash
-cd frontend
+cd vital-fitness/frontend
 npm install
+
+# 微信小程序开发（用微信开发者工具导入 dist/dev/mp-weixin）
+npm run dev:mp-weixin
+
+# H5 开发
 npm run dev:h5
 ```
 
-## API接口
+### 后端开发
 
-### 认证接口
-- POST /api/v1/auth/register - 用户注册
-- POST /api/v1/auth/login - 用户登录
-- POST /api/v1/auth/logout - 用户登出
-
-### 用户接口
-- GET /api/v1/users/profile - 获取用户信息
-- PUT /api/v1/users/profile - 更新用户信息
-
-### 训练接口
-- GET /api/v1/exercises - 获取动作列表
-- POST /api/v1/workouts - 创建训练记录
-- GET /api/v1/workouts - 获取训练记录列表
-
-### 心情接口
-- POST /api/v1/moods - 创建心情记录
-- GET /api/v1/moods - 获取心情记录列表
-
-### 体重接口
-- POST /api/v1/weights - 创建体重记录
-- GET /api/v1/weights - 获取体重记录列表
-
-### 饮食接口
-- POST /api/v1/diets - 创建饮食记录
-- GET /api/v1/diets - 获取饮食记录列表
-
-## 部署说明
-
-### 生产环境部署
-1. 修改 docker-compose.yml 中的环境变量
-2. 配置域名和SSL证书
-3. 启动服务
 ```bash
-docker-compose -f docker-compose.yml up -d
+cd vital-fitness/backend
+# 修改 configs/config.yaml 中的数据库配置
+go run cmd/main.go
 ```
 
-### 数据备份
-```bash
-# 备份数据库
-docker exec vital_mysql mysqldump -u root -p vital_fitness > backup.sql
+### Docker 部署
 
-# 恢复数据库
-docker exec -i vital_mysql mysql -u root -p vital_fitness < backup.sql
+```bash
+cd vital-fitness
+docker-compose up -d
 ```
 
-## 项目特点
+## API 接口
 
-1. **多端支持**: 一套代码编译到多个平台
-2. **现代化技术栈**: Go + Vue.js + Docker
-3. **完整的功能体系**: 覆盖健康管理的各个方面
-4. **良好的用户体验**: 响应式设计，流畅交互
-5. **易于部署**: Docker容器化，一键部署
-6. **数据安全**: JWT认证，数据加密存储
+### 认证（无需 Token）
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | /api/v1/auth/wx-login | 微信登录 |
+| POST | /api/v1/auth/logout | 登出 |
 
-## 开发计划
+### 用户
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/users/profile | 获取个人资料 |
+| PUT | /api/v1/users/profile | 更新个人资料 |
 
-### 已完成功能
-- ✅ 项目架构设计
-- ✅ 前后端基础框架搭建
-- ✅ 数据库设计与初始化
-- ✅ 核心功能页面开发
-- ✅ Docker容器化配置
+### 训练
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/exercises/ | 获取动作库 |
+| POST | /api/v1/exercises/ | 创建动作 |
+| POST | /api/v1/workouts/ | 创建训练记录 |
+| GET | /api/v1/workouts/ | 获取训练列表（支持 category/page/page_size） |
+| GET | /api/v1/workouts/:id | 获取训练详情 |
+| PUT | /api/v1/workouts/:id | 更新训练记录 |
+| DELETE | /api/v1/workouts/:id | 删除训练记录 |
 
-### 待开发功能
-- 🔧 后端API接口实现
-- 🔧 前端数据对接
-- 🔧 用户认证授权
-- 🔧 数据统计图表
-- 🔧 测试用例编写
-- 📱 小程序端适配
-- 📊 数据导出功能
+### 饮食
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/foods/ | 搜索食物库（keyword/category） |
+| POST | /api/v1/foods/ | 创建自定义食物 |
+| POST | /api/v1/diets/ | 创建饮食记录 |
+| GET | /api/v1/diets/ | 获取饮食列表 |
+| PUT | /api/v1/diets/:id | 更新饮食记录 |
+| DELETE | /api/v1/diets/:id | 删除饮食记录 |
 
-## 贡献指南
+### 体重
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | /api/v1/weights/ | 创建体重记录 |
+| GET | /api/v1/weights/ | 获取体重列表 |
+| DELETE | /api/v1/weights/:id | 删除体重记录 |
 
-欢迎提交 Issue 和 Pull Request 来改进项目！
+### 心情（路由待启用）
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | /api/v1/moods/ | 创建心情记录 |
+| GET | /api/v1/moods/ | 获取心情列表 |
+
+### 统计
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | /api/v1/dashboard | 首页仪表盘数据 |
+| GET | /api/v1/stats?period=week | 统计图表数据（week/month/year） |
+
+## 设计系统
+
+项目使用统一的 SCSS 设计系统（`src/styles/variables.scss`）：
+
+- **主色**: 翡翠绿 `#10B981`（健康、活力）
+- **强调色**: 暖橙 `#F97316`（能量、动力）
+- **背景**: 暖白 `#FAFAF9`
+- **字体**: SF Pro + PingFang SC
+- **动画**: fadeInUp 交错入场、骨架屏 shimmer、弹性缓动 `cubic-bezier(0.16, 1, 0.3, 1)`
+- **组件 Mixins**: card、primary-button、segment-control、input-field、empty-state、skeleton-shimmer 等
 
 ## 许可证
 

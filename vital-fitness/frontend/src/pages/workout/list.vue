@@ -15,8 +15,21 @@
 			</view>
 		</scroll-view>
 
+		<!-- 骨架屏 -->
+		<view v-if="loading && workoutList.length === 0" class="skeleton-list">
+			<view v-for="i in 3" :key="i" class="skeleton-card">
+				<view class="skeleton-header">
+					<view class="skeleton-line skeleton-title"></view>
+					<view class="skeleton-line skeleton-meta"></view>
+				</view>
+				<view class="skeleton-tags">
+					<view class="skeleton-tag" v-for="j in 3" :key="j"></view>
+				</view>
+			</view>
+		</view>
+
 		<!-- 按天分组 -->
-		<view class="day-list">
+		<view class="day-list" v-else>
 			<view v-for="(day, i) in groupedDays" :key="i" class="day-card" @tap="goToDetail(day.date)">
 				<view class="day-header">
 					<view class="day-date-wrap">
@@ -38,8 +51,10 @@
 		</view>
 
 		<!-- 空状态 -->
-		<view v-if="groupedDays.length === 0" class="empty">
-			<text class="empty-icon">💪</text>
+		<view v-if="!loading && groupedDays.length === 0" class="empty">
+			<view class="empty-icon">
+				<text class="empty-icon-letter">W</text>
+			</view>
 			<text class="empty-title">暂无训练记录</text>
 			<text class="empty-desc">记录每一次训练，见证你的进步</text>
 			<view class="empty-btn" @tap="addWorkout">
@@ -185,7 +200,7 @@
 			font-size: $font-footnote;
 			color: $color-label-tertiary;
 			font-weight: 500;
-			transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+			transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 
 			&.active {
 				background: $color-label;
@@ -196,11 +211,41 @@
 	}
 }
 
+// --- Skeleton ---
+.skeleton-list {
+	.skeleton-card {
+		@include card;
+		margin-bottom: $spacing-sm;
+		padding: $spacing-xl;
+	}
+	.skeleton-header {
+		margin-bottom: $spacing-md;
+	}
+	.skeleton-line {
+		@include skeleton-shimmer;
+		height: 28rpx;
+		margin-bottom: $spacing-sm;
+	}
+	.skeleton-title { width: 40%; }
+	.skeleton-meta { width: 25%; height: 20rpx; }
+	.skeleton-tags {
+		display: flex;
+		gap: $spacing-xs;
+	}
+	.skeleton-tag {
+		@include skeleton-shimmer;
+		width: 100rpx;
+		height: 44rpx;
+		border-radius: $spacing-xs;
+	}
+}
+
 // --- Day Card ---
 .day-card {
 	@include card;
 	margin-bottom: $spacing-sm;
 	@include press-effect;
+	@include stagger-fade(8);
 
 	.day-header {
 		display: flex;
@@ -266,5 +311,11 @@
 // --- Empty ---
 .empty {
 	@include empty-state;
+
+	.empty-icon-letter {
+		font-size: 44rpx;
+		font-weight: 700;
+		color: $color-label-quaternary;
+	}
 }
 </style>

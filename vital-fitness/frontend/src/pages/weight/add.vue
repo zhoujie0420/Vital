@@ -7,42 +7,33 @@
 		</view>
 
 		<view class="card weight-card">
-			<text class="card-label">体重</text>
-			<view class="weight-display">
-				<view class="weight-btn" @tap="adjustWeight(-0.1)">
-					<text class="weight-btn-text">−</text>
-				</view>
-				<view class="weight-center">
-					<input type="digit" v-model="weight" class="weight-num" placeholder="0" />
+			<view class="weight-input-area" @tap="focusInput">
+				<view class="weight-value-row">
+					<text class="weight-value" :class="{ placeholder: !weight }">{{ weight || '0' }}</text>
 					<text class="weight-unit">kg</text>
 				</view>
-				<view class="weight-btn" @tap="adjustWeight(0.1)">
-					<text class="weight-btn-text">+</text>
-				</view>
-			</view>
-			<view class="quick-row">
-				<text class="quick-pill" v-for="w in [50, 55, 60, 65, 70, 75, 80]" :key="w"
-					:class="{ active: parseFloat(weight) === w }" @tap="weight = w">{{ w }}</text>
+				<text class="weight-hint">点击输入体重</text>
+				<input
+					ref="weightInput"
+					type="digit"
+					v-model="weight"
+					class="hidden-input"
+					:focus="inputFocused"
+					@focus="inputFocused = true"
+					@blur="inputFocused = false"
+					placeholder=""
+				/>
 			</view>
 		</view>
 
+		<!-- 快捷选择 -->
 		<view class="card">
-			<text class="card-label">身高（可选）</text>
-			<view class="input-row">
-				<input type="digit" v-model="height" class="field-input" placeholder="输入身高" />
-				<text class="input-suffix">cm</text>
-			</view>
-		</view>
-
-		<view class="card bmi-card" v-if="bmi > 0">
-			<view class="bmi-row">
-				<view class="bmi-left">
-					<text class="bmi-label">BMI</text>
-					<view class="bmi-badge" :class="bmiClass">
-						<text>{{ bmiStatus }}</text>
-					</view>
-				</view>
-				<text class="bmi-value">{{ bmi }}</text>
+			<text class="card-label">快捷选择</text>
+			<view class="quick-grid">
+				<text v-for="w in quickWeights" :key="w" class="quick-chip"
+					:class="{ active: weight === String(w) }" @tap="weight = String(w)">
+					{{ w }}
+				</text>
 			</view>
 		</view>
 
@@ -58,40 +49,28 @@
 	import { createWeight } from '../../api/weight'
 
 	export default {
-		data() { return { saving: false, weight: '', height: '' } },
+		data() {
+			return {
+				saving: false,
+				weight: '',
+				inputFocused: false,
+				quickWeights: [45, 50, 55, 60, 65, 70, 75, 80, 85, 90]
+			}
+		},
 		computed: {
 			topPadding() {
 				const app = getApp()
 				return (app.globalData?.customBarHeight || 88) + 8
-			},
-			bmi() {
-				const w = parseFloat(this.weight), h = parseFloat(this.height)
-				if (w > 0 && h > 0) return (w / ((h / 100) * (h / 100))).toFixed(1)
-				return 0
-			},
-			bmiStatus() {
-				const b = parseFloat(this.bmi)
-				if (b < 18.5) return '偏瘦'
-				if (b < 24) return '正常'
-				if (b < 28) return '超重'
-				return '肥胖'
-			},
-			bmiClass() {
-				const b = parseFloat(this.bmi)
-				if (b < 18.5) return 'bmi-thin'
-				if (b < 24) return 'bmi-normal'
-				if (b < 28) return 'bmi-over'
-				return 'bmi-obese'
 			}
 		},
 		methods: {
 			goBack() { uni.navigateBack() },
-			adjustWeight(d) {
-				const c = parseFloat(this.weight) || 0
-				if (c + d >= 0) this.weight = (c + d).toFixed(1)
+			focusInput() {
+				this.inputFocused = true
 			},
 			async save() {
-				if (!this.weight || parseFloat(this.weight) <= 0) {
+				const w = parseFloat(this.weight)
+				if (!w || w <= 0) {
 					uni.showToast({ title: '请输入体重', icon: 'none' })
 					return
 				}
@@ -99,8 +78,8 @@
 				try {
 					await createWeight({
 						record_date: new Date().toISOString(),
-						weight: parseFloat(this.weight),
-						height: parseFloat(this.height) || 0
+						weight: w,
+						height: 0
 					})
 					uni.showToast({ title: '保存成功', icon: 'success' })
 					setTimeout(() => uni.navigateBack(), 1000)
@@ -133,118 +112,87 @@
 	.card-label { @include card-label; }
 }
 
-// --- Weight Display ---
-.weight-display {
+// --- Weight Input Area ---
+.weight-card {
+	padding: $spacing-3xl $spacing-xl;
+}
+
+.weight-input-area {
+	text-align: center;
+	position: relative;
+}
+
+.weight-value-row {
 	display: flex;
-	align-items: center;
+	align-items: baseline;
 	justify-content: center;
-	padding: $spacing-lg 0;
+	margin-bottom: $spacing-sm;
+}
 
-	.weight-btn {
-		width: 76rpx;
-		height: 76rpx;
-		border-radius: 50%;
-		background: $color-fill;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		@include press-effect;
+.weight-value {
+	font-size: 120rpx;
+	font-weight: 700;
+	color: $color-label;
+	letter-spacing: -4rpx;
+	font-variant-numeric: tabular-nums;
+	line-height: 1;
 
-		.weight-btn-text {
-			font-size: 44rpx;
-			color: $color-primary;
-			font-weight: 300;
-			line-height: 1;
-		}
-	}
-
-	.weight-center {
-		display: flex;
-		align-items: baseline;
-		margin: 0 $spacing-3xl;
-
-		.weight-num {
-			width: 240rpx;
-			text-align: center;
-			font-size: 96rpx;
-			font-weight: 700;
-			color: $color-label;
-			letter-spacing: -3rpx;
-			font-variant-numeric: tabular-nums;
-		}
-		.weight-unit {
-			font-size: $font-callout;
-			color: $color-label-quaternary;
-			margin-left: 4rpx;
-		}
+	&.placeholder {
+		color: $color-separator-opaque;
 	}
 }
 
-.quick-row {
+.weight-unit {
+	font-size: $font-title2;
+	color: $color-label-quaternary;
+	font-weight: 500;
+	margin-left: $spacing-sm;
+}
+
+.weight-hint {
+	display: block;
+	font-size: $font-caption1;
+	color: $color-label-quaternary;
+	margin-top: $spacing-xs;
+}
+
+.hidden-input {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+}
+
+// --- Quick Grid ---
+.quick-grid {
 	display: flex;
-	justify-content: center;
 	flex-wrap: wrap;
 	gap: $spacing-sm;
-	margin-top: $spacing-md;
 
-	.quick-pill {
-		padding: $spacing-sm $spacing-lg;
+	.quick-chip {
+		width: calc(20% - #{$spacing-sm});
+		text-align: center;
+		padding: $spacing-md 0;
 		background: $color-fill;
-		border-radius: $radius-full;
-		font-size: $font-footnote;
+		border-radius: $radius-md;
+		font-size: $font-subhead;
+		font-weight: 600;
 		color: $color-label-tertiary;
-		font-weight: 500;
 		font-variant-numeric: tabular-nums;
-		transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+		transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 
-		&.active { background: $color-label; color: #fff; }
-		&:active { transform: scale(0.92); }
-	}
-}
-
-// --- Input ---
-.input-row {
-	@include input-field;
-	.field-input { flex: 1; font-size: $font-body; color: $color-label; }
-	.input-suffix { font-size: $font-subhead; color: $color-label-quaternary; }
-}
-
-// --- BMI ---
-.bmi-row {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-
-	.bmi-left {
-		.bmi-label {
-			display: block;
-			font-size: $font-body;
-			font-weight: 600;
-			color: $color-label;
-			margin-bottom: $spacing-xs;
+		&.active {
+			background: $color-primary;
+			color: #fff;
+			box-shadow: 0 4rpx 12rpx rgba(16, 185, 129, 0.2);
 		}
-		.bmi-badge {
-			display: inline-block;
-			font-size: $font-caption2;
-			padding: 4rpx $spacing-md;
-			border-radius: $spacing-xs;
-			font-weight: 600;
-		}
-		.bmi-thin { background: $color-primary-light; color: $color-primary; }
-		.bmi-normal { background: $color-green-light; color: $color-green; }
-		.bmi-over { background: $color-orange-light; color: $color-orange; }
-		.bmi-obese { background: $color-red-light; color: $color-red; }
-	}
-
-	.bmi-value {
-		font-size: 56rpx;
-		font-weight: 700;
-		color: $color-primary;
-		letter-spacing: -2rpx;
-		font-variant-numeric: tabular-nums;
+		&:active { transform: scale(0.94); }
 	}
 }
 
+// --- Bottom Action ---
 .bottom-action {
 	@include bottom-action-bar;
 	.save-btn { @include primary-button; }

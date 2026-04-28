@@ -11,7 +11,9 @@
 			<view class="mood-grid">
 				<view v-for="exp in moods" :key="exp.score" class="mood-item"
 					:class="{ selected: score === exp.score }" @tap="score = exp.score">
-					<text class="mood-emoji">{{ exp.emoji }}</text>
+					<view class="mood-face" :style="{ background: exp.color }">
+						<text class="mood-score-num">{{ exp.score }}</text>
+					</view>
 					<text class="mood-text">{{ exp.label }}</text>
 				</view>
 			</view>
@@ -48,12 +50,12 @@
 			return {
 				saving: false, score: 0, description: '', selectedTags: [],
 				moods: [
-					{ score: 1, emoji: '😫', label: '糟糕' },
-					{ score: 3, emoji: '😔', label: '较差' },
-					{ score: 5, emoji: '😐', label: '一般' },
-					{ score: 7, emoji: '😊', label: '不错' },
-					{ score: 9, emoji: '😁', label: '很好' },
-					{ score: 10, emoji: '😍', label: '极佳' }
+					{ score: 1, icon: ':(', label: '糟糕', color: '#EF4444' },
+					{ score: 3, icon: ':|', label: '较差', color: '#F97316' },
+					{ score: 5, icon: '-', label: '一般', color: '#EAB308' },
+					{ score: 7, icon: ':)', label: '不错', color: '#10B981' },
+					{ score: 9, icon: ':D', label: '很好', color: '#14B8A6' },
+					{ score: 10, icon: '<3', label: '极佳', color: '#EC4899' }
 				],
 				tags: ['开心', '兴奋', '平静', '专注', '疲惫', '焦虑', '压力大', '放松']
 			}
@@ -125,20 +127,30 @@
 		border-radius: $radius-xl;
 		background: $color-fill;
 		border: 2.5rpx solid transparent;
-		transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+		transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 
 		&.selected {
 			background: $color-bg-elevated;
 			border-color: $color-primary;
-			box-shadow: 0 4rpx 24rpx rgba(0, 122, 255, 0.18);
-			transform: scale(1.06);
+			box-shadow: 0 4rpx 20rpx rgba(16, 185, 129, 0.15);
+			transform: scale(1.05);
 		}
 		&:active { transform: scale(0.92); }
 
-		.mood-emoji {
-			display: block;
-			font-size: 56rpx;
-			margin-bottom: $spacing-xs;
+		.mood-face {
+			width: 64rpx;
+			height: 64rpx;
+			border-radius: 50%;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			margin: 0 auto $spacing-sm;
+			opacity: 0.85;
+		}
+		.mood-score-num {
+			font-size: $font-subhead;
+			font-weight: 700;
+			color: #fff;
 		}
 		.mood-text {
 			display: block;

@@ -9,6 +9,8 @@
 		{ "path": "pages/diet/add", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
 		{ "path": "pages/diet/list", "style": { "navigationStyle": "custom", "navigationBarTitleText": "", "enablePullDownRefresh": true } },
 		{ "path": "pages/diet/detail", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
+		{ "path": "pages/diet/plan", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
+		{ "path": "pages/diet/plan-edit", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
 		{ "path": "pages/weight/add", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
 		{ "path": "pages/weight/list", "style": { "navigationStyle": "custom", "navigationBarTitleText": "", "enablePullDownRefresh": true } },
 		{ "path": "pages/statistics/index", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
@@ -19,13 +21,13 @@
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "Vital Fitness",
-		"navigationBarBackgroundColor": "#FFFFFF",
-		"backgroundColor": "#F2F2F7"
+		"navigationBarBackgroundColor": "#FAFAF9",
+		"backgroundColor": "#FAFAF9"
 	},
 	"tabBar": {
-		"color": "#8e8e93",
-		"selectedColor": "#007aff",
-		"backgroundColor": "#f9f9f9",
+		"color": "#A1A1AA",
+		"selectedColor": "#10B981",
+		"backgroundColor": "#FAFAF9",
 		"borderStyle": "white",
 		"list": [
 			{

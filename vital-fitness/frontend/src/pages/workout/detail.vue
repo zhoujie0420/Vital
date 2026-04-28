@@ -39,7 +39,9 @@
 		</view>
 
 		<view v-if="workouts.length === 0" class="empty">
-			<text class="empty-icon">🏋️</text>
+			<view class="empty-icon">
+				<text class="empty-icon-letter">W</text>
+			</view>
 			<text class="empty-title">当天暂无训练记录</text>
 			<text class="empty-desc">点击右上角添加训练</text>
 		</view>
@@ -49,30 +51,38 @@
 		<view class="edit-sheet" v-if="showEdit">
 			<view class="sheet-handle"></view>
 			<text class="sheet-title">编辑训练</text>
-			<view class="sheet-field">
-				<text class="sheet-label">重量 (kg)</text>
-				<view class="sheet-input-wrap">
-					<input type="digit" v-model="editForm.weight" class="sheet-input" />
+
+			<view class="edit-row-group">
+				<view class="edit-row">
+					<text class="edit-label">重量</text>
+					<view class="edit-input-wrap">
+						<input type="digit" v-model="editForm.weight" class="edit-input" />
+						<text class="edit-suffix">kg</text>
+					</view>
+				</view>
+				<view class="edit-row">
+					<text class="edit-label">组数</text>
+					<view class="edit-input-wrap">
+						<input type="number" v-model="editForm.sets" class="edit-input" />
+						<text class="edit-suffix">组</text>
+					</view>
+				</view>
+				<view class="edit-row">
+					<text class="edit-label">次数</text>
+					<view class="edit-input-wrap">
+						<input type="number" v-model="editForm.reps" class="edit-input" />
+						<text class="edit-suffix">次</text>
+					</view>
 				</view>
 			</view>
-			<view class="sheet-field">
-				<text class="sheet-label">组数</text>
-				<view class="sheet-input-wrap">
-					<input type="number" v-model="editForm.sets" class="sheet-input" />
-				</view>
-			</view>
-			<view class="sheet-field">
-				<text class="sheet-label">次数</text>
-				<view class="sheet-input-wrap">
-					<input type="number" v-model="editForm.reps" class="sheet-input" />
-				</view>
-			</view>
+
 			<view class="sheet-field">
 				<text class="sheet-label">备注</text>
 				<view class="sheet-input-wrap">
 					<input v-model="editForm.notes" placeholder="可选" class="sheet-input" />
 				</view>
 			</view>
+
 			<view class="sheet-actions">
 				<view class="sheet-cancel" @tap="showEdit = false">
 					<text>取消</text>
@@ -273,6 +283,12 @@
 
 .empty {
 	@include empty-state;
+
+	.empty-icon-letter {
+		font-size: 44rpx;
+		font-weight: 700;
+		color: $color-label-quaternary;
+	}
 }
 
 // --- Edit Sheet ---
@@ -310,47 +326,99 @@
 		text-align: center;
 		margin-bottom: $spacing-xl;
 	}
+}
 
-	.sheet-field {
-		margin-bottom: $spacing-md;
+// --- Edit Row Group ---
+.edit-row-group {
+	display: flex;
+	gap: $spacing-sm;
+	margin-bottom: $spacing-lg;
+}
 
-		.sheet-label {
-			display: block;
-			font-size: $font-footnote;
-			color: $color-label-quaternary;
-			font-weight: 500;
-			margin-bottom: $spacing-xs;
-		}
-		.sheet-input-wrap {
-			@include input-field;
-		}
-		.sheet-input {
-			flex: 1;
-			font-size: $font-body;
-			color: $color-label;
-		}
+.edit-row {
+	flex: 1;
+
+	.edit-label {
+		display: block;
+		font-size: $font-caption2;
+		color: $color-label-quaternary;
+		font-weight: 500;
+		margin-bottom: $spacing-xs;
+		text-align: center;
+	}
+}
+
+.edit-input-wrap {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: $color-fill;
+	border-radius: $radius-md;
+	padding: $spacing-md $spacing-sm;
+	border: 1.5rpx solid transparent;
+	transition: all 0.2s ease;
+
+	&:focus-within {
+		background: rgba(16, 185, 129, 0.04);
+		border-color: rgba(16, 185, 129, 0.3);
 	}
 
-	.sheet-actions {
-		display: flex;
-		gap: $spacing-md;
-		margin-top: $spacing-lg;
+	.edit-input {
+		width: 80rpx;
+		text-align: center;
+		font-size: $font-headline;
+		font-weight: 700;
+		color: $color-label;
+		font-variant-numeric: tabular-nums;
+	}
+	.edit-suffix {
+		font-size: $font-caption1;
+		color: $color-label-quaternary;
+		font-weight: 500;
+		margin-left: 4rpx;
+	}
+}
 
-		.sheet-cancel, .sheet-save {
-			flex: 1;
-			text-align: center;
-			padding: $spacing-lg 0;
-			border-radius: $radius-md;
-			font-size: $font-callout;
-			font-weight: 600;
-		}
-		.sheet-cancel {
-			background: $color-fill;
-			color: $color-label-tertiary;
-		}
-		.sheet-save {
-			@include primary-button;
-		}
+// --- Notes & Actions ---
+.sheet-field {
+	margin-bottom: $spacing-md;
+
+	.sheet-label {
+		display: block;
+		font-size: $font-footnote;
+		color: $color-label-quaternary;
+		font-weight: 500;
+		margin-bottom: $spacing-xs;
+	}
+	.sheet-input-wrap {
+		@include input-field;
+	}
+	.sheet-input {
+		flex: 1;
+		font-size: $font-body;
+		color: $color-label;
+	}
+}
+
+.sheet-actions {
+	display: flex;
+	gap: $spacing-md;
+	margin-top: $spacing-md;
+
+	.sheet-cancel, .sheet-save {
+		flex: 1;
+		text-align: center;
+		padding: $spacing-lg 0;
+		border-radius: $radius-md;
+		font-size: $font-callout;
+		font-weight: 600;
+	}
+	.sheet-cancel {
+		background: $color-fill;
+		color: $color-label-tertiary;
+	}
+	.sheet-save {
+		@include primary-button;
 	}
 }
 </style>
