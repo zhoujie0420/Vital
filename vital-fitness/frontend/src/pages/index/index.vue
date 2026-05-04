@@ -11,7 +11,7 @@
 			</view>
 		</view>
 
-		<!-- 活动环卡片 -->
+		<!-- 活动环卡片 — 可点击跳转 -->
 		<view class="activity-card">
 			<view class="activity-header">
 				<text class="activity-label">今日活动</text>
@@ -19,7 +19,7 @@
 			</view>
 			<view class="activity-rings">
 				<view class="ring-group">
-					<view class="ring-item">
+					<view class="ring-item" @tap="goTo('/pages/workout/add')">
 						<view class="ring ring-move">
 							<view class="ring-inner">
 								<text class="ring-value">{{ dashboard.today_workouts || 0 }}</text>
@@ -28,7 +28,7 @@
 						</view>
 						<text class="ring-label">训练</text>
 					</view>
-					<view class="ring-item">
+					<view class="ring-item" @tap="goTo('/pages/diet/add')">
 						<view class="ring ring-exercise">
 							<view class="ring-inner">
 								<text class="ring-value">{{ dashboard.today_calories || 0 }}</text>
@@ -37,7 +37,7 @@
 						</view>
 						<text class="ring-label">热量</text>
 					</view>
-					<view class="ring-item">
+					<view class="ring-item" @tap="goTo('/pages/weight/add')">
 						<view class="ring ring-stand">
 							<view class="ring-inner">
 								<text class="ring-value">{{ dashboard.latest_weight || '--' }}</text>
@@ -46,34 +46,6 @@
 						</view>
 						<text class="ring-label">体重</text>
 					</view>
-				</view>
-			</view>
-		</view>
-
-		<!-- 快捷操作 -->
-		<view class="section">
-			<text class="section-title">快捷记录</text>
-			<view class="quick-grid">
-				<view class="quick-card" @tap="goTo('/pages/workout/add')">
-					<view class="quick-icon-bg bg-red">
-						<text class="quick-icon iconfont">&#xe6a3;</text>
-					</view>
-					<text class="quick-label">训练</text>
-					<text class="quick-hint">记录运动</text>
-				</view>
-				<view class="quick-card" @tap="goTo('/pages/diet/add')">
-					<view class="quick-icon-bg bg-green">
-						<text class="quick-icon iconfont">&#xe6a1;</text>
-					</view>
-					<text class="quick-label">饮食</text>
-					<text class="quick-hint">营养追踪</text>
-				</view>
-				<view class="quick-card" @tap="goTo('/pages/weight/add')">
-					<view class="quick-icon-bg bg-orange">
-						<text class="quick-icon iconfont">&#xe6a2;</text>
-					</view>
-					<text class="quick-label">体重</text>
-					<text class="quick-hint">体态管理</text>
 				</view>
 			</view>
 		</view>
@@ -350,6 +322,7 @@
 	.ring-item {
 		text-align: center;
 		@include stagger-fade(3);
+		@include press-effect;
 
 		.ring-label {
 			display: block;

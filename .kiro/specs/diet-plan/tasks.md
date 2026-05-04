@@ -129,35 +129,35 @@
     - **Property 2: Private template creation sets correct metadata**
     - **Validates: Requirements 1.4**
 
-  - [~] 4.6 Write property test: Public templates are immutable (Property 3)
+  - [ ] 4.6 Write property test: Public templates are immutable (Property 3)
     - **Property 3: Public templates are immutable**
     - **Validates: Requirements 1.7**
 
-  - [~] 4.7 Write property test: Template-to-plan snapshot isolation (Property 5)
+  - [ ] 4.7 Write property test: Template-to-plan snapshot isolation (Property 5)
     - **Property 5: Template-to-plan snapshot isolation**
     - **Validates: Requirements 2.5, 2.6**
 
-  - [~] 4.8 Write property test: Custom plan creation produces fixed-type plan (Property 7)
+  - [ ] 4.8 Write property test: Custom plan creation produces fixed-type plan (Property 7)
     - **Property 7: Custom plan creation produces fixed-type plan**
     - **Validates: Requirements 3.4**
 
-  - [~] 4.9 Write property test: Single active plan invariant (Property 8)
+  - [ ] 4.9 Write property test: Single active plan invariant (Property 8)
     - **Property 8: Single active plan invariant**
     - **Validates: Requirements 4.1, 4.2**
 
-  - [~] 4.10 Write property test: localStorage persistence round-trip (Property 13)
+  - [ ] 4.10 Write property test: localStorage persistence round-trip (Property 13)
     - **Property 13: localStorage persistence round-trip**
     - **Validates: Requirements 8.1, 8.2, 8.3**
 
-  - [~] 4.11 Write property test: In-place plan update preserves identity (Property 14)
+  - [ ] 4.11 Write property test: In-place plan update preserves identity (Property 14)
     - **Property 14: In-place plan update preserves identity**
     - **Validates: Requirements 9.1**
 
-  - [~] 4.12 Write property test: Deleting active plan clears active state (Property 15)
+  - [ ] 4.12 Write property test: Deleting active plan clears active state (Property 15)
     - **Property 15: Deleting active plan clears active state**
     - **Validates: Requirements 9.3**
 
-  - [~] 4.13 Write unit tests for store CRUD operations
+  - [ ] 4.13 Write unit tests for store CRUD operations
     - Test createPlanFromTemplate copies params as independent snapshot
     - Test deletePlan removes plan from list and updates localStorage
     - Test activatePlan deactivates previously active plan
@@ -165,25 +165,25 @@
     - Test corrupted localStorage data is handled gracefully (reset to empty)
     - _Requirements: 2.5, 4.2, 8.3, 9.2_
 
-- [~] 5. Checkpoint - Ensure all store tests pass
+- [ ] 5. Checkpoint - Ensure all store tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
 - [ ] 6. Implement Plan List Page (`diet/plan.vue`)
-  - [~] 6.1 Build the Plan List Page layout and active plan display
+  - [ ] 6.1 Build the Plan List Page layout and active plan display
     - Custom nav bar with page title "饮食规划"
     - Active plan section at top: highlight card showing current active plan name, type, and macro targets
     - If no active plan, show empty state with guidance text and "创建方案" button
     - Use SCSS with `@import '../../styles/variables.scss'` and existing mixins (`@include card`, `@include page-title`, etc.)
     - _Requirements: 4.4, 4.5_
 
-  - [~] 6.2 Build the user plans list section
+  - [ ] 6.2 Build the user plans list section
     - List all user plans with name, type badge, and macro summary
     - Each plan card has: activate/deactivate toggle, edit button, delete button
     - Delete action uses `uni.showModal` for confirmation
     - Activate action calls `useDietPlanStore.activatePlan(planId)`
     - _Requirements: 4.2, 4.3, 9.2, 9.4_
 
-  - [~] 6.3 Build the templates section
+  - [ ] 6.3 Build the templates section
     - List all templates (public + private) with name, description, type, and scope label
     - Visually distinguish public vs private templates (e.g., "系统" vs "自定义" badge)
     - Public templates: tap to navigate to plan-edit with `?mode=template&templateId=xxx`
@@ -192,13 +192,13 @@
     - _Requirements: 1.1, 1.2, 1.3, 1.5, 1.6, 1.7_
 
 - [ ] 7. Implement Plan Edit Page (`diet/plan-edit.vue`)
-  - [~] 7.1 Build the Plan Edit Page with mode routing
+  - [ ] 7.1 Build the Plan Edit Page with mode routing
     - Parse URL params: `mode` (template/custom/edit), `templateId`, `planId`
     - Custom nav bar with dynamic title: "从模板创建" / "自定义方案" / "编辑方案"
     - On load: if mode=template, load template and auto-calculate macros; if mode=edit, load existing plan; if mode=custom, show empty form
     - _Requirements: 10.3_
 
-  - [~] 7.2 Implement fixed-type plan form
+  - [ ] 7.2 Implement fixed-type plan form
     - Input fields: plan name, daily calories (kcal), protein (g), carbs (g), fat (g)
     - For template mode: pre-fill with auto-calculated values from `calculateMacrosFromTemplate`
     - If user's body weight is not set, show prompt to enter weight before auto-calculation
@@ -206,50 +206,50 @@
     - Real-time validation with error messages under each field
     - _Requirements: 2.7, 2.8, 3.1, 3.2, 3.3, 3.5_
 
-  - [~] 7.3 Implement carb cycle configuration form
+  - [ ] 7.3 Implement carb cycle configuration form
     - Weekly calendar UI: 7 day buttons (周日-周六), tap to toggle between high/low
     - Separate macro input sections for high-carb day targets and low-carb day targets
     - Validate at least one high and one low day before submission
     - Pre-fill with template's `defaultCycleConfig` and auto-calculated values
     - _Requirements: 5.1, 5.2, 5.4, 5.5_
 
-  - [~] 7.4 Implement carb taper configuration form
+  - [ ] 7.4 Implement carb taper configuration form
     - Input fields: total weeks (positive integer), weekly carb reduction (grams)
     - Display initial carb target (auto-calculated or manual)
     - Show preview of week-by-week carb targets with 50g minimum cap indicator
     - Validate totalWeeks and weeklyReduction
     - _Requirements: 6.1, 6.5_
 
-  - [~] 7.5 Implement form submission and navigation
+  - [ ] 7.5 Implement form submission and navigation
     - On submit: validate all inputs, call appropriate store action (createPlanFromTemplate / createCustomPlan / updatePlan)
     - On success: show toast "保存成功", navigate back to plan list page
     - On validation failure: display specific error messages, prevent submission
     - _Requirements: 3.4, 3.5, 9.1, 10.4_
 
 - [ ] 8. Implement Homepage Diet Module (update `index/index.vue`)
-  - [~] 8.1 Add diet plan module to homepage with active plan display
+  - [ ] 8.1 Add diet plan module to homepage with active plan display
     - Import `useDietPlanStore` and call `init()` on page show
     - When active plan exists: display remaining calories (target - consumed), consumed calories, protein/carbs/fat progress bars
     - Fetch today's diet records from existing `getDietRecords` API to calculate consumed totals
     - Use `getTodayTargets(activePlan, new Date())` for current day's targets (handles fixed/carb_cycle/carb_taper)
     - _Requirements: 7.1, 7.2, 7.6, 7.7_
 
-  - [~] 8.2 Add quick-entry buttons and plan settings link
+  - [ ] 8.2 Add quick-entry buttons and plan settings link
     - Four meal-type quick buttons: 早餐, 午餐, 晚餐, 加餐 — each navigates to `/pages/diet/add?meal=xxx`
     - Plan settings link navigates to `/pages/diet/plan`
     - _Requirements: 7.3, 7.4, 10.2_
 
-  - [~] 8.3 Implement no-plan guidance state
+  - [ ] 8.3 Implement no-plan guidance state
     - When no active plan: show guidance card with message "设置饮食规划，追踪每日营养目标"
     - Include "去设置" button linking to `/pages/diet/plan`
     - _Requirements: 7.5_
 
-  - [~] 8.4 Implement overage warning display
+  - [ ] 8.4 Implement overage warning display
     - When remaining calories < 0: display overage amount with warning color (red)
     - Use `$color-red` from design system for visual warning indicator
     - _Requirements: 7.8_
 
-- [~] 9. Final checkpoint - Ensure all tests pass and pages are wired together
+- [ ] 9. Final checkpoint - Ensure all tests pass and pages are wired together
   - Ensure all tests pass, ask the user if questions arise.
   - Verify page navigation: homepage → plan list → plan edit → back to plan list
   - Verify plan list → homepage diet module reflects active plan changes

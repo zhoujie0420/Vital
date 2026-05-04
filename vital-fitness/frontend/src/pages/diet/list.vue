@@ -82,10 +82,14 @@
 			</view>
 		</view>
 
-		<!-- 历史记录 -->
+		<!-- 历史记录 — 默认折叠 -->
 		<view class="history-section" v-if="historyDays.length > 0">
-			<text class="history-title">历史记录</text>
-			<view v-for="(day, i) in historyDays" :key="i" class="history-card" @tap="goToDetail(day.date)">
+			<view class="history-toggle" @tap="showHistory = !showHistory">
+				<text class="history-title">历史记录</text>
+				<text class="history-arrow">{{ showHistory ? '收起' : '展开 ' + historyDays.length + ' 天' }}</text>
+			</view>
+			<view v-if="showHistory">
+				<view v-for="(day, i) in historyDays" :key="i" class="history-card" @tap="goToDetail(day.date)">
 				<view class="history-top">
 					<view class="history-left">
 						<text class="history-date">{{ day.label }}</text>
@@ -102,6 +106,7 @@
 					<text class="hm-item">碳水{{ day.carbs }}g</text>
 					<text class="hm-sep">·</text>
 					<text class="hm-item">脂肪{{ day.fat }}g</text>
+				</view>
 				</view>
 			</view>
 		</view>
@@ -123,6 +128,7 @@
 		data() {
 			return {
 				dietList: [], page: 1, pageSize: 50, total: 0, loading: false,
+				showHistory: false,
 				mealSections: [
 					{ type: 'breakfast', name: '早餐' },
 					{ type: 'lunch', name: '午餐' },
@@ -508,13 +514,25 @@
 .history-section { margin-top: $spacing-lg; }
 
 .history-title {
-	display: block;
 	font-size: $font-footnote;
 	font-weight: 600;
 	color: $color-label-quaternary;
 	text-transform: uppercase;
 	letter-spacing: 2rpx;
+}
+
+.history-toggle {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
 	margin-bottom: $spacing-md;
+	@include press-effect;
+
+	.history-arrow {
+		font-size: $font-caption1;
+		color: $color-primary;
+		font-weight: 500;
+	}
 }
 
 .history-card {
