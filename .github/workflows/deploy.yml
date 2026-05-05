@@ -21,5 +21,6 @@ jobs:
             cd vital-fitness
             export DASHSCOPE_API_KEY=${{ secrets.DASHSCOPE_API_KEY }}
             docker compose down api web --remove-orphans || true
-            docker compose up -d --build api web
+            docker compose build --no-cache api
+            docker compose up -d api web
             docker image prune -f
