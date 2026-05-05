@@ -20,3 +20,10 @@ JWT:
 WECHAT:
   WX_APP_ID: "your_wx_app_id"
   WX_APP_SECRET: "your_wx_app_secret"
+
+# DashScope AI 模型配置
+DASHSCOPE:
+  API_KEY: "your_dashscope_api_key"
+  MODEL: "qwen-vl-plus"
+  BASE_URL: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+  TIMEOUT: 15

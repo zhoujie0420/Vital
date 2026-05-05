@@ -10,12 +10,13 @@ import (
 
 // Config 应用配置结构体
 type Config struct {
-	ServerPort string   `mapstructure:"SERVER_PORT"`
-	Mode       string   `mapstructure:"MODE"`
-	LogLevel   string   `mapstructure:"LOG_LEVEL"`
-	Database   Database `mapstructure:"DATABASE"`
-	JWT        JWT      `mapstructure:"JWT"`
-	WeChat     WeChat   `mapstructure:"WECHAT"`
+	ServerPort string    `mapstructure:"SERVER_PORT"`
+	Mode       string    `mapstructure:"MODE"`
+	LogLevel   string    `mapstructure:"LOG_LEVEL"`
+	Database   Database  `mapstructure:"DATABASE"`
+	JWT        JWT       `mapstructure:"JWT"`
+	WeChat     WeChat    `mapstructure:"WECHAT"`
+	DashScope  DashScope `mapstructure:"DASHSCOPE"`
 }
 
 // Database 数据库配置
@@ -39,6 +40,14 @@ type WeChat struct {
 	AppSecret string `mapstructure:"WX_APP_SECRET"`
 }
 
+// DashScope AI 模型配置
+type DashScope struct {
+	APIKey  string `mapstructure:"API_KEY"`
+	Model   string `mapstructure:"MODEL"`
+	BaseURL string `mapstructure:"BASE_URL"`
+	Timeout int    `mapstructure:"TIMEOUT"`
+}
+
 // LoadConfig 加载配置
 func LoadConfig() *Config {
 	viper.SetConfigName("config")
@@ -56,6 +65,9 @@ func LoadConfig() *Config {
 	viper.SetDefault("DATABASE.DB_USER", "root")
 	viper.SetDefault("DATABASE.DB_NAME", "vital_fitness")
 	viper.SetDefault("JWT.JWT_EXPIRE", 24)
+	viper.SetDefault("DASHSCOPE.MODEL", "qwen-vl-plus")
+	viper.SetDefault("DASHSCOPE.BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
+	viper.SetDefault("DASHSCOPE.TIMEOUT", 15)
 
 	// 读取配置文件（不存在也不报错，用默认值和环境变量）
 	_ = viper.ReadInConfig()
@@ -77,9 +89,17 @@ func LoadConfig() *Config {
 	envOverride(&config.JWT.Secret, "JWT_SECRET")
 	envOverride(&config.WeChat.AppID, "WX_APP_ID")
 	envOverride(&config.WeChat.AppSecret, "WX_APP_SECRET")
+	envOverride(&config.DashScope.APIKey, "DASHSCOPE_API_KEY")
+	envOverride(&config.DashScope.Model, "DASHSCOPE_MODEL")
+	envOverride(&config.DashScope.BaseURL, "DASHSCOPE_BASE_URL")
 	if v := os.Getenv("JWT_EXPIRE"); v != "" {
 		if n, err := strconv.Atoi(v); err == nil {
 			config.JWT.Expire = n
+		}
+	}
+	if v := os.Getenv("DASHSCOPE_TIMEOUT"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			config.DashScope.Timeout = n
 		}
 	}
 

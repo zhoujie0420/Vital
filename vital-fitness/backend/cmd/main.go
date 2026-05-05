@@ -53,7 +53,7 @@ func main() {
 	middleware.InitJWT(cfg.JWT)
 
 	// 设置路由
-	r := router.SetupRouter(cfg.Mode, cfg.WeChat)
+	r := router.SetupRouter(cfg.Mode, cfg.WeChat, cfg.DashScope)
 
 	// 启动服务
 	port := fmt.Sprintf(":%s", cfg.ServerPort)

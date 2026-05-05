@@ -46,8 +46,22 @@
 				</view>
 			</view>
 
-			<view class="custom-link" @tap="showCustom = true">
-				<text>+ 自定义食物</text>
+			<view class="food-actions">
+				<view class="custom-link" @tap="showCustom = true">
+					<text>+ 自定义食物</text>
+				</view>
+				<view class="ai-recognition-btn" @tap="startRecognition">
+					<text class="ai-btn-icon">📷</text>
+					<text class="ai-btn-text">拍照识别</text>
+				</view>
+			</view>
+		</view>
+
+		<!-- AI 识别加载遮罩 -->
+		<view class="recognition-overlay" v-if="recognizing">
+			<view class="recognition-loading">
+				<view class="recognition-spinner"></view>
+				<text class="recognition-loading-text">AI 识别中...</text>
 			</view>
 		</view>
 
@@ -86,6 +100,56 @@
 		<view class="bottom-action" v-if="selectedFoods.length > 0">
 			<view class="save-btn" :class="{ loading: saving }" @tap="save">
 				<text>{{ saving ? '保存中...' : '保存记录' }}</text>
+			</view>
+		</view>
+
+		<!-- AI 识别结果弹窗 -->
+		<view class="mask" v-if="showRecognition" @tap="showRecognition = false"></view>
+		<view class="recognition-sheet" v-if="showRecognition">
+			<view class="sheet-handle"></view>
+			<text class="sheet-title">识别结果</text>
+			<text class="sheet-hint">可调整份量，勾选后添加</text>
+
+			<scroll-view scroll-y class="recognition-list">
+				<view v-for="(food, idx) in recognizedFoods" :key="idx" class="recognition-item">
+					<view class="recognition-item-header">
+						<view class="recognition-checkbox" :class="{ checked: food.selected }" @tap="food.selected = !food.selected">
+							<text v-if="food.selected" class="checkbox-icon">✓</text>
+						</view>
+						<view class="recognition-item-info">
+							<text class="recognition-food-name">{{ food.name }}</text>
+							<view class="confidence-indicator" v-if="food.confidence < 0.6">
+								<text class="confidence-warning">结果仅供参考</text>
+							</view>
+						</view>
+						<view class="recognition-delete" @tap="recognizedFoods.splice(idx, 1)">
+							<text class="recognition-delete-icon">✕</text>
+						</view>
+					</view>
+
+					<view class="recognition-item-body">
+						<view class="recognition-grams-row">
+							<text class="recognition-grams-label">份量</text>
+							<view class="recognition-grams-input-wrap">
+								<input type="digit" v-model="food.estimated_grams" class="recognition-grams-input" placeholder="100" />
+								<text class="recognition-grams-suffix">克</text>
+							</view>
+						</view>
+						<view class="recognition-nutrition-preview">
+							<text class="recognition-nutrition-item">{{ calcRecognitionCal(food) }} kcal</text>
+							<text class="recognition-nutrition-sep">·</text>
+							<text class="recognition-nutrition-item">蛋白 {{ calcRecognitionProtein(food) }}g</text>
+							<text class="recognition-nutrition-sep">·</text>
+							<text class="recognition-nutrition-item">碳水 {{ calcRecognitionCarbs(food) }}g</text>
+							<text class="recognition-nutrition-sep">·</text>
+							<text class="recognition-nutrition-item">脂肪 {{ calcRecognitionFat(food) }}g</text>
+						</view>
+					</view>
+				</view>
+			</scroll-view>
+
+			<view class="recognition-confirm" @tap="confirmRecognition">
+				<text>全部添加</text>
 			</view>
 		</view>
 
@@ -179,12 +243,13 @@
 </template>
 
 <script>
-	import { getFoods, createFood, createDietRecord } from '../../api/diet'
+	import { getFoods, createFood, createDietRecord, recognizeFood } from '../../api/diet'
 
 	export default {
 		data() {
 			return {
 				saving: false, showCustom: false, showPortion: false,
+				showRecognition: false, recognizing: false, recognizedFoods: [], recognitionError: '',
 				mealType: 'lunch', keyword: '', currentCat: '全部',
 				meals: [
 					{ type: 'breakfast', name: '早餐' },
@@ -300,6 +365,120 @@
 					uni.showToast({ title: '保存成功', icon: 'success' })
 					setTimeout(() => uni.navigateBack(), 1000)
 				} catch (e) {} finally { this.saving = false }
+			},
+			startRecognition() {
+				uni.chooseImage({
+					count: 1,
+					sizeType: ['compressed'],
+					sourceType: ['album', 'camera'],
+					success: (res) => {
+						const tempFilePath = res.tempFilePaths[0]
+						this.readFileAsBase64(tempFilePath)
+					},
+					fail: (err) => {
+						if (err.errMsg && (err.errMsg.indexOf('auth deny') !== -1 || err.errMsg.indexOf('authorize') !== -1)) {
+							uni.showModal({
+								title: '需要相机权限',
+								content: '请前往设置 → 隐私 → 相机，开启相机权限',
+								confirmText: '去设置',
+								success: (modalRes) => {
+									if (modalRes.confirm) {
+										uni.openSetting()
+									}
+								}
+							})
+						}
+					}
+				})
+			},
+			readFileAsBase64(filePath) {
+				// #ifdef MP-WEIXIN
+				const fs = uni.getFileSystemManager()
+				fs.readFile({
+					filePath: filePath,
+					encoding: 'base64',
+					success: (res) => {
+						this.processBase64Image(res.data)
+					},
+					fail: () => {
+						uni.showToast({ title: '读取图片失败', icon: 'none' })
+					}
+				})
+				// #endif
+				// #ifdef H5
+				uni.request({
+					url: filePath,
+					responseType: 'arraybuffer',
+					success: (res) => {
+						const base64 = uni.arrayBufferToBase64(res.data)
+						this.processBase64Image(base64)
+					},
+					fail: () => {
+						uni.showToast({ title: '读取图片失败', icon: 'none' })
+					}
+				})
+				// #endif
+			},
+			async processBase64Image(base64Data) {
+				// Check size: base64 length * 3/4 gives approximate byte size
+				const sizeInBytes = base64Data.length * 3 / 4
+				const sizeInMB = sizeInBytes / (1024 * 1024)
+				if (sizeInMB > 2) {
+					uni.showToast({ title: '图片过大，请重新选择', icon: 'none' })
+					return
+				}
+
+				this.recognizing = true
+				this.recognitionError = ''
+				try {
+					const res = await recognizeFood(base64Data)
+					const foods = (res.data && res.data.foods) || []
+					if (foods.length === 0) {
+						uni.showToast({ title: '未能识别出食物，请尝试重新拍照', icon: 'none' })
+						return
+					}
+					this.recognizedFoods = foods.map(f => ({ ...f, selected: true }))
+					this.showRecognition = true
+				} catch (e) {
+					const msg = (e && e.message) || 'AI 识别失败，请重试'
+					this.recognitionError = msg
+					uni.showToast({ title: msg, icon: 'none' })
+				} finally {
+					this.recognizing = false
+				}
+			},
+			calcRecognitionCal(food) {
+				const g = parseFloat(food.estimated_grams) || 0
+				return ((food.calories_per_100g || 0) * g / 100).toFixed(0)
+			},
+			calcRecognitionProtein(food) {
+				const g = parseFloat(food.estimated_grams) || 0
+				return ((food.protein_per_100g || 0) * g / 100).toFixed(1)
+			},
+			calcRecognitionCarbs(food) {
+				const g = parseFloat(food.estimated_grams) || 0
+				return ((food.carbs_per_100g || 0) * g / 100).toFixed(1)
+			},
+			calcRecognitionFat(food) {
+				const g = parseFloat(food.estimated_grams) || 0
+				return ((food.fat_per_100g || 0) * g / 100).toFixed(1)
+			},
+			convertToSelectedFood(recognizedFood) {
+				return {
+					name: recognizedFood.name,
+					grams: parseFloat(recognizedFood.estimated_grams) || 0,
+					calories: parseFloat((recognizedFood.calories_per_100g * (parseFloat(recognizedFood.estimated_grams) || 0) / 100).toFixed(1)),
+					protein: parseFloat((recognizedFood.protein_per_100g * (parseFloat(recognizedFood.estimated_grams) || 0) / 100).toFixed(1)),
+					carbs: parseFloat((recognizedFood.carbs_per_100g * (parseFloat(recognizedFood.estimated_grams) || 0) / 100).toFixed(1)),
+					fat: parseFloat((recognizedFood.fat_per_100g * (parseFloat(recognizedFood.estimated_grams) || 0) / 100).toFixed(1))
+				}
+			},
+			confirmRecognition() {
+				const selected = this.recognizedFoods.filter(f => f.selected)
+				const converted = selected.map(f => this.convertToSelectedFood(f))
+				this.selectedFoods.push(...converted)
+				this.showRecognition = false
+				this.recognizedFoods = []
 			}
 		}
 	}
@@ -400,15 +579,6 @@
 			.food-add-icon { font-size: 32rpx; color: $color-green; font-weight: 400; line-height: 1; }
 		}
 	}
-}
-
-.custom-link {
-	text-align: center;
-	padding: $spacing-md 0 4rpx;
-	font-size: $font-subhead;
-	color: $color-primary;
-	font-weight: 500;
-	&:active { opacity: 0.5; }
 }
 
 // --- Selected Foods ---
@@ -705,5 +875,275 @@
 		@include primary-button;
 		margin-top: $spacing-lg;
 	}
+}
+
+// --- Food Actions (custom link + AI button) ---
+.food-actions {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: $spacing-xl;
+	padding: $spacing-md 0 4rpx;
+}
+
+.custom-link {
+	font-size: $font-subhead;
+	color: $color-primary;
+	font-weight: 500;
+	&:active { opacity: 0.5; }
+}
+
+// --- AI Recognition Button ---
+.ai-recognition-btn {
+	display: flex;
+	align-items: center;
+	gap: $spacing-xs;
+	padding: $spacing-sm $spacing-lg;
+	background: $color-primary-light;
+	border-radius: $radius-full;
+	@include press-effect;
+
+	.ai-btn-icon {
+		font-size: 28rpx;
+	}
+	.ai-btn-text {
+		font-size: $font-subhead;
+		color: $color-primary;
+		font-weight: 600;
+	}
+}
+
+// --- Recognition Loading Overlay ---
+.recognition-overlay {
+	position: fixed;
+	top: 0; left: 0; right: 0; bottom: 0;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 200;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	.recognition-loading {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: $spacing-lg;
+		background: $color-bg-elevated;
+		border-radius: $radius-xl;
+		padding: $spacing-3xl $spacing-3xl;
+		box-shadow: $shadow-float;
+	}
+
+	.recognition-spinner {
+		width: 64rpx;
+		height: 64rpx;
+		border: 4rpx solid $color-fill-tertiary;
+		border-top-color: $color-primary;
+		border-radius: 50%;
+		animation: spin 0.8s linear infinite;
+	}
+
+	.recognition-loading-text {
+		font-size: $font-body;
+		color: $color-label;
+		font-weight: 600;
+	}
+}
+
+@keyframes spin {
+	to { transform: rotate(360deg); }
+}
+
+// --- Recognition Result Sheet ---
+.recognition-sheet {
+	position: fixed;
+	bottom: 0; left: 0; right: 0;
+	background: $color-bg-elevated;
+	border-radius: $radius-xl $radius-xl 0 0;
+	padding: $spacing-md $spacing-xl $spacing-2xl;
+	padding-bottom: calc(#{$spacing-2xl} + env(safe-area-inset-bottom));
+	z-index: 101;
+	max-height: 75vh;
+	display: flex;
+	flex-direction: column;
+
+	.sheet-handle {
+		width: 72rpx; height: 8rpx;
+		background: $color-fill-tertiary;
+		border-radius: 4rpx;
+		margin: 0 auto $spacing-lg;
+	}
+
+	.sheet-title {
+		display: block;
+		font-size: $font-title3;
+		font-weight: 700;
+		color: $color-label;
+		text-align: center;
+		margin-bottom: $spacing-xs;
+	}
+
+	.sheet-hint {
+		display: block;
+		font-size: $font-caption1;
+		color: $color-label-quaternary;
+		text-align: center;
+		margin-bottom: $spacing-lg;
+	}
+}
+
+.recognition-list {
+	flex: 1;
+	max-height: 50vh;
+	margin-bottom: $spacing-lg;
+}
+
+.recognition-item {
+	background: $color-fill;
+	border-radius: $radius-md;
+	padding: $spacing-lg;
+	margin-bottom: $spacing-sm;
+
+	.recognition-item-header {
+		display: flex;
+		align-items: center;
+		gap: $spacing-md;
+		margin-bottom: $spacing-md;
+	}
+
+	.recognition-checkbox {
+		width: 44rpx; height: 44rpx;
+		border-radius: $radius-sm;
+		border: 2rpx solid $color-label-quaternary;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		transition: all 0.2s ease;
+
+		&.checked {
+			background: $color-primary;
+			border-color: $color-primary;
+		}
+
+		.checkbox-icon {
+			font-size: 24rpx;
+			color: #fff;
+			font-weight: 700;
+		}
+	}
+
+	.recognition-item-info {
+		flex: 1;
+	}
+
+	.recognition-food-name {
+		display: block;
+		font-size: $font-body;
+		font-weight: 600;
+		color: $color-label;
+	}
+
+	.confidence-indicator {
+		margin-top: 4rpx;
+	}
+
+	.confidence-warning {
+		font-size: $font-caption2;
+		color: $color-orange;
+		font-weight: 500;
+		background: $color-orange-light;
+		padding: 2rpx $spacing-sm;
+		border-radius: $radius-sm;
+	}
+
+	.recognition-delete {
+		width: 40rpx; height: 40rpx;
+		border-radius: 50%;
+		background: $color-red-light;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		@include press-effect;
+
+		.recognition-delete-icon {
+			font-size: $font-caption2;
+			color: $color-red;
+		}
+	}
+
+	.recognition-item-body {
+		padding-left: 60rpx;
+	}
+
+	.recognition-grams-row {
+		display: flex;
+		align-items: center;
+		gap: $spacing-md;
+		margin-bottom: $spacing-sm;
+
+		.recognition-grams-label {
+			font-size: $font-footnote;
+			color: $color-label-tertiary;
+			font-weight: 500;
+			flex-shrink: 0;
+		}
+
+		.recognition-grams-input-wrap {
+			display: flex;
+			align-items: center;
+			background: $color-bg-elevated;
+			border-radius: $radius-sm;
+			padding: $spacing-sm $spacing-md;
+			border: 1.5rpx solid transparent;
+			transition: all 0.2s ease;
+			flex: 1;
+			max-width: 240rpx;
+
+			&:focus-within {
+				border-color: rgba(16, 185, 129, 0.3);
+			}
+
+			.recognition-grams-input {
+				flex: 1;
+				font-size: $font-subhead;
+				font-weight: 600;
+				color: $color-label;
+				text-align: center;
+				font-variant-numeric: tabular-nums;
+			}
+
+			.recognition-grams-suffix {
+				font-size: $font-caption1;
+				color: $color-label-quaternary;
+				font-weight: 500;
+			}
+		}
+	}
+
+	.recognition-nutrition-preview {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: $spacing-xs;
+
+		.recognition-nutrition-item {
+			font-size: $font-caption1;
+			color: $color-label-tertiary;
+			font-weight: 500;
+			font-variant-numeric: tabular-nums;
+		}
+
+		.recognition-nutrition-sep {
+			font-size: $font-caption1;
+			color: $color-separator-opaque;
+		}
+	}
+}
+
+.recognition-confirm {
+	@include primary-button;
+	flex-shrink: 0;
 }
 </style>

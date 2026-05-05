@@ -19,6 +19,7 @@ jobs:
             cd /opt/vital-fitness
             git pull origin main
             cd vital-fitness
+            export DASHSCOPE_API_KEY=${{ secrets.DASHSCOPE_API_KEY }}
             docker compose down api web --remove-orphans || true
             docker compose up -d --build api web
             docker image prune -f

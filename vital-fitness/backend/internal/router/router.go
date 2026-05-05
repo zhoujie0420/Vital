@@ -15,7 +15,7 @@ import (
 )
 
 // SetupRouter 设置路由
-func SetupRouter(mode string, wxCfg config.WeChat) *gin.Engine {
+func SetupRouter(mode string, wxCfg config.WeChat, dsCfg config.DashScope) *gin.Engine {
 	if mode == "release" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -40,6 +40,7 @@ func SetupRouter(mode string, wxCfg config.WeChat) *gin.Engine {
 	// moodHandler := handler.NewMoodHandler() // 心情模块暂时关闭
 	dietHandler := handler.NewDietHandler()
 	statsHandler := handler.NewStatsHandler()
+	foodRecognitionHandler := handler.NewFoodRecognitionHandler(dsCfg)
 
 	// API v1 路由组
 	v1 := r.Group("/api/v1")
@@ -112,6 +113,7 @@ func SetupRouter(mode string, wxCfg config.WeChat) *gin.Engine {
 			{
 				foods.GET("/", dietHandler.GetFoods)
 				foods.POST("/", dietHandler.CreateFood)
+				foods.POST("/recognize", foodRecognitionHandler.RecognizeFood)
 			}
 		}
 	}

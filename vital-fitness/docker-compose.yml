@@ -40,6 +40,7 @@ services:
       - JWT_EXPIRE=24
       - WX_APP_ID=wxcfe982f21211f9c6
       - WX_APP_SECRET=7a72fe7769b53e048bb7a8e1b10ccfaa
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
     depends_on:
       - mysql
     networks:
