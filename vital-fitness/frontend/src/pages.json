@@ -16,7 +16,8 @@
 		{ "path": "pages/statistics/index", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
 		{ "path": "pages/user/index", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
 		{ "path": "pages/user/profile", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
-		{ "path": "pages/user/settings", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } }
+		{ "path": "pages/user/settings", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } },
+		{ "path": "pages/user/changelog", "style": { "navigationStyle": "custom", "navigationBarTitleText": "" } }
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",

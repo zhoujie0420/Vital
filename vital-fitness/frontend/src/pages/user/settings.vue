@@ -7,14 +7,17 @@
 		</view>
 
 		<view class="menu-card">
-			<view class="menu-row">
+			<view class="menu-row" @tap="goToChangelog">
 				<view class="menu-left">
 					<view class="menu-icon bg-purple">
 						<text class="menu-icon-letter">V</text>
 					</view>
-					<text class="menu-text">版本</text>
+					<text class="menu-text">版本变动</text>
 				</view>
-				<text class="menu-value">v1.0.0</text>
+				<view class="menu-row-right">
+					<text class="menu-value">v{{ currentVersion }}</text>
+					<text class="sf-chevron">›</text>
+				</view>
 			</view>
 			<view class="menu-row last" @tap="clearCache">
 				<view class="menu-left">
@@ -36,6 +39,9 @@
 <script setup>
 	import { computed } from 'vue'
 	import { logout } from '../../api/user'
+	import { CURRENT_VERSION } from '../../utils/changelog'
+
+	const currentVersion = CURRENT_VERSION
 
 	const topPadding = computed(() => {
 		const app = getApp()
@@ -43,6 +49,7 @@
 	})
 
 	const goBack = () => uni.navigateBack()
+	const goToChangelog = () => uni.navigateTo({ url: '/pages/user/changelog' })
 	const clearCache = () => {
 		uni.showModal({
 			title: '清除缓存', content: '确定清除？',
@@ -145,6 +152,11 @@
 		.menu-value {
 			font-size: $font-subhead;
 			color: $color-label-quaternary;
+		}
+		.menu-row-right {
+			display: flex;
+			align-items: center;
+			gap: $spacing-sm;
 		}
 		.sf-chevron {
 			font-size: 36rpx;
