@@ -123,6 +123,7 @@
 	import { getDietRecords } from '../../api/diet'
 	import { useDietPlanStore } from '../../store/dietPlan'
 	import { getTodayTargets } from '../../utils/dietPlanCalc'
+	import { isLoggedIn as checkLoggedIn, requireLogin } from '../../utils/authGuard'
 
 	export default {
 		data() {
@@ -216,6 +217,7 @@
 			},
 			async load() {
 				if (this.loading) return
+				if (!checkLoggedIn()) { this.loading = false; return }
 				this.loading = true
 				try {
 					const res = await getDietRecords({ page: this.page, page_size: this.pageSize })
@@ -226,9 +228,15 @@
 				} catch (e) {}
 				this.loading = false
 			},
-			addDiet(mealType) { uni.navigateTo({ url: '/pages/diet/add?meal=' + (mealType || '') }) },
+			addDiet(mealType) {
+				if (!checkLoggedIn()) { requireLogin(); return }
+				uni.navigateTo({ url: '/pages/diet/add?meal=' + (mealType || '') })
+			},
 			goToPlan() { uni.navigateTo({ url: '/pages/diet/plan' }) },
-			goToDetail(date) { uni.navigateTo({ url: '/pages/diet/detail?date=' + date }) }
+			goToDetail(date) {
+				if (!checkLoggedIn()) { requireLogin(); return }
+				uni.navigateTo({ url: '/pages/diet/detail?date=' + date })
+			}
 		}
 	}
 </script>

@@ -50,6 +50,7 @@
 	import { getProfile } from '../../api/user'
 	import { put } from '../../utils/request'
 	import { useUserStore } from '../../store'
+	import { isLoggedIn as checkLoggedIn, requireLogin } from '../../utils/authGuard'
 
 	export default {
 		data() {
@@ -64,7 +65,13 @@
 				return (app.globalData?.customBarHeight || 88) + 8
 			}
 		},
-		onLoad() { this.loadProfile() },
+		onLoad() {
+			if (!checkLoggedIn()) {
+				requireLogin()
+				return
+			}
+			this.loadProfile()
+		},
 		methods: {
 			goBack() { uni.navigateBack() },
 			async loadProfile() {
@@ -78,6 +85,7 @@
 				} catch (e) {}
 			},
 			async save() {
+				if (!checkLoggedIn()) { requireLogin(); return }
 				this.saving = true
 				try {
 					await put('/users/profile', {

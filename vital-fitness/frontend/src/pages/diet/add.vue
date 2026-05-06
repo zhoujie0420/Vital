@@ -244,6 +244,7 @@
 
 <script>
 	import { getFoods, createFood, createDietRecord, recognizeFood } from '../../api/diet'
+	import { isLoggedIn as checkLoggedIn, requireLogin } from '../../utils/authGuard'
 
 	export default {
 		data() {
@@ -350,6 +351,7 @@
 				} catch (e) {}
 			},
 			async save() {
+				if (!checkLoggedIn()) { requireLogin(); return }
 				this.saving = true
 				try {
 					await createDietRecord({

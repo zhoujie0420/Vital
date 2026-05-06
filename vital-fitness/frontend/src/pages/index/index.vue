@@ -4,10 +4,10 @@
 		<view class="header">
 			<view class="greeting">
 				<text class="greeting-sub">{{ greetingTime }}</text>
-				<text class="greeting-name">{{ userStore.userInfo?.nickname || '健身达人' }}</text>
+				<text class="greeting-name">{{ isLoggedIn ? (userStore.userInfo?.nickname || '健身达人') : '欢迎体验' }}</text>
 			</view>
 			<view class="header-avatar" @tap="goTo('/pages/user/index')">
-				<text class="avatar-letter">{{ (userStore.userInfo?.nickname || '你')[0] }}</text>
+				<text class="avatar-letter">{{ isLoggedIn ? (userStore.userInfo?.nickname || '你')[0] : '访' }}</text>
 			</view>
 		</view>
 
@@ -150,11 +150,13 @@
 	import { getDashboard } from '../../api/stats'
 	import { getDietRecords } from '../../api/diet'
 	import { getTodayTargets, calculateRemaining } from '../../utils/dietPlanCalc'
+	import { isLoggedIn as checkLoggedIn, requireLogin } from '../../utils/authGuard'
 
 	const userStore = useUserStore()
 	const dietPlanStore = useDietPlanStore()
 	const dashboard = ref({})
 	const todayDietRecords = ref([])
+	const isLoggedIn = computed(() => !!userStore.token)
 
 	const todayTargets = computed(() => {
 		if (!dietPlanStore.activePlan) return { calories: 0, protein: 0, carbs: 0, fat: 0 }
@@ -200,6 +202,13 @@
 
 	const goTo = (url) => {
 		const tabbarPages = ['/pages/index/index', '/pages/workout/list', '/pages/diet/list', '/pages/statistics/index', '/pages/user/index']
+		// Tabbar 页面和认证页面无需鉴权，其它内部页面需要登录
+		const publicPages = [...tabbarPages, '/pages/auth/login', '/pages/auth/register']
+		const urlPath = url.split('?')[0]
+		if (!publicPages.includes(urlPath) && !checkLoggedIn()) {
+			requireLogin()
+			return
+		}
 		if (tabbarPages.includes(url)) {
 			uni.switchTab({ url })
 		} else {
@@ -208,6 +217,7 @@
 	}
 
 	const loadDashboard = async () => {
+		if (!checkLoggedIn()) return
 		try {
 			const res = await getDashboard()
 			dashboard.value = res.data || {}
@@ -221,6 +231,7 @@
 	})
 
 	const loadTodayDiet = async () => {
+		if (!checkLoggedIn()) return
 		try {
 			const res = await getDietRecords({ page: 1, page_size: 50 })
 			const all = res.data || []

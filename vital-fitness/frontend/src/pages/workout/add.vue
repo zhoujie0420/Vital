@@ -78,6 +78,7 @@
 <script setup>
 	import { ref, computed, onMounted } from 'vue'
 	import { getExercises, createWorkout } from '../../api/workout'
+	import { isLoggedIn as checkLoggedIn, requireLogin } from '../../utils/authGuard'
 
 	const topPadding = computed(() => {
 		const app = getApp()
@@ -123,6 +124,7 @@
 	}
 
 	const saveWorkout = async () => {
+		if (!checkLoggedIn()) { requireLogin(); return }
 		const validSets = sets.value.filter(s => parseFloat(s.weight) > 0 && parseInt(s.reps) > 0)
 		if (validSets.length === 0) {
 			uni.showToast({ title: '请至少填写一组数据', icon: 'none' }); return

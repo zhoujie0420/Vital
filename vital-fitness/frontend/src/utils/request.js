@@ -25,10 +25,20 @@ const request = (options) => {
       },
       success: (res) => {
         if (res.statusCode === 401) {
-          // token 过期，清除登录状态并跳转登录页
+          // token 过期，清除登录状态并提示，避免强制跳转打断用户浏览
           uni.removeStorageSync('token')
           uni.removeStorageSync('userInfo')
-          uni.redirectTo({ url: '/pages/auth/login' })
+          uni.showModal({
+            title: '登录提示',
+            content: '登录已过期，是否重新登录？',
+            confirmText: '去登录',
+            cancelText: '再看看',
+            success: (modalRes) => {
+              if (modalRes.confirm) {
+                uni.navigateTo({ url: '/pages/auth/login' })
+              }
+            }
+          })
           reject(new Error('登录已过期'))
           return
         }

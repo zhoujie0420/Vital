@@ -1,10 +1,7 @@
 <script>
 	export default {
 		onLaunch() {
-			const token = uni.getStorageSync('token')
-			if (!token) {
-				uni.redirectTo({ url: '/pages/auth/login' })
-			}
+			// 不强制跳转登录页，允许用户浏览体验功能后再自行选择是否登录
 			// 获取系统信息，设置全局状态栏高度
 			const sysInfo = uni.getSystemInfoSync()
 			const statusBarHeight = sysInfo.statusBarHeight || 20

@@ -41,6 +41,7 @@
 
 <script>
 	import { getWeights } from '../../api/weight'
+	import { isLoggedIn as checkLoggedIn, requireLogin } from '../../utils/authGuard'
 
 	export default {
 		data() { return { weightList: [], page: 1, pageSize: 20, total: 0, loading: false } },
@@ -66,6 +67,7 @@
 			},
 			async load() {
 				if (this.loading) return
+				if (!checkLoggedIn()) { this.loading = false; return }
 				this.loading = true
 				try {
 					const res = await getWeights({ page: this.page, page_size: this.pageSize })
@@ -79,7 +81,10 @@
 				} catch (e) {}
 				this.loading = false
 			},
-			addWeight() { uni.navigateTo({ url: '/pages/weight/add' }) },
+			addWeight() {
+				if (!checkLoggedIn()) { requireLogin(); return }
+				uni.navigateTo({ url: '/pages/weight/add' })
+			},
 			goBack() { uni.navigateBack() },
 			formatDate(d) {
 				if (!d) return ''

@@ -55,10 +55,10 @@
 			<view class="empty-icon">
 				<text class="empty-icon-letter">W</text>
 			</view>
-			<text class="empty-title">暂无训练记录</text>
-			<text class="empty-desc">记录每一次训练，见证你的进步</text>
+			<text class="empty-title">{{ isGuest ? '登录后开始记录' : '暂无训练记录' }}</text>
+			<text class="empty-desc">{{ isGuest ? '登录同步训练数据，追踪进步' : '记录每一次训练，见证你的进步' }}</text>
 			<view class="empty-btn" @tap="addWorkout">
-				<text>开始记录</text>
+				<text>{{ isGuest ? '去登录' : '开始记录' }}</text>
 			</view>
 		</view>
 	</view>
@@ -66,6 +66,7 @@
 
 <script>
 	import { getWorkouts } from '../../api/workout'
+	import { isLoggedIn as checkLoggedIn, requireLogin } from '../../utils/authGuard'
 
 	export default {
 		data() {
@@ -113,7 +114,8 @@
 						dateStr: d.getFullYear() + '.' + (d.getMonth()+1) + '.' + d.getDate()
 					}
 				})
-			}
+			},
+			isGuest() { return !checkLoggedIn() }
 		},
 		methods: {
 			changeTab(index) {
@@ -132,6 +134,7 @@
 			},
 			async loadWorkouts() {
 				if (this.loading) return
+				if (!checkLoggedIn()) { this.loading = false; return }
 				this.loading = true
 				try {
 					const category = this.tabList[this.currentTab].name
@@ -149,8 +152,12 @@
 				} catch (e) {}
 				this.loading = false
 			},
-			addWorkout() { uni.navigateTo({ url: '/pages/workout/add' }) },
+			addWorkout() {
+				if (!checkLoggedIn()) { requireLogin(); return }
+				uni.navigateTo({ url: '/pages/workout/add' })
+			},
 			goToDetail(date) {
+				if (!checkLoggedIn()) { requireLogin(); return }
 				uni.navigateTo({ url: '/pages/workout/detail?date=' + date })
 			}
 		}

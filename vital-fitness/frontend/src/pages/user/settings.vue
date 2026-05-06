@@ -59,7 +59,8 @@
 					try { await logout() } catch (e) {}
 					uni.removeStorageSync('token')
 					uni.removeStorageSync('userInfo')
-					uni.redirectTo({ url: '/pages/auth/login' })
+					uni.showToast({ title: '已退出登录', icon: 'success' })
+					setTimeout(() => uni.navigateBack(), 800)
 				}
 			}
 		})

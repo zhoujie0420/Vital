@@ -100,6 +100,7 @@
 
 <script>
 	import { getStats } from '../../api/stats'
+	import { isLoggedIn as checkLoggedIn } from '../../utils/authGuard'
 
 	export default {
 		data() {
@@ -136,6 +137,7 @@
 		},
 		methods: {
 			async load() {
+				if (!checkLoggedIn()) { this.stats = {}; return }
 				try {
 					const res = await getStats(this.currentPeriod)
 					this.stats = res.data || {}

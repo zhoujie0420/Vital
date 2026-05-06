@@ -4,8 +4,8 @@
 			<text class="page-title">我的</text>
 		</view>
 
-		<!-- 用户卡片 -->
-		<view class="profile-card" @tap="goTo('/pages/user/profile')">
+		<!-- 已登录：用户卡片 -->
+		<view v-if="isLoggedIn" class="profile-card" @tap="goTo('/pages/user/profile')">
 			<view class="profile-avatar">
 				<text class="avatar-text">{{ (userStore.userInfo?.nickname || '用')[0] }}</text>
 			</view>
@@ -14,6 +14,18 @@
 				<text class="profile-sub">查看和编辑个人资料</text>
 			</view>
 			<text class="sf-chevron">›</text>
+		</view>
+
+		<!-- 未登录：引导登录卡片 -->
+		<view v-else class="profile-card guest-card" @tap="goToLogin">
+			<view class="profile-avatar guest-avatar">
+				<text class="avatar-text">访</text>
+			</view>
+			<view class="profile-info">
+				<text class="profile-name">未登录</text>
+				<text class="profile-sub">登录后可同步记录与数据</text>
+			</view>
+			<view class="login-btn-small"><text>去登录</text></view>
 		</view>
 
 		<!-- 功能菜单 -->
@@ -57,7 +69,7 @@
 		</view>
 
 		<!-- 退出登录 -->
-		<view class="logout-card" @tap="logout">
+		<view v-if="isLoggedIn" class="logout-card" @tap="logout">
 			<text class="logout-text">退出登录</text>
 		</view>
 	</view>
@@ -66,15 +78,27 @@
 <script setup>
 	import { computed } from 'vue'
 	import { useUserStore } from '../../store'
+	import { isLoggedIn as checkLoggedIn, requireLogin } from '../../utils/authGuard'
 
 	const userStore = useUserStore()
+
+	const isLoggedIn = computed(() => !!userStore.token)
 
 	const topPadding = computed(() => {
 		const app = getApp()
 		return (app.globalData?.customBarHeight || 88) + 8
 	})
 
+	const goToLogin = () => {
+		uni.navigateTo({ url: '/pages/auth/login' })
+	}
+
 	const goTo = (url) => {
+		// 未登录时，除统计页（仅本地展示）外的功能引导登录
+		if (!checkLoggedIn()) {
+			requireLogin()
+			return
+		}
 		const tabbarPages = ['/pages/index/index', '/pages/workout/list', '/pages/diet/list', '/pages/statistics/index', '/pages/user/index']
 		if (tabbarPages.includes(url)) {
 			uni.switchTab({ url })
@@ -90,7 +114,7 @@
 			success: (res) => {
 				if (res.confirm) {
 					userStore.logout()
-					uni.redirectTo({ url: '/pages/auth/login' })
+					uni.showToast({ title: '已退出登录', icon: 'success' })
 				}
 			}
 		})
@@ -140,6 +164,11 @@
 		}
 	}
 
+	.guest-avatar {
+		background: $color-separator-opaque;
+		box-shadow: none;
+	}
+
 	.profile-info {
 		flex: 1;
 
@@ -162,6 +191,17 @@
 		font-size: 44rpx;
 		color: $color-separator-opaque;
 		font-weight: 300;
+	}
+
+	.login-btn-small {
+		padding: $spacing-xs $spacing-lg;
+		background: $color-primary;
+		border-radius: $radius-full;
+		text {
+			font-size: $font-caption1;
+			color: #fff;
+			font-weight: 600;
+		}
 	}
 }
 

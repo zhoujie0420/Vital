@@ -19,6 +19,9 @@
 					<text class="btn-text">{{ loading ? '登录中...' : '微信一键登录' }}</text>
 				</view>
 				<text class="login-hint">使用微信账号安全登录</text>
+				<view class="browse-btn" @tap="browseFirst">
+					<text class="browse-text">先体验再登录</text>
+				</view>
 			</view>
 		</view>
 	</view>
@@ -41,7 +44,15 @@
 					const res = await wxLogin(loginRes.code)
 					userStore.saveLoginInfo({ token: res.data.token, user: res.data.user })
 					uni.showToast({ title: '登录成功', icon: 'success' })
-					setTimeout(() => uni.switchTab({ url: '/pages/index/index' }), 1000)
+					setTimeout(() => {
+						// 登录成功后返回上一页，若无则跳转首页
+						const pages = getCurrentPages()
+						if (pages.length > 1) {
+							uni.navigateBack()
+						} else {
+							uni.switchTab({ url: '/pages/index/index' })
+						}
+					}, 1000)
 				} catch (err) {
 					uni.showToast({ title: '登录失败', icon: 'none' })
 				} finally { loading.value = false }
@@ -51,6 +62,16 @@
 				uni.showToast({ title: '微信登录取消', icon: 'none' })
 			}
 		})
+	}
+
+	const browseFirst = () => {
+		// 未登录先浏览体验：返回上一页或进入首页
+		const pages = getCurrentPages()
+		if (pages.length > 1) {
+			uni.navigateBack()
+		} else {
+			uni.switchTab({ url: '/pages/index/index' })
+		}
 	}
 </script>
 
@@ -165,6 +186,24 @@
 		font-size: $font-caption1;
 		color: rgba(250, 250, 249, 0.2);
 		margin-top: $spacing-lg;
+	}
+
+	.browse-btn {
+		margin-top: $spacing-2xl;
+		text-align: center;
+		padding: $spacing-md 0;
+
+		&:active { opacity: 0.6; }
+
+		.browse-text {
+			font-size: $font-subhead;
+			color: rgba(250, 250, 249, 0.55);
+			font-weight: 500;
+			letter-spacing: 0.5rpx;
+			text-decoration: underline;
+			text-decoration-color: rgba(250, 250, 249, 0.2);
+			text-underline-offset: 6rpx;
+		}
 	}
 }
 </style>

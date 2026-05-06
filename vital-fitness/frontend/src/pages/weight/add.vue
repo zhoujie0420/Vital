@@ -47,6 +47,7 @@
 
 <script>
 	import { createWeight } from '../../api/weight'
+	import { isLoggedIn as checkLoggedIn, requireLogin } from '../../utils/authGuard'
 
 	export default {
 		data() {
@@ -74,6 +75,7 @@
 					uni.showToast({ title: '请输入体重', icon: 'none' })
 					return
 				}
+				if (!checkLoggedIn()) { requireLogin(); return }
 				this.saving = true
 				try {
 					await createWeight({
